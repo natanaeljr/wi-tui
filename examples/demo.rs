@@ -1,5 +1,6 @@
 use cui::render::{BufferedRenderer, RenderCtx};
 use cui::widgets::{Align, Button, Column, Table, Widget};
+use std::ops::{Deref, DerefMut};
 
 fn main() {
   let mut render_ctx = RenderCtx {
@@ -33,7 +34,6 @@ fn main() {
 
   let table = Table::new().columns(columns).data(aligned_data);
 
-  // TODO: How to mutate the columns and data
   let table = Table::new()
     .columns(vec![
       Column::heading("A"),
@@ -57,4 +57,26 @@ fn main() {
       Column::heading(col2), //
     ])
     .data(vec![cell1, cell2]);
+
+  let table = table;
+  let columns = table.columns_ref().unwrap();
+  let columns = table.columns_ref_as::<Vec<Column<Box<dyn Widget>>>>().unwrap();
+  let data = table.data_ref().unwrap();
+  let data = table.data_ref_as::<Vec<Box<dyn Widget>>>().unwrap();
+
+  let mut table = table;
+  let mut columns = table
+    .columns_mut()
+    .unwrap()
+    .as_any_mut()
+    .downcast_mut::<Vec<Column<Box<dyn Widget>>>>()
+    .unwrap();
+  let mut columns = table.columns_mut_as::<Vec<Column<Box<dyn Widget>>>>().unwrap();
+  let mut data = table
+    .data_mut()
+    .unwrap()
+    .as_any_mut()
+    .downcast_ref::<Vec<Box<dyn Widget>>>()
+    .unwrap();
+  let mut data = table.data_mut_as::<Vec<Box<dyn Widget>>>().unwrap();
 }

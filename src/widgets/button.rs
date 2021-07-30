@@ -2,24 +2,20 @@ use crate::render::{RenderCtx, Renderer};
 use crate::widgets::Widget;
 use std::ops::{Deref, DerefMut};
 
-pub struct Button {
-  text: String,
+pub struct Button<Child> {
+  child: Child,
 }
 
-impl Button {
-  pub fn new(text: impl Into<String>) -> Self {
-    Self { text: text.into() }
-  }
-  pub fn text(&self) -> &String {
-    &self.text
-  }
-  pub fn set_text(&mut self, text: impl Into<String>) -> &mut Self {
-    self.text = text.into();
-    self
+impl<Child> Button<Child>
+where
+  Child: Widget,
+{
+  pub fn new(child: Child) -> Self {
+    Self { child }
   }
 }
 
-impl Widget for Button {
+impl Widget for Button<&str> {
   fn event(&mut self) {
     todo!()
   }
@@ -33,6 +29,6 @@ impl Widget for Button {
   }
 
   fn render(&self, ctx: &mut RenderCtx) {
-    ctx.renderer.deref_mut().print(&self.text);
+    ctx.renderer.print(&self.child);
   }
 }

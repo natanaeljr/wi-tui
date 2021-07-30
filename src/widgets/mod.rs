@@ -34,6 +34,9 @@ pub struct Bread;
 pub struct Text;
 
 // Default impl of Widgets
+
+// impl Widget for Fn {}
+
 impl Widget for &str {
   fn event(&mut self) {
     todo!()
