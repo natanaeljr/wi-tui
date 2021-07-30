@@ -35,7 +35,7 @@ where
   }
 
   fn render(&self, ctx: &mut RenderCtx) {
-    todo!()
+    self.heading.render(ctx);
   }
 }
 //
@@ -53,7 +53,8 @@ where
 
 pub trait TableColumns: 'static {
   type Heading;
-  fn get(&self, idx: usize) -> Option<&Column<Self::Heading>>;
+  fn len(&self) -> usize;
+  fn column(&self, idx: usize) -> Option<&Column<Self::Heading>>;
   fn as_any(&self) -> &dyn Any;
   fn as_any_mut(&mut self) -> &mut dyn Any;
 }
@@ -64,7 +65,11 @@ where
 {
   type Heading = Heading;
 
-  fn get(&self, idx: usize) -> Option<&Column<Self::Heading>> {
+  fn len(&self) -> usize {
+    Self::len(self)
+  }
+
+  fn column(&self, idx: usize) -> Option<&Column<Self::Heading>> {
     self.get(idx)
   }
 
@@ -79,29 +84,10 @@ where
 
 pub trait TableData: 'static {
   type Item;
-
+  fn rows_len(&self) -> usize;
   fn cell(&self, row: usize, col: usize) -> Option<&Self::Item>;
   fn as_any(&self) -> &dyn Any;
   fn as_any_mut(&mut self) -> &mut dyn Any;
-}
-
-impl<Item> TableData for Vec<Item>
-where
-  Item: Widget + 'static,
-{
-  type Item = Item;
-
-  fn cell(&self, row: usize, col: usize) -> Option<&Self::Item> {
-    self.get(row * col)
-  }
-
-  fn as_any(&self) -> &dyn Any {
-    self
-  }
-
-  fn as_any_mut(&mut self) -> &mut dyn Any {
-    self
-  }
 }
 
 impl<Item> TableData for Vec<Vec<Item>>
@@ -109,6 +95,10 @@ where
   Item: Widget + 'static,
 {
   type Item = Item;
+
+  fn rows_len(&self) -> usize {
+    self.len()
+  }
 
   fn cell(&self, row: usize, col: usize) -> Option<&Self::Item> {
     self.get(row).and_then(|v| v.get(col))
@@ -123,6 +113,7 @@ where
   }
 }
 
+// TODO: how to merge cells
 // TODO: Generic for Heading
 pub struct Table<Item> {
   columns: Option<Box<dyn TableColumns<Heading = Item>>>,
@@ -235,15 +226,24 @@ where
   }
 
   fn render(&self, ctx: &mut RenderCtx) {
-    for c in 0..1 {
-      let column = self.columns_ref().unwrap().get(c).unwrap();
+    let columns = self.columns_ref().unwrap();
+    for c in 0..columns.len() {
+      let column = columns.column(c).unwrap();
       // set render context, box constrains
       column.render(ctx);
-      for r in 0..1 {
-        let cell = self.data_ref().unwrap().cell(r, c).unwrap();
+      ctx.renderer.print(" ");
+    }
+    ctx.renderer.next_line();
+
+    let data = self.data_ref().unwrap();
+    for r in 0..data.rows_len() {
+      for c in 0..columns.len() {
+        let cell = data.cell(r, c).unwrap();
         // set render context, box constrains
         cell.render(ctx);
+        ctx.renderer.print(" ");
       }
+      ctx.renderer.next_line();
     }
   }
 }

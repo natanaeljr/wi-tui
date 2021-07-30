@@ -20,7 +20,10 @@ where
   }
 }
 
-impl<Child> Widget for Align<Child> {
+impl<Child> Widget for Align<Child>
+where
+  Child: Widget,
+{
   fn event(&mut self) {
     todo!()
   }
@@ -34,6 +37,6 @@ impl<Child> Widget for Align<Child> {
   }
 
   fn render(&self, ctx: &mut RenderCtx) {
-    todo!()
+    self.child.render(ctx);
   }
 }
