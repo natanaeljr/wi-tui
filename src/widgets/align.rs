@@ -36,7 +36,7 @@ where
     todo!()
   }
 
-  fn render(&self, ctx: &mut RenderCtx) {
-    self.child.render(ctx);
+  fn render(&self, ctx: &mut RenderCtx) -> Option<()> {
+    self.child.render(ctx)
   }
 }

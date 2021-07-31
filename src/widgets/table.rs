@@ -6,6 +6,7 @@ use std::ops::{Deref, DerefMut};
 pub struct Column<Heading> {
   heading: Heading,
   hidden: bool,
+  width: usize,
   // TODO: width: Constraints
 }
 
@@ -14,7 +15,7 @@ where
   Heading: Widget,
 {
   pub fn heading(heading: Heading) -> Self {
-    Self { heading, hidden: false }
+    Self { heading, hidden: false, width: 10 }
   }
 }
 
@@ -34,8 +35,9 @@ where
     todo!()
   }
 
-  fn render(&self, ctx: &mut RenderCtx) {
+  fn render(&self, ctx: &mut RenderCtx) -> Option<()> {
     self.heading.render(ctx);
+    Some(())
   }
 }
 //
@@ -225,7 +227,7 @@ where
     todo!()
   }
 
-  fn render(&self, ctx: &mut RenderCtx) {
+  fn render(&self, ctx: &mut RenderCtx) -> Option<()> {
     let columns = self.columns_ref().unwrap();
     for c in 0..columns.len() {
       let column = columns.column(c).unwrap();
@@ -233,6 +235,7 @@ where
       column.render(ctx);
       ctx.renderer.print(" ");
     }
+
     ctx.renderer.next_line();
 
     let data = self.data_ref().unwrap();
@@ -245,5 +248,7 @@ where
       }
       ctx.renderer.next_line();
     }
+
+    Some(())
   }
 }

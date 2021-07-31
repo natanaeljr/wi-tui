@@ -1,4 +1,5 @@
 use crate::render::{RenderCtx, Renderer};
+use std::ops::Deref;
 
 mod align;
 mod button;
@@ -10,6 +11,7 @@ mod scrollbar;
 mod table;
 mod tabs;
 mod textbox;
+mod padding;
 
 pub use button::Button;
 pub use table::Column;
@@ -19,14 +21,12 @@ pub trait Widget {
   fn event(&mut self);
   fn update(&mut self);
   fn layout(&mut self);
-  fn render(&self, ctx: &mut RenderCtx);
+  fn render(&self, ctx: &mut RenderCtx) -> Option<()>;
 }
 
 // Wrapping Widgets
 pub use align::Align;
-use std::ops::Deref;
-
-pub struct Padding;
+pub use padding::Padding;
 pub struct Border;
 pub struct Bread;
 
@@ -50,8 +50,9 @@ impl Widget for &str {
     todo!()
   }
 
-  fn render(&self, ctx: &mut RenderCtx) {
+  fn render(&self, ctx: &mut RenderCtx) -> Option<()> {
     ctx.renderer.print(self);
+    Some(())
   }
 }
 
@@ -68,8 +69,9 @@ impl Widget for String {
     todo!()
   }
 
-  fn render(&self, ctx: &mut RenderCtx) {
+  fn render(&self, ctx: &mut RenderCtx) -> Option<()> {
     ctx.renderer.print(self);
+    Some(())
   }
 }
 
@@ -86,7 +88,8 @@ impl Widget for Box<dyn Widget> {
     todo!()
   }
 
-  fn render(&self, ctx: &mut RenderCtx) {
+  fn render(&self, ctx: &mut RenderCtx) -> Option<()> {
     self.deref().render(ctx);
+    Some(())
   }
 }

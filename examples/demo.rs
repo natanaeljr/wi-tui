@@ -1,15 +1,17 @@
-use cui::render::{BufferedRenderer, RenderCtx};
-use cui::widgets::{Align, Button, Column, Table, Widget};
+use cui::rect::Rect;
+use cui::render::{RenderCtx, Renderer};
+use cui::widgets::{Align, Button, Column, Padding, Table, Widget};
+use std::io::Read;
 use std::ops::{Deref, DerefMut};
 
 fn main() {
   let mut render_ctx = RenderCtx {
-    renderer: Box::new(BufferedRenderer {}),
+    renderer: Renderer::new(),
   };
 
   let button = Button::new("Button");
-  button.render(&mut render_ctx);
-  render_ctx.renderer.next_line();
+  // button.render(&mut render_ctx);
+  // render_ctx.renderer.next_line();
 
   let data = vec![
     vec!["A1", "B2", "C1"], //
@@ -45,10 +47,23 @@ fn main() {
       vec!["A1", "B2", "C1"], //
       vec!["A2", "B2", "C2"], //
       vec!["A3", "B3", "C3"], //
+      vec!["A4", "B4", "C4"], //
+      vec!["A5", "B5", "C5"], //
+      vec!["A6", "B6", "C6"], //
+      vec!["A7", "B7", "C7"], //
+      vec!["A8", "B8", "C8"], //
     ]);
-
+  render_ctx
+    .renderer
+    .set_frame(Rect::from_size_unchecked((0, 0), (50, 10)));
+  let table = Padding::around(table).left(5).top(0);
   table.render(&mut render_ctx);
-  render_ctx.renderer.next_line();
+
+  render_ctx
+    .renderer
+    .set_frame(Rect::from_size_unchecked((0, 0), (50, 10)));
+  // render_ctx.renderer.next_line();
+  // std::thread::sleep(std::time::Duration::from_secs(5));
 
   let table: Table<Box<dyn Widget>> = Table::new()
     .columns(vec![
@@ -63,8 +78,10 @@ fn main() {
   let mut data = table.data_mut_as::<Vec<Vec<Box<dyn Widget>>>>().unwrap();
   data[0][1] = Box::new("Tschuss");
 
+  let table = Padding::around(table).left(20).top(2);
   table.render(&mut render_ctx);
-  render_ctx.renderer.next_line();
+  // render_ctx.renderer.next_line();
+  let table = table.child;
 
   let table = table;
   let columns = table.columns_ref().unwrap();

@@ -28,7 +28,8 @@ impl Widget for Button<&str> {
     todo!()
   }
 
-  fn render(&self, ctx: &mut RenderCtx) {
+  fn render(&self, ctx: &mut RenderCtx) -> Option<()> {
     ctx.renderer.print(&self.child);
+    Some(())
   }
 }
