@@ -39,9 +39,9 @@ fn main() {
 
   let table = Table::new()
     .columns(vec![
-      Column::heading("A"), //
-      Column::heading("B"), //
-      Column::heading("C"), //
+      Column::heading("A").width(2), //
+      Column::heading("B").width(2), //
+      Column::heading("C").width(2), //
     ])
     .data(vec![
       vec!["A1", "B2", "C1"], //
@@ -51,7 +51,6 @@ fn main() {
       vec!["A5", "B5", "C5"], //
       vec!["A6", "B6", "C6"], //
       vec!["A7", "B7", "C7"], //
-      vec!["A8", "B8", "C8"], //
     ]);
   render_ctx
     .renderer
@@ -67,7 +66,7 @@ fn main() {
 
   let table: Table<Box<dyn Widget>> = Table::new()
     .columns(vec![
-      Column::heading(Box::new("Hi") as Box<dyn Widget>), //
+      Column::heading(Box::new("Hi") as Box<dyn Widget>).width(4), //
       Column::heading(Box::new(Align::centered("Hey")) as Box<dyn Widget>), //
     ])
     .data(vec![vec![

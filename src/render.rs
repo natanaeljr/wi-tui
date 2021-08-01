@@ -94,6 +94,17 @@ impl Renderer {
     execute!(stdout, cursor::MoveTo(x, y + self.reset_pos.1 as u16));
     Some(())
   }
+
+  pub fn move_to_column_relative(&mut self, x: u16) -> Option<()> {
+    let the_x = self.frame.x.0 as u16 + x;
+    if the_x > self.frame.x.1 as u16 {
+      return None;
+    }
+    self.frame_cursor.0 = the_x as usize;
+    let mut stdout = std::io::stdout();
+    execute!(stdout, cursor::MoveToColumn(the_x));
+    Some(())
+  }
 }
 
 impl Drop for Renderer {
@@ -102,7 +113,7 @@ impl Drop for Renderer {
     // execute!(stdout, terminal::LeaveAlternateScreen);
     // self.move_to(0, (self.size.1) as u16);
     execute!(stdout, cursor::MoveTo(0, (self.reset_pos.1 + self.nl_counter) as u16),);
-    std::thread::sleep(std::time::Duration::from_secs(2));
+    std::thread::sleep(std::time::Duration::from_secs(1));
     terminal::disable_raw_mode().unwrap();
     println!();
   }

@@ -15,7 +15,15 @@ where
   Heading: Widget,
 {
   pub fn heading(heading: Heading) -> Self {
-    Self { heading, hidden: false, width: 10 }
+    Self {
+      heading,
+      hidden: false,
+      width: 8,
+    }
+  }
+  pub fn width(mut self, width: usize) -> Self {
+    self.width = width;
+    self
   }
 }
 
@@ -229,22 +237,27 @@ where
 
   fn render(&self, ctx: &mut RenderCtx) -> Option<()> {
     let columns = self.columns_ref().unwrap();
+    let mut the_x = 0;
     for c in 0..columns.len() {
       let column = columns.column(c).unwrap();
       // set render context, box constrains
       column.render(ctx);
-      ctx.renderer.print(" ");
+      the_x += column.width + 1;
+      ctx.renderer.move_to_column_relative((the_x + 1) as u16);
     }
 
     ctx.renderer.next_line();
 
     let data = self.data_ref().unwrap();
     for r in 0..data.rows_len() {
+      let mut the_x = 0;
       for c in 0..columns.len() {
+        let column = columns.column(c).unwrap();
         let cell = data.cell(r, c).unwrap();
         // set render context, box constrains
         cell.render(ctx);
-        ctx.renderer.print(" ");
+        the_x += column.width + 1;
+        ctx.renderer.move_to_column_relative((the_x + 1) as u16);
       }
       ctx.renderer.next_line();
     }
