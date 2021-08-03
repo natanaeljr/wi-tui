@@ -103,4 +103,29 @@ fn main() {
     .downcast_mut::<Vec<Vec<Box<dyn Widget>>>>()
     .unwrap();
   let mut data = table.data_mut_as::<Vec<Vec<Box<dyn Widget>>>>().unwrap();
+
+  // // $ nmcli d
+  // // DEVICE          TYPE      STATE         CONNECTION
+  // // wlp8s0          wifi      connected     SUPERROUTER
+  // // p2p-dev-wlp8s0  wifi-p2p  disconnected  --
+  // // enp7s0          ethernet  unavailable   --
+  // // lo              loopback  unmanaged     --
+  let table = Table::new()
+    .columns(vec![
+      Column::heading("DEVICE").width(14),     //
+      Column::heading("TYPE").width(8),        //
+      Column::heading("STATE").width(12),      //
+      Column::heading("CONNECTION").width(11), //
+    ])
+    .data(vec![
+      vec!["wlp8s0", "wifi", "connected", "SUPERROUTER"],       //
+      vec!["p2p-dev-wlp8s0", "wifi-p2p", "disconnected", "--"], //
+      vec!["enp7s0", "ethernet", "unavailable", "--"],          //
+      vec!["lo", "loopback", "unmanaged", "--"],                //
+    ]);
+  render_ctx
+    .renderer
+    .set_frame(Rect::from_size_unchecked((0, 0), (60, 20)));
+  let table = Padding::around(table).left(0).top(10);
+  table.render(&mut render_ctx);
 }

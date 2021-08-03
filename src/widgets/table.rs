@@ -48,6 +48,18 @@ where
     Some(())
   }
 }
+
+// TODO:
+// impl<IntoColumn, Heading> Into<Column<Heading>> for IntoColumn
+// where
+//   IntoColumn: Widget + 'static,
+//   Heading: Widget + 'static,
+// {
+//   fn into(self) -> Column<Heading> {
+//     Column::heading(self)
+//   }
+// }
+
 //
 // impl<Heading> Into<Column<Heading>> for &str {
 //   fn into(self) -> Column<Heading> {
@@ -91,6 +103,31 @@ where
     self
   }
 }
+
+// TODO:
+// impl<IntoColumn, Heading> TableColumns for Vec<IntoColumn>
+// where
+//   IntoColumn: Into<Column<Heading>>,
+//   Heading: Widget + 'static,
+// {
+//   type Heading = Heading;
+//
+//   fn len(&self) -> usize {
+//     Self::len(self)
+//   }
+//
+//   fn column(&self, idx: usize) -> Option<&Column<Self::Heading>> {
+//     self.get(idx).and_then(|c| c.into())
+//   }
+//
+//   fn as_any(&self) -> &dyn Any {
+//     self
+//   }
+//
+//   fn as_any_mut(&mut self) -> &mut dyn Any {
+//     self
+//   }
+// }
 
 pub trait TableData: 'static {
   type Item;
