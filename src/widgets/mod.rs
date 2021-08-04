@@ -4,16 +4,20 @@ use std::ops::Deref;
 mod align;
 mod button;
 mod checkbox;
+mod container;
+mod flex;
 mod label;
 mod line;
+mod padding;
 mod progressbar;
 mod scrollbar;
 mod table;
 mod tabs;
 mod textbox;
-mod padding;
+mod vertical;
 
 pub use button::Button;
+pub use container::Container;
 pub use table::Column;
 pub use table::Table;
 

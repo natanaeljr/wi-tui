@@ -49,30 +49,6 @@ where
   }
 }
 
-// TODO:
-// impl<IntoColumn, Heading> Into<Column<Heading>> for IntoColumn
-// where
-//   IntoColumn: Widget + 'static,
-//   Heading: Widget + 'static,
-// {
-//   fn into(self) -> Column<Heading> {
-//     Column::heading(self)
-//   }
-// }
-
-//
-// impl<Heading> Into<Column<Heading>> for &str {
-//   fn into(self) -> Column<Heading> {
-//     Column::new(self)
-//   }
-// }
-//
-// impl<Heading> Into<Column<Heading>> for String {
-//   fn into(self) -> Column<Heading> {
-//     Column::new(self)
-//   }
-// }
-
 pub trait TableColumns: 'static {
   type Heading;
   fn len(&self) -> usize;
@@ -103,31 +79,6 @@ where
     self
   }
 }
-
-// TODO:
-// impl<IntoColumn, Heading> TableColumns for Vec<IntoColumn>
-// where
-//   IntoColumn: Into<Column<Heading>>,
-//   Heading: Widget + 'static,
-// {
-//   type Heading = Heading;
-//
-//   fn len(&self) -> usize {
-//     Self::len(self)
-//   }
-//
-//   fn column(&self, idx: usize) -> Option<&Column<Self::Heading>> {
-//     self.get(idx).and_then(|c| c.into())
-//   }
-//
-//   fn as_any(&self) -> &dyn Any {
-//     self
-//   }
-//
-//   fn as_any_mut(&mut self) -> &mut dyn Any {
-//     self
-//   }
-// }
 
 pub trait TableData: 'static {
   type Item;
@@ -162,6 +113,8 @@ where
 
 // TODO: how to merge cells
 // TODO: Generic for Heading
+// TODO: column indices for cherry-picking columns from TableData
+//  that is to allow TableData to have more columns than what is shown.
 pub struct Table<Item> {
   columns: Option<Box<dyn TableColumns<Heading = Item>>>,
   data: Option<Box<dyn TableData<Item = Item>>>,

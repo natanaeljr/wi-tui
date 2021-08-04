@@ -11,3 +11,5 @@ crossterm = "0.20.0"
 
 [[example]]
 name = "demo"
+[[example]]
+name = "mgmt"
