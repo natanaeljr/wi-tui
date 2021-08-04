@@ -8,6 +8,7 @@ edition = "2018"
 
 [dependencies]
 crossterm = "0.20.0"
+euclid = "0.22.6"
 
 [[example]]
 name = "demo"

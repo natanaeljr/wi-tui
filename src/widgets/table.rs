@@ -1,7 +1,8 @@
 use crate::render::RenderCtx;
-use crate::widgets::Widget;
+use crate::widgets::{Widget, LayoutResult};
 use std::any::Any;
 use std::ops::{Deref, DerefMut};
+use euclid::default::Size2D;
 
 pub struct Column<Heading> {
   heading: Heading,
@@ -39,7 +40,7 @@ where
     todo!()
   }
 
-  fn layout(&mut self) {
+  fn layout(&mut self, max_size: &Size2D<usize>) -> LayoutResult {
     todo!()
   }
 
@@ -221,7 +222,7 @@ where
     todo!()
   }
 
-  fn layout(&mut self) {
+  fn layout(&mut self, max_size: &Size2D<usize>) -> LayoutResult {
     todo!()
   }
 

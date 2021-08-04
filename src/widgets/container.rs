@@ -1,26 +1,14 @@
 use crate::render::RenderCtx;
-use crate::widgets::Widget;
+use crate::widgets::{Widget, LayoutResult};
+use euclid::default::Size2D;
 
-pub struct Container {
-  split: Split,
+pub struct VerticalContainer {
   children: Vec<Box<dyn Widget>>,
 }
 
-enum Split {
-  Horizontal,
-  Vertical,
-}
-
-impl Container {
-  pub fn horizontal() -> Self {
+impl VerticalContainer {
+  pub fn new() -> Self {
     Self {
-      split: Split::Horizontal,
-      children: Vec::default(),
-    }
-  }
-  pub fn vertical() -> Self {
-    Self {
-      split: Split::Vertical,
       children: Vec::default(),
     }
   }
@@ -30,7 +18,7 @@ impl Container {
   }
 }
 
-impl Widget for Container {
+impl Widget for VerticalContainer {
   fn event(&mut self) {
     todo!()
   }
@@ -39,7 +27,7 @@ impl Widget for Container {
     todo!()
   }
 
-  fn layout(&mut self) {
+  fn layout(&mut self, max_size: &Size2D<usize>) -> LayoutResult {
     todo!()
   }
 

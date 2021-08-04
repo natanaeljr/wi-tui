@@ -1,6 +1,6 @@
 use cui::rect::Rect;
 use cui::render::{RenderCtx, Renderer};
-use cui::widgets::{Button, Column, Container, Table, Widget};
+use cui::widgets::{Align, Button, Column, Table, VerticalContainer, Widget};
 
 struct App {
   root: Option<Box<dyn Widget>>,
@@ -28,14 +28,25 @@ impl App {
 }
 
 fn main() {
-  let app = App::new().root_widget(
-    Container::vertical()
+  let app = App::new().root_widget(Align::centered(
+    VerticalContainer::new()
       .child("Hello")
       .child(String::from("Welt"))
       .child(Button::new("CUI")),
-  );
+  ));
 
   // app.handle_input();
   app.render();
   // app.swap_buffers();
+}
+
+mod tmp {
+  use euclid::default::{Size2D, Rect, Point2D};
+
+  fn myfn() {
+    let rect = Rect::new(Point2D::zero(), Size2D::new(100, 40));
+    let s = Size2D::new(10usize, 20usize);
+    let u = Size2D::new(10usize, 20usize);
+    let x = u * s;
+  }
 }

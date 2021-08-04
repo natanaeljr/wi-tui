@@ -1,6 +1,6 @@
-use crate::rect::Rect;
 use crate::render::RenderCtx;
-use crate::widgets::Widget;
+use crate::widgets::{LayoutResult, Widget};
+use euclid::default::{Point2D, Rect, Size2D};
 
 pub struct Padding<Child> {
   pub child: Child,
@@ -56,13 +56,15 @@ where
     todo!()
   }
 
-  fn layout(&mut self) {}
+  fn layout(&mut self, max_size: &Size2D<usize>) -> LayoutResult {
+    todo!()
+  }
 
   fn render(&self, ctx: &mut RenderCtx) -> Option<()> {
-    let frame = Rect::from_size(
-      (self.left, self.top),
-      (self.layout.0 - self.right, self.layout.1 - self.bottom),
-    )?;
+    let frame = Rect::new(
+      Point2D::new(self.left, self.top),
+      Size2D::new(self.layout.0 - self.right, self.layout.1 - self.bottom),
+    );
     ctx.renderer.set_frame(frame);
     self.child.render(ctx)
   }

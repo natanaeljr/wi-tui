@@ -1,5 +1,6 @@
 use crate::render::RenderCtx;
-use crate::widgets::Widget;
+use crate::widgets::{Widget, LayoutResult};
+use euclid::default::Size2D;
 
 pub struct Align<Child> {
   child: Child,
@@ -32,8 +33,8 @@ where
     todo!()
   }
 
-  fn layout(&mut self) {
-    todo!()
+  fn layout(&mut self, max_size: &Size2D<usize>) -> LayoutResult {
+    self.child.layout(max_size)
   }
 
   fn render(&self, ctx: &mut RenderCtx) -> Option<()> {

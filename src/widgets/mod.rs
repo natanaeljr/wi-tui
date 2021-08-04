@@ -16,21 +16,30 @@ mod tabs;
 mod textbox;
 mod vertical;
 
+// Built-in Widgets
 pub use button::Button;
-pub use container::Container;
+pub use container::VerticalContainer;
 pub use table::Column;
 pub use table::Table;
+
+pub enum LayoutError {
+  InsufficientSpace,
+}
+
+type LayoutResult = Result<Size2D<usize>, LayoutError>;
 
 pub trait Widget {
   fn event(&mut self);
   fn update(&mut self);
-  fn layout(&mut self);
+  fn layout(&mut self, max_size: &Size2D<usize>) -> LayoutResult;
   fn render(&self, ctx: &mut RenderCtx) -> Option<()>;
 }
 
 // Wrapping Widgets
 pub use align::Align;
+use euclid::default::Size2D;
 pub use padding::Padding;
+
 pub struct Border;
 pub struct Bread;
 
@@ -50,7 +59,7 @@ impl Widget for &str {
     todo!()
   }
 
-  fn layout(&mut self) {
+  fn layout(&mut self, max_size: &Size2D<usize>) -> LayoutResult {
     todo!()
   }
 
@@ -69,7 +78,7 @@ impl Widget for String {
     todo!()
   }
 
-  fn layout(&mut self) {
+  fn layout(&mut self, max_size: &Size2D<usize>) -> LayoutResult {
     todo!()
   }
 
@@ -88,7 +97,7 @@ impl Widget for Box<dyn Widget> {
     todo!()
   }
 
-  fn layout(&mut self) {
+  fn layout(&mut self, max_size: &Size2D<usize>) -> LayoutResult {
     todo!()
   }
 

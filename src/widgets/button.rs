@@ -1,6 +1,7 @@
 use crate::render::{RenderCtx, Renderer};
-use crate::widgets::Widget;
+use crate::widgets::{Widget, LayoutResult};
 use std::ops::{Deref, DerefMut};
+use euclid::default::Size2D;
 
 pub struct Button<Child> {
   child: Child,
@@ -24,7 +25,7 @@ impl Widget for Button<&str> {
     todo!()
   }
 
-  fn layout(&mut self) {
+  fn layout(&mut self, max_size: &Size2D<usize>) -> LayoutResult {
     todo!()
   }
 

@@ -1,6 +1,6 @@
-use cui::rect::Rect;
 use cui::render::{RenderCtx, Renderer};
 use cui::widgets::{Align, Button, Column, Padding, Table, Widget};
+use euclid::default::{Rect, Size2D};
 use std::io::Read;
 use std::ops::{Deref, DerefMut};
 
@@ -52,15 +52,11 @@ fn main() {
       vec!["A6", "B6", "C6"], //
       vec!["A7", "B7", "C7"], //
     ]);
-  render_ctx
-    .renderer
-    .set_frame(Rect::from_size_unchecked((0, 0), (50, 10)));
+  render_ctx.renderer.set_frame(Rect::from_size(Size2D::new(50, 10)));
   let table = Padding::around(table).left(5).top(0);
   table.render(&mut render_ctx);
 
-  render_ctx
-    .renderer
-    .set_frame(Rect::from_size_unchecked((0, 0), (50, 10)));
+  render_ctx.renderer.set_frame(Rect::from_size(Size2D::new(50, 10)));
   // render_ctx.renderer.next_line();
   // std::thread::sleep(std::time::Duration::from_secs(5));
 
@@ -123,9 +119,7 @@ fn main() {
       vec!["enp7s0", "ethernet", "unavailable", "--"],          //
       vec!["lo", "loopback", "unmanaged", "--"],                //
     ]);
-  render_ctx
-    .renderer
-    .set_frame(Rect::from_size_unchecked((0, 0), (60, 20)));
+  render_ctx.renderer.set_frame(Rect::from_size(Size2D::new(60, 20)));
   let table = Padding::around(table).left(0).top(10);
   table.render(&mut render_ctx);
 }

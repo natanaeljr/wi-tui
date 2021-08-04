@@ -1,11 +1,13 @@
-use crate::rect::Rect;
 use crossterm::{cursor, execute, terminal};
+use euclid::default::{Rect, Size2D};
 use std::io::Write;
+
+// TODO: Check https://docs.rs/sdl2/0.34.5/sdl2/render/
 
 pub struct Renderer {
   size: (usize, usize),      // xy, cr
   reset_pos: (usize, usize), // xy, cr
-  frame: Rect,
+  frame: Rect<usize>,
   frame_cursor: (usize, usize), // xy, cr
   nl_counter: usize,
 }
@@ -25,7 +27,7 @@ impl Renderer {
       frame_cursor: (0, 0),
       nl_counter: 0,
     };
-    this.set_frame(Rect::from_size((0, 0), (rows as usize, cols as usize)).unwrap());
+    this.set_frame(Rect::from_size(Size2D::new(rows as usize, cols as usize)));
     this
   }
 
@@ -44,17 +46,20 @@ impl Renderer {
   }
 
   pub fn next_line(&mut self) {
-    if self.frame_cursor.1 >= self.frame.y.1 {
+    if self.frame_cursor.1 >= self.frame.max_y() {
       return;
     }
-    self.frame_cursor.0 = self.frame.x.0;
+    self.frame_cursor.0 = self.frame.min_x();
     self.frame_cursor.1 += 1;
     let mut stdout = std::io::stdout();
     execute!(
       stdout,
-      cursor::MoveTo(self.frame.x.0 as u16, (self.frame_cursor.1 + self.reset_pos.1) as u16),
+      cursor::MoveTo(
+        self.frame.min_x() as u16,
+        (self.frame_cursor.1 + self.reset_pos.1) as u16
+      ),
       // cursor::MoveToNextLine(1),
-      // cursor::MoveToColumn(self.frame.x.0 as u16)
+      // cursor::MoveToColumn(self.frame.min_x() as u16)
     );
     if self.reset_pos.1 + self.frame_cursor.1 >= self.size.1 {
       self.reset_pos.1 -= 1;
@@ -67,26 +72,26 @@ impl Renderer {
     // std::thread::sleep(std::time::Duration::from_secs(5));
   }
 
-  pub fn set_frame(&mut self, frame: Rect) {
+  pub fn set_frame(&mut self, frame: Rect<usize>) {
     // let frame = Rect::from_size(
-    //   (frame.x.0, frame.y.0 + self.reset_pos.1),
+    //   (frame.min_x(), frame.min_y() + self.reset_pos.1),
     //   (frame.width(), frame.height()),
     // )
     // .unwrap();
     self.frame = frame;
-    self.frame_cursor = (frame.x.0, frame.y.0);
+    self.frame_cursor = (frame.min_x(), frame.min_y());
     let mut stdout = std::io::stdout();
     execute!(
       stdout,
-      cursor::MoveTo(frame.x.0 as u16, (frame.y.0 + self.reset_pos.1) as u16)
+      cursor::MoveTo(frame.min_x() as u16, (frame.min_y() + self.reset_pos.1) as u16)
     );
   }
 
   pub fn move_to(&mut self, x: u16, y: u16) -> Option<()> {
-    if x < self.frame.x.0 as u16 || x > self.frame.x.1 as u16 {
+    if x < self.frame.min_x() as u16 || x > self.frame.max_x() as u16 {
       return None;
     }
-    if y < self.frame.y.0 as u16 || y > self.frame.y.1 as u16 {
+    if y < self.frame.min_y() as u16 || y > self.frame.max_y() as u16 {
       return None;
     }
     self.frame_cursor = (x as usize, y as usize);
@@ -96,8 +101,8 @@ impl Renderer {
   }
 
   pub fn move_to_column_relative(&mut self, x: u16) -> Option<()> {
-    let the_x = self.frame.x.0 as u16 + x;
-    if the_x > self.frame.x.1 as u16 {
+    let the_x = self.frame.min_x() as u16 + x;
+    if the_x > self.frame.max_x() as u16 {
       return None;
     }
     self.frame_cursor.0 = the_x as usize;
