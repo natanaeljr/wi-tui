@@ -1,45 +1,37 @@
 use crate::render::RenderCtx;
 use crate::widgets::{LayoutResult, Widget};
-use euclid::default::{Point2D, Rect, Size2D};
+use euclid::default::{Point2D, Rect, SideOffsets2D, Size2D};
 
 pub struct Padding<Child> {
   pub child: Child,
-  pub top: usize,
-  pub left: usize,
-  pub right: usize,
-  pub bottom: usize,
-  layout: (usize, usize),
+  pub offsets: SideOffsets2D<usize>,
 }
 
 impl<Child> Padding<Child> {
   pub fn around(child: Child) -> Self {
     Self {
       child,
-      top: 0,
-      left: 0,
-      right: 0,
-      bottom: 0,
-      layout: (50, 9),
+      offsets: SideOffsets2D::zero(),
     }
   }
 
   pub fn top(mut self, top: usize) -> Self {
-    self.top = top;
+    self.offsets.top = top;
     self
   }
 
   pub fn left(mut self, left: usize) -> Self {
-    self.left = left;
+    self.offsets.left = left;
     self
   }
 
   pub fn right(mut self, right: usize) -> Self {
-    self.right = right;
+    self.offsets.right = right;
     self
   }
 
   pub fn bottom(mut self, bottom: usize) -> Self {
-    self.bottom = bottom;
+    self.offsets.bottom = bottom;
     self
   }
 }
@@ -61,10 +53,8 @@ where
   }
 
   fn render(&self, ctx: &mut RenderCtx) -> Option<()> {
-    let frame = Rect::new(
-      Point2D::new(self.left, self.top),
-      Size2D::new(self.layout.0 - self.right, self.layout.1 - self.bottom),
-    );
+    let ext_size = Size2D::new(50, 10);
+    let frame = Rect::from_size(ext_size).inner_rect(self.offsets.clone());
     ctx.renderer.set_frame(frame);
     self.child.render(ctx)
   }

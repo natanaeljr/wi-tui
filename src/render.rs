@@ -1,14 +1,14 @@
 use crossterm::{cursor, execute, terminal};
-use euclid::default::{Rect, Size2D};
+use euclid::default::{Box2D, Point2D, Rect, Size2D};
 use std::io::Write;
 
 // TODO: Check https://docs.rs/sdl2/0.34.5/sdl2/render/
 
 pub struct Renderer {
-  size: (usize, usize),      // xy, cr
-  reset_pos: (usize, usize), // xy, cr
+  size: Size2D<usize>,
+  reset_pos: Point2D<usize>,
   frame: Rect<usize>,
-  frame_cursor: (usize, usize), // xy, cr
+  frame_cursor: Point2D<usize>,
   nl_counter: usize,
 }
 
@@ -21,10 +21,10 @@ impl Renderer {
     let mut stdout = std::io::stdout();
     // execute!(stdout, terminal::EnterAlternateScreen);
     let mut this = Self {
-      size: (cols as usize, rows as usize),
-      reset_pos: (pos_c as usize, pos_r as usize),
+      size: Size2D::new(cols as usize, rows as usize),
+      reset_pos: Point2D::new(pos_c as usize, pos_r as usize),
       frame: Default::default(),
-      frame_cursor: (0, 0),
+      frame_cursor: Point2D::new(0, 0),
       nl_counter: 0,
     };
     this.set_frame(Rect::from_size(Size2D::new(rows as usize, cols as usize)));
@@ -33,39 +33,39 @@ impl Renderer {
 
   pub fn print(&mut self, buf: &str) {
     std::thread::sleep(std::time::Duration::from_millis(100));
-    let space = self.frame.width() - self.frame_cursor.0;
+    let space = self.frame.width() - self.frame_cursor.x;
     if buf.len() > space {
       let (buf, _) = buf.split_at(space);
       print!("{}", buf);
-      self.frame_cursor.0 += space;
+      self.frame_cursor.x += space;
     } else {
       print!("{}", buf);
-      self.frame_cursor.0 += buf.len();
+      self.frame_cursor.x += buf.len();
     }
     std::io::stdout().flush();
   }
 
   pub fn next_line(&mut self) {
-    if self.frame_cursor.1 >= self.frame.max_y() {
+    if self.frame_cursor.y >= self.frame.max_y() {
       return;
     }
-    self.frame_cursor.0 = self.frame.min_x();
-    self.frame_cursor.1 += 1;
+    self.frame_cursor.x = self.frame.min_x();
+    self.frame_cursor.y += 1;
     let mut stdout = std::io::stdout();
     execute!(
       stdout,
       cursor::MoveTo(
         self.frame.min_x() as u16,
-        (self.frame_cursor.1 + self.reset_pos.1) as u16
+        (self.frame_cursor.y + self.reset_pos.y) as u16
       ),
       // cursor::MoveToNextLine(1),
       // cursor::MoveToColumn(self.frame.min_x() as u16)
     );
-    if self.reset_pos.1 + self.frame_cursor.1 >= self.size.1 {
-      self.reset_pos.1 -= 1;
+    if self.reset_pos.y + self.frame_cursor.y >= self.size.height {
+      self.reset_pos.y -= 1;
       execute!(stdout, crossterm::terminal::ScrollUp(1),);
     }
-    if self.frame_cursor.1 >= self.nl_counter {
+    if self.frame_cursor.y >= self.nl_counter {
       self.nl_counter += 1;
     }
     // print!("{:?} {:?} {:?}", self.reset_pos, self.frame_cursor, self.size);
@@ -74,16 +74,16 @@ impl Renderer {
 
   pub fn set_frame(&mut self, frame: Rect<usize>) {
     // let frame = Rect::from_size(
-    //   (frame.min_x(), frame.min_y() + self.reset_pos.1),
+    //   (frame.min_x(), frame.min_y() + self.reset_pos.y),
     //   (frame.width(), frame.height()),
     // )
     // .unwrap();
     self.frame = frame;
-    self.frame_cursor = (frame.min_x(), frame.min_y());
+    self.frame_cursor = frame.min();
     let mut stdout = std::io::stdout();
     execute!(
       stdout,
-      cursor::MoveTo(frame.min_x() as u16, (frame.min_y() + self.reset_pos.1) as u16)
+      cursor::MoveTo(frame.min_x() as u16, (frame.min_y() + self.reset_pos.y) as u16)
     );
   }
 
@@ -94,9 +94,9 @@ impl Renderer {
     if y < self.frame.min_y() as u16 || y > self.frame.max_y() as u16 {
       return None;
     }
-    self.frame_cursor = (x as usize, y as usize);
+    self.frame_cursor = Point2D::new(x as usize, y as usize);
     let mut stdout = std::io::stdout();
-    execute!(stdout, cursor::MoveTo(x, y + self.reset_pos.1 as u16));
+    execute!(stdout, cursor::MoveTo(x, y + self.reset_pos.y as u16));
     Some(())
   }
 
@@ -105,7 +105,7 @@ impl Renderer {
     if the_x > self.frame.max_x() as u16 {
       return None;
     }
-    self.frame_cursor.0 = the_x as usize;
+    self.frame_cursor.x = the_x as usize;
     let mut stdout = std::io::stdout();
     execute!(stdout, cursor::MoveToColumn(the_x));
     Some(())
@@ -116,8 +116,8 @@ impl Drop for Renderer {
   fn drop(&mut self) {
     let mut stdout = std::io::stdout();
     // execute!(stdout, terminal::LeaveAlternateScreen);
-    // self.move_to(0, (self.size.1) as u16);
-    execute!(stdout, cursor::MoveTo(0, (self.reset_pos.1 + self.nl_counter) as u16),);
+    // self.move_to(0, (self.size.height) as u16);
+    execute!(stdout, cursor::MoveTo(0, (self.reset_pos.y + self.nl_counter) as u16),);
     std::thread::sleep(std::time::Duration::from_secs(1));
     terminal::disable_raw_mode().unwrap();
     println!();

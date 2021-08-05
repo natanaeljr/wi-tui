@@ -1,6 +1,7 @@
 use crate::render::RenderCtx;
-use crate::widgets::{Widget, LayoutResult};
+use crate::widgets::{LayoutResult, Widget};
 use euclid::default::Size2D;
+use std::iter::FromIterator;
 
 pub struct VerticalContainer {
   children: Vec<Box<dyn Widget>>,
@@ -10,6 +11,18 @@ impl VerticalContainer {
   pub fn new() -> Self {
     Self {
       children: Vec::default(),
+    }
+  }
+  pub fn children<I, W>(container: I) -> Self
+  where
+    I: IntoIterator<Item = W>,
+    W: Widget + 'static,
+  {
+    Self {
+      children: container
+        .into_iter()
+        .map(|c| Box::new(c) as Box<dyn Widget>)
+        .collect::<Vec<_>>(),
     }
   }
   pub fn child<W: Widget + 'static>(mut self, child: W) -> Self {
