@@ -20,7 +20,7 @@ mod vertical;
 pub use button::Button;
 pub use container::VerticalContainer;
 pub use table::Column;
-pub use table::Table;
+pub use table::{Table, TableData, TableColumns};
 
 pub enum LayoutError {
   InsufficientSpace,
