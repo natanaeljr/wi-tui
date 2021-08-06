@@ -20,7 +20,7 @@ mod vertical;
 pub use button::Button;
 pub use container::VerticalContainer;
 pub use table::Column;
-pub use table::{Table, TableData, TableColumns};
+pub use table::{Table, TableColumns, TableData};
 
 pub enum LayoutError {
   InsufficientSpace,
@@ -84,6 +84,26 @@ impl Widget for String {
 
   fn render(&self, ctx: &mut RenderCtx) -> Option<()> {
     ctx.renderer.print(self);
+    Some(())
+  }
+}
+
+impl Widget for u32 {
+  fn event(&mut self) {
+    todo!()
+  }
+
+  fn update(&mut self) {
+    todo!()
+  }
+
+  fn layout(&mut self, max_size: &Size2D<usize>) -> LayoutResult {
+    todo!()
+  }
+
+  fn render(&self, ctx: &mut RenderCtx) -> Option<()> {
+    let val = format!("{}", self);
+    ctx.renderer.print(&val);
     Some(())
   }
 }

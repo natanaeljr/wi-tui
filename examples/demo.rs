@@ -60,7 +60,7 @@ fn main() {
   // render_ctx.renderer.next_line();
   // std::thread::sleep(std::time::Duration::from_secs(5));
 
-  let table: Table<Box<dyn Widget>> = Table::new()
+  let table: Table = Table::new()
     .columns(vec![
       Column::heading(Box::new("Hi") as Box<dyn Widget>).width(4), //
       Column::heading(Box::new(Align::centered("Hey")) as Box<dyn Widget>), //

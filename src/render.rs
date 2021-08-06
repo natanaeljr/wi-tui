@@ -27,12 +27,12 @@ impl Renderer {
       frame_cursor: Point2D::new(0, 0),
       nl_counter: 0,
     };
-    this.set_frame(Rect::from_size(Size2D::new(rows as usize, cols as usize)));
+    this.set_frame(Rect::from_size(Size2D::new(cols as usize, rows as usize)));
     this
   }
 
   pub fn print(&mut self, buf: &str) {
-    std::thread::sleep(std::time::Duration::from_millis(100));
+    std::thread::sleep(std::time::Duration::from_millis(300));
     let space = self.frame.width() - self.frame_cursor.x;
     if buf.len() > space {
       let (buf, _) = buf.split_at(space);
