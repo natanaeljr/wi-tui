@@ -1,5 +1,5 @@
 use crate::render::RenderCtx;
-use crate::widgets::{LayoutResult, Widget};
+use crate::widgets::{LayoutResult, Widget, RenderResult};
 use euclid::default::Size2D;
 use std::iter::FromIterator;
 
@@ -40,18 +40,18 @@ impl Widget for VerticalContainer {
     todo!()
   }
 
-  fn layout(&mut self, max_size: &Size2D<usize>) -> LayoutResult {
+  fn layout(&self, max_size: &Size2D<usize>) -> LayoutResult {
     todo!()
   }
 
-  fn render(&self, ctx: &mut RenderCtx) -> Option<()> {
+  fn render(&self, ctx: &mut RenderCtx) -> RenderResult {
     let len = self.children.len();
     for (idx, child) in self.children.iter().enumerate() {
       child.render(ctx);
       if idx < len - 1 {
-        ctx.renderer.next_line();
+        ctx.renderer().next_line();
       }
     }
-    Some(())
+    Ok(())
   }
 }

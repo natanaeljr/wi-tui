@@ -1,5 +1,5 @@
 use crate::render::RenderCtx;
-use crate::widgets::{LayoutResult, Widget};
+use crate::widgets::{LayoutResult, Widget, RenderResult};
 use euclid::default::{Point2D, Rect, SideOffsets2D, Size2D};
 
 pub struct Padding<Child> {
@@ -13,6 +13,14 @@ impl<Child> Padding<Child> {
       child,
       offsets: SideOffsets2D::zero(),
     }
+  }
+
+  pub fn all(mut self, all: usize) -> Self {
+    self.offsets.top = all;
+    self.offsets.left = all;
+    self.offsets.right = all;
+    self.offsets.bottom = all;
+    self
   }
 
   pub fn top(mut self, top: usize) -> Self {
@@ -48,14 +56,14 @@ where
     todo!()
   }
 
-  fn layout(&mut self, max_size: &Size2D<usize>) -> LayoutResult {
+  fn layout(&self, max_size: &Size2D<usize>) -> LayoutResult {
     todo!()
   }
 
-  fn render(&self, ctx: &mut RenderCtx) -> Option<()> {
-    let ext_size = Size2D::new(50, 10);
-    let frame = Rect::from_size(ext_size).inner_rect(self.offsets.clone());
-    ctx.renderer.set_frame(frame);
-    self.child.render(ctx)
+  fn render(&self, ctx: &mut RenderCtx) -> RenderResult {
+    let mut child_ctx = ctx.child_ctx(ctx.get_frame().inner_rect(self.offsets.clone()));
+    self.child.render(&mut child_ctx)?;
+    ctx.set_frame(Rect::from_size(ctx.get_frame_size().clone()));
+    Ok(())
   }
 }

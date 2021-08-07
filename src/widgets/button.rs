@@ -1,5 +1,5 @@
 use crate::render::{RenderCtx, Renderer};
-use crate::widgets::{Widget, LayoutResult};
+use crate::widgets::{Widget, LayoutResult, RenderResult};
 use std::ops::{Deref, DerefMut};
 use euclid::default::Size2D;
 
@@ -25,12 +25,12 @@ impl Widget for Button<&str> {
     todo!()
   }
 
-  fn layout(&mut self, max_size: &Size2D<usize>) -> LayoutResult {
+  fn layout(&self, max_size: &Size2D<usize>) -> LayoutResult {
     todo!()
   }
 
-  fn render(&self, ctx: &mut RenderCtx) -> Option<()> {
-    ctx.renderer.print(&self.child);
-    Some(())
+  fn render(&self, ctx: &mut RenderCtx) -> RenderResult {
+    ctx.renderer().print(&self.child);
+    Ok(())
   }
 }

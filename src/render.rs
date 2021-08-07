@@ -1,6 +1,10 @@
 use crossterm::{cursor, execute, terminal};
 use euclid::default::{Box2D, Point2D, Rect, Size2D};
+use std::borrow::BorrowMut;
+use std::cell::{Cell, RefCell, RefMut};
 use std::io::Write;
+use std::ops::Deref;
+use std::rc::Rc;
 
 // TODO: Check https://docs.rs/sdl2/0.34.5/sdl2/render/
 
@@ -32,8 +36,8 @@ impl Renderer {
   }
 
   pub fn print(&mut self, buf: &str) {
-    std::thread::sleep(std::time::Duration::from_millis(300));
-    let space = self.frame.width() - self.frame_cursor.x;
+    // std::thread::sleep(std::time::Duration::from_millis(500));
+    let space = self.frame.width() - (self.frame_cursor.x - self.frame.origin.x);
     if buf.len() > space {
       let (buf, _) = buf.split_at(space);
       print!("{}", buf);
@@ -72,7 +76,7 @@ impl Renderer {
     // std::thread::sleep(std::time::Duration::from_secs(5));
   }
 
-  pub fn set_frame(&mut self, frame: Rect<usize>) {
+  fn set_frame(&mut self, frame: Rect<usize>) {
     // let frame = Rect::from_size(
     //   (frame.min_x(), frame.min_y() + self.reset_pos.y),
     //   (frame.width(), frame.height()),
@@ -85,6 +89,15 @@ impl Renderer {
       stdout,
       cursor::MoveTo(frame.min_x() as u16, (frame.min_y() + self.reset_pos.y) as u16)
     );
+
+    if self.reset_pos.y + self.frame_cursor.y + 1 >= self.size.height {
+      let diff = self.reset_pos.y + self.frame_cursor.y + 1 - self.size.height;
+      self.reset_pos.y -= diff;
+      execute!(stdout, crossterm::terminal::ScrollUp(diff as u16),);
+    }
+    if self.frame_cursor.y >= self.nl_counter {
+      self.nl_counter = self.frame_cursor.y;
+    }
   }
 
   pub fn move_to(&mut self, x: u16, y: u16) -> Option<()> {
@@ -118,7 +131,7 @@ impl Drop for Renderer {
     // execute!(stdout, terminal::LeaveAlternateScreen);
     // self.move_to(0, (self.size.height) as u16);
     execute!(stdout, cursor::MoveTo(0, (self.reset_pos.y + self.nl_counter) as u16),);
-    std::thread::sleep(std::time::Duration::from_secs(1));
+    // std::thread::sleep(std::time::Duration::from_secs(1));
     terminal::disable_raw_mode().unwrap();
     println!();
   }
@@ -126,5 +139,39 @@ impl Drop for Renderer {
 
 pub struct RenderCtx {
   // widget constraints box
-  pub renderer: Renderer,
+  renderer: Rc<RefCell<Renderer>>,
+  frame_size: Size2D<usize>,
+}
+
+impl RenderCtx {
+  pub fn new() -> Self {
+    let mut this = Self {
+      renderer: Rc::new(RefCell::new(Renderer::new())),
+      frame_size: Default::default(),
+    };
+    let tmp = this.renderer().frame.size.clone();
+    this.frame_size = tmp;
+    this
+  }
+  pub fn child_ctx(&self, frame: Rect<usize>) -> Self {
+    let mut this = Self {
+      renderer: self.renderer.clone(),
+      frame_size: Default::default(),
+    };
+    this.set_frame(frame);
+    this
+  }
+  pub fn renderer(&mut self) -> RefMut<'_, Renderer> {
+    self.renderer.deref().borrow_mut()
+  }
+  pub fn set_frame(&mut self, frame: Rect<usize>) {
+    self.frame_size = frame.size.clone();
+    self.renderer().set_frame(frame);
+  }
+  pub fn get_frame(&self) -> Rect<usize> {
+    self.renderer.deref().borrow().frame.clone()
+  }
+  pub fn get_frame_size(&self) -> &Size2D<usize> {
+    &self.frame_size
+  }
 }

@@ -1,5 +1,5 @@
 use cui::render::{RenderCtx, Renderer};
-use cui::widgets::{Align, Button, Column, Table, VerticalContainer, Widget};
+use cui::widgets::{Align, Button, Table, VerticalContainer, Widget};
 use euclid::default::{Rect, Size2D};
 
 struct App {
@@ -17,10 +17,8 @@ impl App {
   }
 
   pub fn render(&self) {
-    let mut render_ctx = RenderCtx {
-      renderer: Renderer::new(),
-    };
-    render_ctx.renderer.set_frame(Rect::from_size(Size2D::new(60, 20)));
+    let mut render_ctx = RenderCtx::new();
+    // render_ctx.set_frame(Rect::from_size(Size2D::new(60, 20)));
     self.root.as_ref().unwrap().render(&mut render_ctx);
   }
 }
