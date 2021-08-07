@@ -4,7 +4,8 @@ use crate::widgets::Widget;
 
 pub mod widgets;
 pub mod render;
+pub mod util;
 
-struct Tui {
+pub struct Tui {
   widgets: Vec<Box<dyn Widget>>,
 }

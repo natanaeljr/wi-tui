@@ -1,77 +1,113 @@
-use crate::render::RenderCtx;
-use crate::widgets::{LayoutError, LayoutResult, RenderError, RenderResult, Widget};
-use euclid::default::{Point2D, Rect, Size2D};
 use std::any::Any;
+use std::borrow::Cow;
 use std::cmp::max;
 use std::num::NonZeroUsize;
 use std::ops::{Deref, DerefMut, Sub, SubAssign};
 
+use crossterm::style::{ContentStyle, StyledContent, Stylize};
+use euclid::default::{Point2D, Rect, Size2D};
+
+use crate::render::RenderCtx;
+use crate::util::Scoped;
+use crate::widgets::{LayoutError, LayoutResult, LayoutSize, RenderError, RenderResult, Widget};
+
 #[derive(Clone)]
-pub enum ColumnAutoWidth {
+pub enum ColumnWidthAuto {
+  /// Do not adjust column width automatically
+  Off,
+  /// Adjust column width to the width of the heading
   Heading,
-  LargestCell,
-  // TODO: LargestVisibleCell,
-  // TODO: LargestCellOrHeading
-  // TODO: LargestVisibleCellOrHeading
+  /// Adjust column width to the width of the largest cell in that column
+  AllCells,
+  /// Adjust column width to the width of the largest _visible_ cell in that column
+  VisibleCells,
+  /// Adjust column width to the width of the largest cell in that column or the heading
+  AllCellsOrHeading,
+  /// Adjust column width to the width of the largest _visible_ cell in that column or the heading
+  VisibleCellsOrHeading,
 }
 
 #[derive(Clone)]
-pub enum ColumnMax {
-  Fixed(NonZeroUsize),
+pub enum ColumnWidthValue {
+  /// Use a fixed value
+  Fixed(usize),
+  /// Use value computed from the auto setting
   Auto,
 }
 
+/// Combinations for "abcdefghijklmnopqrswxyz"
+///  Fixed:           { min: 10, max: 10,      auto: None,        flex_weight: 0 } => "abcdefghij"
+///  Min:             { min: 5,  max: 10,      auto: None,        flex_weight: 0 } => "abcde"
+///  Distributed:     { min: 5,  max: 10|Auto, auto: None,        flex_weight: 1 } => "abcdef...j"
+///  AutoFixed:       { min: 1,  max: Auto,    auto: LargestCell, flex_weight: 0 } => "abcdefghijklmnopqrswxyz"
+///  AutoFlexed:      { min: 1,  max: Auto,    auto: LargestCell, flex_weight: 1 } => "a..z"
+///  AutoFlexedBeyond:{ min: 1,  max: Inf,     auto: LargestCell, flex_weight: 1 } => "abc... "
 #[derive(Clone)]
-pub struct ColumnConstraints {
-  pub min: NonZeroUsize,
-  pub max: ColumnMax,
-  pub auto: Option<ColumnAutoWidth>,
+pub struct ColumnWidth {
+  /// Minimum column width
+  pub min: ColumnWidthValue,
+  /// Maximum column width
+  pub max: ColumnWidthValue,
+  /// Automatic column width adjustment
+  pub auto_mode: ColumnWidthAuto,
+  /// Flex column width to available space based on weight; zero is no flex.
   pub flex_weight: usize,
-  // pub flex_max_auto: bool = true,
 }
 
-impl Default for ColumnConstraints {
+impl Default for ColumnWidth {
   fn default() -> Self {
-    Self {
-      min: NonZeroUsize::new(1).unwrap(),
-      max: ColumnMax::Auto,
-      auto: None,
-      flex_weight: 1,
-    }
+    Self::new()
   }
-}
-
-impl ColumnConstraints {
-  pub fn new() -> Self {
-    Default::default()
-  }
-
-  pub fn min(mut self, min: NonZeroUsize) -> Self {
-    self.min = min;
-    self
-  }
-  pub fn max(mut self, max: ColumnMax) -> Self {
-    self.max = max;
-    self
-  }
-  pub fn auto(mut self, auto: ColumnAutoWidth) -> Self {
-    self.auto = Some(auto);
-    self
-  }
-}
-
-#[derive(Clone)]
-pub enum ColumnWidth {
-  Fixed(NonZeroUsize),
-  Dynamic(ColumnConstraints),
 }
 
 impl ColumnWidth {
-  pub fn auto_heading() -> Self {
-    ColumnWidth::Dynamic(ColumnConstraints::new().auto(ColumnAutoWidth::Heading))
+  pub fn new() -> Self {
+    Self {
+      min: ColumnWidthValue::Fixed(1),
+      max: ColumnWidthValue::Auto,
+      auto_mode: ColumnWidthAuto::AllCellsOrHeading,
+      flex_weight: 1,
+    }
   }
-  pub fn auto_data() -> Self {
-    ColumnWidth::Dynamic(ColumnConstraints::new().auto(ColumnAutoWidth::LargestCell))
+
+  pub fn min(mut self, min: ColumnWidthValue) -> Self {
+    self.min = min;
+    self
+  }
+
+  pub fn min_auto(mut self) -> Self {
+    self.min = ColumnWidthValue::Auto;
+    self
+  }
+
+  pub fn min_fixed(mut self, min: usize) -> Self {
+    self.min = ColumnWidthValue::Fixed(min);
+    self
+  }
+
+  pub fn max(mut self, max: ColumnWidthValue) -> Self {
+    self.max = max;
+    self
+  }
+
+  pub fn max_fixed(mut self, fixed: usize) -> Self {
+    self.max = ColumnWidthValue::Fixed(fixed);
+    self
+  }
+
+  pub fn max_auto(mut self) -> Self {
+    self.max = ColumnWidthValue::Auto;
+    self
+  }
+
+  pub fn auto_mode(mut self, auto_mode: ColumnWidthAuto) -> Self {
+    self.auto_mode = auto_mode;
+    self
+  }
+
+  pub fn flex_weight(mut self, weight: usize) -> Self {
+    self.flex_weight = weight;
+    self
   }
 }
 
@@ -84,39 +120,14 @@ impl<Heading> Column<Heading>
 where
   Heading: Widget,
 {
-  pub fn heading(heading: Heading) -> Self {
+  pub fn new(heading: Heading) -> Self {
     Self {
       heading,
-      width: ColumnWidth::auto_data(),
+      width: ColumnWidth::default(),
     }
   }
   pub fn width(mut self, width: ColumnWidth) -> Self {
     self.width = width;
-    self
-  }
-  pub fn width_fixed(mut self, fixed: NonZeroUsize) -> Self {
-    self.width = ColumnWidth::Fixed(fixed);
-    self
-  }
-  pub fn width_auto_heading(mut self) -> Self {
-    self.width = ColumnWidth::Dynamic(ColumnConstraints::new().auto(ColumnAutoWidth::Heading));
-    self
-  }
-  pub fn width_auto_data(mut self) -> Self {
-    self.width = ColumnWidth::Dynamic(ColumnConstraints::new().auto(ColumnAutoWidth::LargestCell));
-    self
-  }
-  pub fn width_dynamic(mut self, constraints: ColumnConstraints) -> Self {
-    self.width = ColumnWidth::Dynamic(constraints);
-    self
-  }
-  pub fn width_no_flex(mut self) -> Self {
-    match &mut self.width {
-      ColumnWidth::Fixed(_) => {}
-      ColumnWidth::Dynamic(constraints) => {
-        constraints.flex_weight = 0;
-      }
-    }
     self
   }
 }
@@ -133,8 +144,8 @@ where
     todo!()
   }
 
-  fn layout(&self, max_size: &Size2D<usize>) -> LayoutResult {
-    self.heading.layout(max_size)
+  fn layout(&self, parent_size: &Size2D<usize>) -> LayoutResult {
+    self.heading.layout(parent_size)
   }
 
   fn render(&self, ctx: &mut RenderCtx) -> RenderResult {
@@ -144,22 +155,21 @@ where
 }
 
 pub trait TableColumn: Widget {
-  fn get_width(&self) -> ColumnWidth;
+  fn get_width(&self) -> Cow<ColumnWidth>;
 }
 
 impl<Heading> TableColumn for Column<Heading>
 where
   Heading: Widget,
 {
-  fn get_width(&self) -> ColumnWidth {
-    self.width.clone()
+  fn get_width(&self) -> Cow<ColumnWidth> {
+    Cow::Borrowed(&self.width)
   }
 }
 
 pub trait TableColumns {
   fn len(&self) -> usize;
-  fn column(&self, idx: usize) -> Option<&dyn TableColumn>;
-  fn column_mut(&mut self, idx: usize) -> Option<&mut dyn TableColumn>;
+  fn column(&self, idx: usize) -> Option<Scoped<dyn TableColumn>>;
   fn as_any(&self) -> &dyn Any;
   fn as_any_mut(&mut self) -> &mut dyn Any;
 }
@@ -172,12 +182,8 @@ where
     Self::len(self)
   }
 
-  fn column(&self, idx: usize) -> Option<&dyn TableColumn> {
-    self.get(idx).and_then(|c| Some(c as &dyn TableColumn))
-  }
-
-  fn column_mut(&mut self, idx: usize) -> Option<&mut dyn TableColumn> {
-    self.get_mut(idx).and_then(|c| Some(c as &mut dyn TableColumn))
+  fn column(&self, idx: usize) -> Option<Scoped<dyn TableColumn>> {
+    self.get(idx).and_then(|col| Some(Scoped::Ref(col as &dyn TableColumn)))
   }
 
   fn as_any(&self) -> &dyn Any {
@@ -191,8 +197,7 @@ where
 
 pub trait TableData {
   fn rows_len(&self) -> usize;
-  fn cell(&self, row: usize, col: usize) -> Option<&dyn Widget>;
-  fn cell_mut(&mut self, row: usize, col: usize) -> Option<&mut dyn Widget>;
+  fn cell(&self, row: usize, col: usize) -> Option<Scoped<dyn Widget>>;
   fn as_any(&self) -> &dyn Any;
   fn as_any_mut(&mut self) -> &mut dyn Any;
 }
@@ -205,16 +210,10 @@ where
     self.len()
   }
 
-  fn cell(&self, row: usize, col: usize) -> Option<&dyn Widget> {
+  fn cell(&self, row: usize, col: usize) -> Option<Scoped<dyn Widget>> {
     self
       .get(row)
-      .and_then(|v| v.get(col).and_then(|i| Some(i as &dyn Widget)))
-  }
-
-  fn cell_mut(&mut self, row: usize, col: usize) -> Option<&mut dyn Widget> {
-    self
-      .get_mut(row)
-      .and_then(|v| v.get_mut(col).and_then(|i| Some(i as &mut dyn Widget)))
+      .and_then(|vec| vec.get(col).and_then(|cell| Some(Scoped::Ref(cell as &dyn Widget))))
   }
 
   fn as_any(&self) -> &dyn Any {
@@ -227,17 +226,62 @@ where
 }
 
 pub struct TableLayout {
-  // fixed_rows
-// fixed_cols
-// column_separator
-// must_show_all_columns
-// flex_mode: first_cols/distributed/weight  // weight could be measured based on the computed auto width
-// default col/row styles
+  /// Number of fixed top rows
+  pub fixed_rows: usize,
+  /// Number of
+  pub fixed_cols: usize,
+  /// Whether to render column headings or not
+  pub hide_headings: bool,
+  /// Column separator
+  pub column_separator: char,
+  /// Rendering must fit all columns or render nothing at all (declare insufficient space)
+  pub must_render_fit_all_columns: bool,
+}
+
+impl Default for TableLayout {
+  fn default() -> Self {
+    Self::new()
+  }
+}
+
+impl TableLayout {
+  pub fn new() -> Self {
+    Self {
+      fixed_rows: 0,
+      fixed_cols: 0,
+      hide_headings: false,
+      column_separator: ' ',
+      must_render_fit_all_columns: false,
+    }
+  }
+
+  pub fn fixed_rows(mut self, fixed_rows: usize) -> Self {
+    self.fixed_cols = fixed_rows;
+    self
+  }
+
+  pub fn fixed_cols(mut self, fixed_cols: usize) -> Self {
+    self.fixed_cols = fixed_cols;
+    self
+  }
+
+  pub fn hide_headings(mut self, hide_headings: bool) -> Self {
+    self.hide_headings = hide_headings;
+    self
+  }
+
+  pub fn column_separator(mut self, column_separator: char) -> Self {
+    self.column_separator = column_separator;
+    self
+  }
+
+  pub fn must_render_fit_all_columns(mut self, must_render_fit_all_columns: bool) -> Self {
+    self.must_render_fit_all_columns = must_render_fit_all_columns;
+    self
+  }
 }
 
 // TODO: how to merge cells
-// TODO: column indices for cherry-picking columns from TableData
-//  that is to allow TableData to have more columns than what is shown.
 pub struct Table {
   columns: Option<Box<dyn TableColumns>>,
   data: Option<Box<dyn TableData>>,
@@ -249,7 +293,7 @@ impl Table {
     Self {
       columns: None,
       data: None,
-      layout: TableLayout {},
+      layout: TableLayout::default(),
     }
   }
 
@@ -307,156 +351,174 @@ impl Table {
       .and_then(|data| data.deref_mut().as_any_mut().downcast_mut::<D>())
   }
 
-  // pub fn theme() -> Self {}
-
-  fn layout_flex(size: &Size2D<usize>, input_layout: Vec<ColumnLayoutWidth>) -> Result<Vec<usize>, LayoutError> {
-    let mut output_layout = Vec::new();
-    output_layout.reserve(input_layout.len());
-
-    let mut fixed_width = 0;
-    let mut flex_total_weight = 0;
-    for layout in input_layout.iter() {
-      match layout {
-        ColumnLayoutWidth::Fixed(fixed) => {
-          fixed_width += fixed;
-          output_layout.push(*fixed);
-        }
-        ColumnLayoutWidth::Flex { min, max, weight } => {
-          fixed_width += min;
-          flex_total_weight += weight;
-          output_layout.push(0 /* computed later */);
-        }
-      }
-    }
-
-    if !size.contains(Size2D::new(fixed_width, 1)) {
-      return Err(LayoutError::InsufficientSpace);
-    }
-
-    let mut total_width = fixed_width;
-    let mut avail_flex_width = size.width - fixed_width;
-    let mut flex_unit = avail_flex_width as f32 / flex_total_weight as f32;
-
-    for (idx, layout) in input_layout.iter().enumerate() {
-      match layout {
-        ColumnLayoutWidth::Fixed(_) => {}
-        ColumnLayoutWidth::Flex { min, max, weight } => {
-          let flex = (*weight as f32 * flex_unit).round() as usize;
-          let add_width = std::cmp::min(flex, *max - min);
-          let rest = flex - add_width;
-          avail_flex_width -= add_width;
-          flex_total_weight -= weight;
-          flex_unit = avail_flex_width as f32 / flex_total_weight as f32;
-          output_layout[idx] = min + add_width;
-          total_width += add_width;
-        }
-      }
-    }
-
-    if size.contains(Size2D::new(total_width, 1)) {
-      Ok(output_layout)
-    } else {
-      Err(LayoutError::InsufficientSpace)
-    }
+  pub fn layout(mut self, layout: TableLayout) -> Self {
+    self.layout = layout;
+    self
   }
 
-  fn layout_internal(&self, max_size: &Size2D<usize>) -> Result<(Size2D<usize>, Vec<ColumnLayoutWidth>), LayoutError> {
-    let mut column_layout = Vec::new();
+  // TODO: pub fn theme() -> Self {}
 
-    let mut avail_size = max_size.clone();
-    dbg!(max_size);
-    let mut col_used_height = 0;
+  fn layout_flex(size: &Size2D<usize>, input_layout: Vec<ColumnLayoutWidth>) -> Result<Vec<usize>, LayoutError> {
+    // let mut output_layout = Vec::new();
+    // output_layout.reserve(input_layout.len());
+    //
+    // let mut fixed_width = 0;
+    // let mut flex_total_weight = 0;
+    // for layout in input_layout.iter() {
+    //   match layout {
+    //     ColumnLayoutWidth::Fixed(fixed) => {
+    //       fixed_width += fixed;
+    //       output_layout.push(*fixed);
+    //     }
+    //     ColumnLayoutWidth::Flex { min, max, weight } => {
+    //       fixed_width += min;
+    //       flex_total_weight += weight;
+    //       output_layout.push(0 /* computed later */);
+    //     }
+    //   }
+    // }
+    //
+    // if !size.contains(Size2D::new(fixed_width, 1)) {
+    //   return Err(LayoutError::InsufficientSpace);
+    // }
+    //
+    // let mut total_width = fixed_width;
+    // let mut avail_flex_width = size.width - fixed_width;
+    // let mut flex_unit = avail_flex_width as f32 / flex_total_weight as f32;
+    //
+    // for (idx, layout) in input_layout.iter().enumerate() {
+    //   match layout {
+    //     ColumnLayoutWidth::Fixed(_) => {}
+    //     ColumnLayoutWidth::Flex { min, max, weight } => {
+    //       let flex = (*weight as f32 * flex_unit).round() as usize;
+    //       let add_width = std::cmp::min(flex, *max - min);
+    //       let rest = flex - add_width;
+    //       avail_flex_width -= add_width;
+    //       flex_total_weight -= weight;
+    //       flex_unit = avail_flex_width as f32 / flex_total_weight as f32;
+    //       output_layout[idx] = min + add_width;
+    //       total_width += add_width;
+    //     }
+    //   }
+    // }
+    //
+    // if size.contains(Size2D::new(total_width, 1)) {
+    //   Ok(output_layout)
+    // } else {
+    //   Err(LayoutError::InsufficientSpace)
+    // }
 
-    let columns = self.columns_ref().unwrap();
-    let data = self.data_ref().unwrap();
+    Err(LayoutError::InsufficientSpace)
+  }
 
-    for col in 0..columns.len() {
-      let column = columns.column(col).unwrap();
-      let column_size = column.layout(&avail_size)?;
-      let column_width = match column.get_width() {
-        ColumnWidth::Fixed(fixed) => {
-          dbg!(avail_size);
-          column_layout.push(ColumnLayoutWidth::Fixed(fixed.get()));
-          fixed.get()
-        }
-        ColumnWidth::Dynamic(constraints) => {
-          let dynamic_width = {
-            let auto_width = if let Some(auto) = constraints.auto {
-              match auto {
-                ColumnAutoWidth::Heading => column_size.width,
-                ColumnAutoWidth::LargestCell => {
-                  let mut max_width = 0;
-                  for row in 0..data.rows_len() {
-                    if let Some(cell) = data.cell(row, col) {
-                      let cell_width = cell.layout(&avail_size)?.width;
-                      if cell_width > max_width {
-                        max_width = cell_width;
-                      }
-                    }
-                  }
-                  max_width
-                }
-              }
-            } else {
-              0
-            };
-            let width = match constraints.max {
-              ColumnMax::Fixed(max) => std::cmp::min(auto_width, max.get()),
-              ColumnMax::Auto => auto_width,
-            };
-            let width = std::cmp::max(width, constraints.min.get());
-            width
-          };
+  fn layout_internal(&self, parent_size: &Size2D<usize>) -> Result<(LayoutSize, Vec<ColumnLayoutWidth>), LayoutError> {
+    // let mut column_layout = Vec::new();
+    //
+    // let columns = self.columns_ref().unwrap();
+    // let data = self.data_ref().unwrap();
+    //
+    // let mut avail_size = parent_size.clone();
+    // let mut col_min_height = 0;
+    // let mut col_max_height = 0;
+    //
+    // for col in 0..columns.len() {
+    //   let column = columns.column(col).unwrap();
+    //   let column_size = column.layout(&avail_size)?;
+    //   let column_width = match column.get_width() {
+    //     ColumnWidth::Fixed(fixed) => {
+    //       column_layout.push(ColumnLayoutWidth::Fixed(fixed));
+    //       MinMax::new(fixed, fixed)
+    //     }
+    //     ColumnWidth::Dynamic(constraints) => {
+    //       let dynamic_width = {
+    //         let auto_width = if let Some(auto) = constraints.auto {
+    //           match auto {
+    //             ColumnWidthAuto::Heading => column_size.max.width,
+    //             ColumnWidthAuto::LargestCell => {
+    //               let mut max_width = 0;
+    //               for row in 0..data.rows_len() {
+    //                 if let Some(cell) = data.cell(row, col) {
+    //                   let cell_width = cell.layout(&avail_size)?.max.width;
+    //                   if cell_width > max_width {
+    //                     max_width = cell_width;
+    //                   }
+    //                 }
+    //               }
+    //               max_width
+    //             }
+    //           }
+    //         } else {
+    //           0
+    //         };
+    //         let width = match constraints.max {
+    //           ColumnWidthValue::Fixed(max) => std::cmp::min(auto_width, max),
+    //           ColumnWidthValue::Auto => auto_width,
+    //         };
+    //         let width = std::cmp::max(width, constraints.min);
+    //         width
+    //       };
+    //
+    //       if constraints.flex_weight > 0 {
+    //         column_layout.push(ColumnLayoutWidth::Flex {
+    //           min: constraints.min,
+    //           max: match constraints.max {
+    //             ColumnWidthValue::Fixed(max) => max,
+    //             ColumnWidthValue::Auto => dynamic_width,
+    //           },
+    //           weight: constraints.flex_weight,
+    //         });
+    //         constraints.min
+    //       } else {
+    //         column_layout.push(ColumnLayoutWidth::Fixed(dynamic_width));
+    //         dynamic_width
+    //       }
+    //     }
+    //   };
+    //   if !avail_size.contains(Size2D::new(column_width, column_size.height)) {
+    //     return Err(LayoutError::InsufficientSpace);
+    //   }
+    //   avail_size.width -= column_width;
+    //   col_min_height = std::cmp::max(col_min_height, column_size.height);
+    // }
+    //
+    // let mut row_used_height = 0;
+    // if data.rows_len() > 0 {
+    //   let row_avail_size = Size2D::new(parent_size.width, parent_size.height - col_min_height);
+    //   for col in 0..columns.len() {
+    //     if let Some(cell) = data.cell(0, col) {
+    //       let cell_height = cell.layout(&row_avail_size)?.height;
+    //       row_used_height = std::cmp::max(row_used_height, cell_height);
+    //     }
+    //   }
+    // }
+    //
+    // let used_width = parent_size.width - avail_size.width;
+    // let used_height = col_min_height + row_used_height;
+    // let min_size = Size2D::new(used_width, used_height);
+    //
+    // if parent_size.contains(min_size.clone()) {
+    //   Ok((min_size, column_layout))
+    // } else {
+    //   Err(LayoutError::InsufficientSpace)
+    // }
 
-          if constraints.flex_weight > 0 {
-            column_layout.push(ColumnLayoutWidth::Flex {
-              min: constraints.min.get(),
-              max: match constraints.max {
-                ColumnMax::Fixed(max) => max.get(),
-                ColumnMax::Auto => dynamic_width,
-              },
-              weight: constraints.flex_weight,
-            });
-            constraints.min.get()
-          } else {
-            column_layout.push(ColumnLayoutWidth::Fixed(dynamic_width));
-            dynamic_width
-          }
-        }
-      };
-      if !avail_size.contains(Size2D::new(column_width, column_size.height)) {
-        return Err(LayoutError::InsufficientSpace);
-      }
-      avail_size.width -= column_width;
-      col_used_height = std::cmp::max(col_used_height, column_size.height);
-    }
-
-    let mut row_used_height = 0;
-    if data.rows_len() > 0 {
-      let row_avail_size = Size2D::new(max_size.width, max_size.height - col_used_height);
-      for col in 0..columns.len() {
-        if let Some(cell) = data.cell(0, col) {
-          let cell_height = cell.layout(&row_avail_size)?.height;
-          row_used_height = std::cmp::max(row_used_height, cell_height);
-        }
-      }
-    }
-
-    let used_width = max_size.width - avail_size.width;
-    let used_height = col_used_height + row_used_height;
-    let min_size = Size2D::new(used_width, used_height);
-
-    if max_size.contains(min_size.clone()) {
-      Ok((min_size, column_layout))
-    } else {
-      Err(LayoutError::InsufficientSpace)
-    }
+    Err(LayoutError::InsufficientSpace)
   }
 }
 
 enum ColumnLayoutWidth {
   Fixed(usize),
   Flex { min: usize, max: usize, weight: usize },
+}
+
+struct MinMax<T> {
+  min: T,
+  max: T,
+}
+impl<T> MinMax<T> {
+  pub fn new(min: T, max: T) -> Self {
+    Self { min, max }
+  }
 }
 
 impl Widget for Table {
@@ -470,58 +532,60 @@ impl Widget for Table {
     todo!()
   }
 
-  fn layout(&self, max_size: &Size2D<usize>) -> LayoutResult {
-    self.layout_internal(max_size).map(|ok| ok.0)
+  fn layout(&self, parent_size: &Size2D<usize>) -> LayoutResult {
+    self.layout_internal(parent_size).map(|ok| ok.0)
   }
 
   fn render(&self, ctx: &mut RenderCtx) -> RenderResult {
-    let (_, layout) = self
-      .layout_internal(ctx.get_frame_size())
-      .map_err(|err| RenderError::Layout(err))?;
-    let flexed_layout = Self::layout_flex(ctx.get_frame_size(), layout).map_err(|err| RenderError::Layout(err))?;
+    // let (_, layout) = self
+    //   .layout_internal(ctx.get_frame_size())
+    //   .map_err(|err| RenderError::Layout(err))?;
+    // let flexed_layout = Self::layout_flex(ctx.get_frame_size(), layout).map_err(|err| RenderError::Layout(err))?;
+    //
+    // let columns = self.columns_ref().unwrap();
+    // let mut the_x = 0;
+    // for c in 0..columns.len() {
+    //   let column = columns.column(c).unwrap();
+    //   // TODO: set render context, box constrains
+    //   let prev_frame = ctx.get_frame();
+    //   let mut child_ctx = ctx.child_ctx(Rect::new(
+    //     Point2D::new(ctx.get_frame().min_x() + the_x, ctx.get_frame().min_y()),
+    //     Size2D::new(flexed_layout[c], 1),
+    //   ));
+    //   column.render(&mut child_ctx);
+    //   ctx.set_frame(prev_frame);
+    //   the_x += flexed_layout[c];
+    //   // ctx.renderer.move_to_column_relative((the_x + 1) as u16);
+    // }
+    //
+    // // ctx.renderer.next_line();
+    //
+    // let data = self.data_ref().unwrap();
+    // for r in 0..data.rows_len() {
+    //   let mut the_x = 0;
+    //   for c in 0..columns.len() {
+    //     let column = columns.column(c).unwrap();
+    //     if let Some(cell) = data.cell(r, c) {
+    //       // TODO: set render context, box constrains
+    //       let prev_frame = ctx.get_frame();
+    //       let mut child_ctx = ctx.child_ctx(Rect::new(
+    //         Point2D::new(
+    //           ctx.get_frame().min_x() + the_x,
+    //           ctx.get_frame().min_y() + r + 1, /*col*/
+    //         ),
+    //         Size2D::new(flexed_layout[c], 1),
+    //       ));
+    //       cell.render(&mut child_ctx);
+    //       ctx.set_frame(prev_frame);
+    //     }
+    //     the_x += flexed_layout[c];
+    //     // ctx.renderer.move_to_column_relative((the_x + 1) as u16);
+    //   }
+    //   // ctx.renderer.next_line();
+    // }
+    //
+    // Ok(())
 
-    let columns = self.columns_ref().unwrap();
-    let mut the_x = 0;
-    for c in 0..columns.len() {
-      let column = columns.column(c).unwrap();
-      // TODO: set render context, box constrains
-      let prev_frame = ctx.get_frame();
-      let mut child_ctx = ctx.child_ctx(Rect::new(
-        Point2D::new(ctx.get_frame().min_x() + the_x, ctx.get_frame().min_y()),
-        Size2D::new(flexed_layout[c], 1),
-      ));
-      column.render(&mut child_ctx);
-      ctx.set_frame(prev_frame);
-      the_x += flexed_layout[c];
-      // ctx.renderer.move_to_column_relative((the_x + 1) as u16);
-    }
-
-    // ctx.renderer.next_line();
-
-    let data = self.data_ref().unwrap();
-    for r in 0..data.rows_len() {
-      let mut the_x = 0;
-      for c in 0..columns.len() {
-        let column = columns.column(c).unwrap();
-        if let Some(cell) = data.cell(r, c) {
-          // TODO: set render context, box constrains
-          let prev_frame = ctx.get_frame();
-          let mut child_ctx = ctx.child_ctx(Rect::new(
-            Point2D::new(
-              ctx.get_frame().min_x() + the_x,
-              ctx.get_frame().min_y() + r + 1, /*col*/
-            ),
-            Size2D::new(flexed_layout[c], 1),
-          ));
-          cell.render(&mut child_ctx);
-          ctx.set_frame(prev_frame);
-        }
-        the_x += flexed_layout[c];
-        // ctx.renderer.move_to_column_relative((the_x + 1) as u16);
-      }
-      // ctx.renderer.next_line();
-    }
-
-    Ok(())
+    Err(RenderError::Layout(LayoutError::InsufficientSpace))
   }
 }

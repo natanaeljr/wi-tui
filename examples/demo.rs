@@ -1,5 +1,5 @@
 use cui::render::{RenderCtx, Renderer};
-use cui::widgets::table::Column;
+use cui::widgets::table::{Column, ColumnWidth};
 use cui::widgets::{Align, Button, Padding, Table, Widget};
 use euclid::default::{Rect, Size2D};
 use std::io::Read;
@@ -30,28 +30,28 @@ fn main() {
   ]];
 
   let columns = vec![
-    Column::heading(Align::centered("A")),
-    Column::heading(Align::centered("B")),
-    Column::heading(Align::centered("C")),
-    Column::heading(Align::centered("D")),
+    Column::new(Align::centered("A")),
+    Column::new(Align::centered("B")),
+    Column::new(Align::centered("C")),
+    Column::new(Align::centered("D")),
   ];
 
   let table = Table::new().columns(columns).data(aligned_data);
 
   let table = Table::new()
     .columns(vec![
-      Column::heading("A"), //
-      Column::heading("B"), //
-      Column::heading("C"), //
+      Column::new("A"), //
+      Column::new("B"), //
+      Column::new("C"), //
     ])
     .data(vec![
-      vec!["A1", "B2", "C1"], //
-      vec!["A2", "B2", "C2"], //
-      vec!["A3", "B3", "C3"], //
+      vec!["A1", "B2", "C1"],     //
+      vec!["A2", "B2", "C2"],     //
+      vec!["A3", "B3", "C3"],     //
       vec!["A4", "B44444", "C4"], //
-      vec!["A5", "B5", "C5"], //
-      vec!["A6", "B6", "C6"], //
-      vec!["A72", "B7", "C7"], //
+      vec!["A5", "B5", "C5"],     //
+      vec!["A6", "B6", "C6"],     //
+      vec!["A72", "B7", "C7"],    //
     ]);
   render_ctx.set_frame(prev_frame);
   let table = Padding::around(table).left(5).top(0);
@@ -63,8 +63,8 @@ fn main() {
 
   let table: Table = Table::new()
     .columns(vec![
-      Column::heading(Box::new("Hi") as Box<dyn Widget>).width_fixed(NonZeroUsize::new(3).unwrap()), //
-      Column::heading(Box::new(Align::centered("Hey")) as Box<dyn Widget>),                          //
+      Column::new(Box::new("Hi") as Box<dyn Widget>).width(ColumnWidth::new().max_fixed(3)),
+      Column::new(Box::new(Align::centered("Hey")) as Box<dyn Widget>), //
     ])
     .data(vec![vec![
       Box::new("Bye") as Box<dyn Widget>,
@@ -109,10 +109,10 @@ fn main() {
   // // lo              loopback  unmanaged     --
   let table = Table::new()
     .columns(vec![
-      Column::heading("DEVICE"),     //
-      Column::heading("TYPE"),       //
-      Column::heading("STATE"),      //
-      Column::heading("CONNECTION"), //
+      Column::new("DEVICE"),     //
+      Column::new("TYPE"),       //
+      Column::new("STATE"),      //
+      Column::new("CONNECTION"), //
     ])
     .data(vec![
       vec!["wlp8s0", "wifi", "connected", "SUPERROUTER"],       //

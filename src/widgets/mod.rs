@@ -56,14 +56,19 @@ impl Display for RenderError {
 
 impl Error for RenderError {}
 
-type LayoutResult = Result<Size2D<usize>, LayoutError>;
+pub struct LayoutSize {
+  min: Size2D<usize>,
+  max: Size2D<usize>,
+}
+
+type LayoutResult = Result<LayoutSize, LayoutError>;
 type RenderResult = Result<(), RenderError>;
 
 pub trait Widget {
   fn event(&mut self);
   fn update(&mut self);
   /// layout must return the **minimum** required space for drawing this widget
-  fn layout(&self, max_size: &Size2D<usize>) -> LayoutResult;
+  fn layout(&self, parent_size: &Size2D<usize>) -> LayoutResult;
   fn render(&self, ctx: &mut RenderCtx) -> RenderResult;
 }
 
@@ -94,10 +99,11 @@ impl Widget for &str {
     todo!()
   }
 
-  fn layout(&self, max_size: &Size2D<usize>) -> LayoutResult {
-    let size = Size2D::new(self.len(), 1);
-    if max_size.contains(size.clone()) {
-      Ok(size)
+  fn layout(&self, parent_size: &Size2D<usize>) -> LayoutResult {
+    let min = Size2D::new(1, 1);
+    let max = Size2D::new(self.len(), 1);
+    if parent_size.contains(min.clone()) {
+      Ok(LayoutSize { min, max })
     } else {
       Err(LayoutError::InsufficientSpace)
     }
@@ -118,10 +124,11 @@ impl Widget for String {
     todo!()
   }
 
-  fn layout(&self, max_size: &Size2D<usize>) -> LayoutResult {
-    let size = Size2D::new(self.len(), 1);
-    if max_size.contains(size.clone()) {
-      Ok(size)
+  fn layout(&self, parent_size: &Size2D<usize>) -> LayoutResult {
+    let min = Size2D::new(1, 1);
+    let max = Size2D::new(self.len(), 1);
+    if parent_size.contains(min.clone()) {
+      Ok(LayoutSize { min, max })
     } else {
       Err(LayoutError::InsufficientSpace)
     }
@@ -142,11 +149,39 @@ impl Widget for u32 {
     todo!()
   }
 
-  fn layout(&self, max_size: &Size2D<usize>) -> LayoutResult {
+  fn layout(&self, parent_size: &Size2D<usize>) -> LayoutResult {
+    let value = format!("{}", self);
+    let min = Size2D::new(1, 1);
+    let max = Size2D::new(value.len(), 1);
+    if parent_size.contains(min.clone()) {
+      Ok(LayoutSize { min, max })
+    } else {
+      Err(LayoutError::InsufficientSpace)
+    }
+  }
+
+  fn render(&self, ctx: &mut RenderCtx) -> RenderResult {
     let val = format!("{}", self);
-    let size = Size2D::new(val.len(), 1);
-    if max_size.contains(size.clone()) {
-      Ok(size)
+    ctx.renderer().print(&val);
+    Ok(())
+  }
+}
+
+impl Widget for usize {
+  fn event(&mut self) {
+    todo!()
+  }
+
+  fn update(&mut self) {
+    todo!()
+  }
+
+  fn layout(&self, parent_size: &Size2D<usize>) -> LayoutResult {
+    let value = format!("{}", self);
+    let min = Size2D::new(1, 1);
+    let max = Size2D::new(value.len(), 1);
+    if parent_size.contains(min.clone()) {
+      Ok(LayoutSize { min, max })
     } else {
       Err(LayoutError::InsufficientSpace)
     }
@@ -168,8 +203,8 @@ impl Widget for Box<dyn Widget> {
     todo!()
   }
 
-  fn layout(&self, max_size: &Size2D<usize>) -> LayoutResult {
-    self.deref().layout(max_size)
+  fn layout(&self, parent_size: &Size2D<usize>) -> LayoutResult {
+    self.deref().layout(parent_size)
   }
 
   fn render(&self, ctx: &mut RenderCtx) -> RenderResult {

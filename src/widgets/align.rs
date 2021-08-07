@@ -33,8 +33,8 @@ where
     todo!()
   }
 
-  fn layout(&self, max_size: &Size2D<usize>) -> LayoutResult {
-    self.child.layout(max_size)
+  fn layout(&self, parent_size: &Size2D<usize>) -> LayoutResult {
+    self.child.layout(parent_size)
   }
 
   fn render(&self, ctx: &mut RenderCtx) -> RenderResult {

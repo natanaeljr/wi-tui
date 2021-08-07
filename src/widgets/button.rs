@@ -25,7 +25,7 @@ impl Widget for Button<&str> {
     todo!()
   }
 
-  fn layout(&self, max_size: &Size2D<usize>) -> LayoutResult {
+  fn layout(&self, parent_size: &Size2D<usize>) -> LayoutResult {
     todo!()
   }
 

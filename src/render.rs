@@ -8,6 +8,10 @@ use std::rc::Rc;
 
 // TODO: Check https://docs.rs/sdl2/0.34.5/sdl2/render/
 
+// TODO:
+//  PUSH settings on Context creation
+//  POP settings on Context drop
+
 pub struct Renderer {
   size: Size2D<usize>,
   reset_pos: Point2D<usize>,
