@@ -82,6 +82,11 @@ impl ColumnWidth {
     self
   }
 
+  pub fn min_heading(mut self) -> Self {
+    self.min = ColumnWidthValue::Heading;
+    self
+  }
+
   pub fn min_fixed(mut self, min: usize) -> Self {
     self.min = ColumnWidthValue::Fixed(min);
     self
@@ -89,6 +94,11 @@ impl ColumnWidth {
 
   pub fn max(mut self, max: ColumnWidthValue) -> Self {
     self.max = max;
+    self
+  }
+
+  pub fn max_heading(mut self) -> Self {
+    self.max = ColumnWidthValue::Heading;
     self
   }
 
@@ -513,10 +523,12 @@ impl Table {
       let column_auto_width = match column_width_settings.max {
         ColumnWidthValue::Fixed(max) => std::cmp::min(column_auto_width, max),
         ColumnWidthValue::Auto => column_auto_width,
+        ColumnWidthValue::Heading => std::cmp::min(column_auto_width, column_layout.max.width),
       };
       let column_auto_width = match column_width_settings.min {
         ColumnWidthValue::Fixed(min) => std::cmp::max(column_auto_width, min),
         ColumnWidthValue::Auto => column_auto_width,
+        ColumnWidthValue::Heading => std::cmp::max(column_auto_width, column_layout.max.width),
       };
 
       // Compute the final minimum and maximum widths for this column
@@ -524,10 +536,12 @@ impl Table {
       column_width.min = match column_width_settings.min {
         ColumnWidthValue::Fixed(min) => min,
         ColumnWidthValue::Auto => column_auto_width,
+        ColumnWidthValue::Heading => column_layout.max.width,
       };
       column_width.max = match column_width_settings.max {
         ColumnWidthValue::Fixed(max) => max,
         ColumnWidthValue::Auto => column_auto_width,
+        ColumnWidthValue::Heading => column_layout.max.width,
       };
 
       // 1) Check if we still have space for minimum column width/height
@@ -551,7 +565,6 @@ impl Table {
 
       // 4) Add this column values for the flex calculation
       column_layouts_flex_input.push(ColumnLayoutFlexInput {
-        auto: column_auto_width,
         min: column_width.min,
         max: column_width.max,
         weight: column_width_settings.flex_weight,
@@ -616,7 +629,6 @@ impl Table {
 
 #[derive(Debug)]
 struct ColumnLayoutFlexInput {
-  auto: usize,
   min: usize,
   max: usize,
   weight: usize,
