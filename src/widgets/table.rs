@@ -33,8 +33,8 @@ pub enum ColumnWidthValue {
   Fixed(usize),
   /// Use value computed from the auto setting
   Auto,
-  /// Use heading length
-  /// TODO: Heading,
+  // /// Use heading length
+  // Heading,
 }
 
 /// Combinations for "abcdefghijklmnopqrswxyz"
@@ -429,8 +429,8 @@ impl Table {
     let columns = self.columns_ref().unwrap();
     // local helpers
     let mut avail_table_size = parent_size.clone();
-    let mut table_width = MinMax::default();
-    let mut table_headings_height = MinMax::default();
+    let mut table_width = MinMax::<usize>::default();
+    let mut table_headings_height = MinMax::<usize>::default();
 
     // Compute column min/max width and height of all columns.
     // After this we should know: 1) if there is enough space; 2) the table_headings_height min/max;
@@ -546,8 +546,8 @@ impl Table {
 
       // 3) Add column width to the overall table width values
       avail_table_size.width -= column_width.min;
-      table_width.min += column_width.min;
-      table_width.max += column_width.max;
+      table_width.min = table_width.min.checked_add(column_width.min).unwrap_or(std::usize::MAX);
+      table_width.max = table_width.max.checked_add(column_width.max).unwrap_or(std::usize::MAX);
 
       // 4) Add this column values for the flex calculation
       column_layouts_flex_input.push(ColumnLayoutFlexInput {

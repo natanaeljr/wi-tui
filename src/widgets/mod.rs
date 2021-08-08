@@ -105,7 +105,11 @@ impl Widget for &str {
 
   fn layout(&self, parent_size: &Size2D<usize>) -> LayoutResult {
     let min = Size2D::new(1, 1);
-    let max = Size2D::new(self.len(), 1);
+    let mut max = Size2D::new(self.len(), 1);
+    // clamp max size to parent size
+    max.width = std::cmp::min(max.width, parent_size.width);
+    max.height = std::cmp::min(max.height, parent_size.height);
+    // check for minimum space in parent size
     if parent_size.contains(min.clone()) {
       Ok(LayoutSize { min, max })
     } else {
@@ -130,7 +134,11 @@ impl Widget for String {
 
   fn layout(&self, parent_size: &Size2D<usize>) -> LayoutResult {
     let min = Size2D::new(1, 1);
-    let max = Size2D::new(self.len(), 1);
+    let mut max = Size2D::new(self.len(), 1);
+    // clamp max size to parent size
+    max.width = std::cmp::min(max.width, parent_size.width);
+    max.height = std::cmp::min(max.height, parent_size.height);
+    // check for minimum space in parent size
     if parent_size.contains(min.clone()) {
       Ok(LayoutSize { min, max })
     } else {
@@ -156,7 +164,11 @@ impl Widget for u32 {
   fn layout(&self, parent_size: &Size2D<usize>) -> LayoutResult {
     let value = format!("{}", self);
     let min = Size2D::new(1, 1);
-    let max = Size2D::new(value.len(), 1);
+    let mut max = Size2D::new(value.len(), 1);
+    // clamp max size to parent size
+    max.width = std::cmp::min(max.width, parent_size.width);
+    max.height = std::cmp::min(max.height, parent_size.height);
+    // check for minimum space in parent size
     if parent_size.contains(min.clone()) {
       Ok(LayoutSize { min, max })
     } else {
@@ -183,7 +195,11 @@ impl Widget for usize {
   fn layout(&self, parent_size: &Size2D<usize>) -> LayoutResult {
     let value = format!("{}", self);
     let min = Size2D::new(1, 1);
-    let max = Size2D::new(value.len(), 1);
+    let mut max = Size2D::new(value.len(), 1);
+    // clamp max size to parent size
+    max.width = std::cmp::min(max.width, parent_size.width);
+    max.height = std::cmp::min(max.height, parent_size.height);
+    // check for minimum space in parent size
     if parent_size.contains(min.clone()) {
       Ok(LayoutSize { min, max })
     } else {
