@@ -118,7 +118,15 @@ impl Widget for &str {
   }
 
   fn render(&self, ctx: &mut RenderCtx) -> RenderResult {
-    ctx.renderer().print(self);
+    let parent_size = ctx.get_frame_size();
+    let mut string = String::new();
+    let mut buf = *self;
+    if parent_size.width < self.len() {
+      buf = self.split_at(parent_size.width.checked_sub(1).unwrap_or(0)).0;
+      string = format!("{}…", buf);
+      buf = string.as_str();
+    }
+    ctx.renderer().print(buf);
     Ok(())
   }
 }
@@ -147,7 +155,15 @@ impl Widget for String {
   }
 
   fn render(&self, ctx: &mut RenderCtx) -> RenderResult {
-    ctx.renderer().print(self);
+    let parent_size = ctx.get_frame_size();
+    let mut string = String::new();
+    let mut buf = self.as_str();
+    if parent_size.width < self.len() {
+      buf = self.split_at(parent_size.width.checked_sub(1).unwrap_or(0)).0;
+      string = format!("{}…", buf);
+      buf = string.as_str();
+    }
+    ctx.renderer().print(buf);
     Ok(())
   }
 }

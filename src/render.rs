@@ -47,7 +47,7 @@ impl Renderer {
   pub fn print(&mut self, buf: &str) {
     // std::thread::sleep(std::time::Duration::from_millis(500));
     let space = self.frame.width() - (self.frame_cursor.x - self.frame.origin.x);
-    if buf.len() > space {
+    if buf.chars().count() > space {
       let (buf, _) = buf.split_at(space);
       print!("{}", buf);
       self.frame_cursor.x += space;

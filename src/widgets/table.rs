@@ -238,10 +238,10 @@ where
 }
 
 pub struct TableLayout {
-  /// Number of fixed top rows
-  pub fixed_rows: usize,
-  /// Number of
-  pub fixed_cols: usize,
+  // /// Number of fixed top rows
+  // TODO: pub fixed_rows: usize,
+  // /// Number of
+  // TODO: pub fixed_cols: usize,
   /// Whether to render column headings or not
   pub hide_headings: bool,
   /// Column separator
@@ -252,31 +252,15 @@ pub struct TableLayout {
 
 impl Default for TableLayout {
   fn default() -> Self {
-    Self::new()
-  }
-}
-
-impl TableLayout {
-  pub fn new() -> Self {
     Self {
-      fixed_rows: 0,
-      fixed_cols: 0,
       hide_headings: false,
       column_separator: ' ',
       must_render_fit_all_columns: false,
     }
   }
+}
 
-  pub fn fixed_rows(mut self, fixed_rows: usize) -> Self {
-    self.fixed_cols = fixed_rows;
-    self
-  }
-
-  pub fn fixed_cols(mut self, fixed_cols: usize) -> Self {
-    self.fixed_cols = fixed_cols;
-    self
-  }
-
+impl TableLayout {
   pub fn hide_headings(mut self, hide_headings: bool) -> Self {
     self.hide_headings = hide_headings;
     self
@@ -372,7 +356,7 @@ impl Table {
   // TODO: pub fn theme() -> Self {}
 
   fn layout_flex(
-    render_size: &Size2D<usize>, input_layout: Vec<ColumnLayoutFlexInput>,
+    &self, render_size: &Size2D<usize>, input_layout: Vec<ColumnLayoutFlexInput>,
   ) -> Result<Vec<usize>, LayoutError> {
     let mut final_widths = Vec::new();
     final_widths.reserve(input_layout.len());
@@ -380,13 +364,17 @@ impl Table {
     let mut fixed_width = 0;
     let mut flex_total_weight = 0;
     // Compute fixed columns total width and accumulate the weight for flexible columns for later distribution
-    for column in input_layout.iter() {
-      fixed_width += column.min;
+    for (col, column) in input_layout.iter().enumerate() {
+      // Prepend the column separator, starting from the second column on
+      let separator_len = if col > 0 {
+        self.layout.column_separator.len_utf8().min(1) // char len: one or zero!
+      } else {
+        0
+      };
+      fixed_width += column.min + separator_len;
       final_widths.push(column.min);
       flex_total_weight += column.weight;
     }
-
-    // TODO: factor in column_separator
 
     // Should not be needed, but just double check space for fixed columns
     if !render_size.contains(Size2D::new(fixed_width, 1)) {
@@ -437,6 +425,7 @@ impl Table {
     let mut column_layouts_flex_input = Vec::new();
     // self fields shorthand
     let columns = self.columns_ref().unwrap();
+    let column_separator_str = self.layout.column_separator.to_string();
     // local helpers
     let mut avail_table_size = parent_size.clone();
     let mut table_width = MinMax::<usize>::default();
@@ -447,6 +436,27 @@ impl Table {
     // 3) how much width the columns used; 4) column values for flex computation.
     for col in 0..columns.len() {
       let column = columns.column(col).unwrap();
+
+      // Prepend the column separator, starting from the second column on
+      let separator_len = if col > 0 {
+        self.layout.column_separator.len_utf8().min(1) // char len: one or zero!
+      } else {
+        0
+      };
+      // note: do not care with insufficient space error here, as the next calculations for column width should take care of that
+      avail_table_size.width = avail_table_size.width.checked_sub(separator_len).unwrap_or(0);
+      table_width.min = table_width.min.checked_add(separator_len).unwrap_or(table_width.min);
+      table_width.max = table_width.max.checked_add(separator_len).unwrap_or(table_width.max);
+
+      // Check if we still have space for minimum column width/height
+      if !avail_table_size.contains(Size2D::new(separator_len, 1)) {
+        if self.layout.must_render_fit_all_columns {
+          return Err(LayoutError::InsufficientSpace);
+        } else {
+          // Do not consider Insufficient Space as error, we are just not going to render the remaining columns
+          break;
+        }
+      }
 
       // Get the underlying column layout
       let column_layout_result = column.layout(&avail_table_size);
@@ -653,45 +663,79 @@ impl Widget for Table {
     let (_, layout) = self
       .layout_table(ctx.get_frame_size())
       .map_err(|err| RenderError::Layout(err))?;
-    let flexed_widths = Self::layout_flex(ctx.get_frame_size(), layout).map_err(|err| RenderError::Layout(err))?;
+    let flexed_widths = self
+      .layout_flex(ctx.get_frame_size(), layout)
+      .map_err(|err| RenderError::Layout(err))?;
 
     let columns = self.columns_ref().unwrap();
-    let mut the_x = 0;
-    for c in 0..flexed_widths.len() {
-      let column = columns.column(c).unwrap();
-      // TODO: set render context, box constrains
-      let prev_frame = ctx.get_frame();
-      let mut child_ctx = ctx.child_ctx(Rect::new(
-        Point2D::new(ctx.get_frame().min_x() + the_x, ctx.get_frame().min_y()),
-        Size2D::new(flexed_widths[c], 1),
-      ));
-      column.render(&mut child_ctx);
-      ctx.set_frame(prev_frame);
-      the_x += flexed_widths[c];
-      // ctx.renderer.move_to_column_relative((the_x + 1) as u16);
+
+    // render table headings
+    let mut heading_height = 0;
+    if !self.layout.hide_headings {
+      heading_height = 1 /*TODO: other heights */;
+      let mut the_x = 0;
+      for col in 0..flexed_widths.len() {
+        let prev_frame = ctx.get_frame();
+        // factor-in the column separator
+        the_x += if col > 0 {
+          let mut child_ctx = ctx.child_ctx(Rect::new(
+            Point2D::new(ctx.get_frame().min_x() + the_x, ctx.get_frame().min_y()),
+            Size2D::new(1, 1 /* TODO: height */),
+          ));
+          ctx.renderer().print(self.layout.column_separator.to_string().as_str());
+          ctx.set_frame(prev_frame);
+          self.layout.column_separator.len_utf8().min(1) // char len: one or zero!
+        } else {
+          0
+        };
+        // render column heading
+        let column = columns.column(col).unwrap();
+        let mut child_ctx = ctx.child_ctx(Rect::new(
+          Point2D::new(ctx.get_frame().min_x() + the_x, ctx.get_frame().min_y()),
+          Size2D::new(flexed_widths[col], 1 /* TODO: height */),
+        ));
+        column.render(&mut child_ctx);
+        ctx.set_frame(prev_frame);
+        the_x += flexed_widths[col];
+        // ctx.renderer.move_to_column_relative((the_x + 1) as u16);
+      }
     }
 
     // ctx.renderer.next_line();
 
     let data = self.data_ref().unwrap();
-    for r in 0..data.rows_len() {
+    for row in 0..data.rows_len() {
       let mut the_x = 0;
-      for c in 0..flexed_widths.len() {
-        let column = columns.column(c).unwrap();
-        if let Some(cell) = data.cell(r, c) {
-          // TODO: set render context, box constrains
-          let prev_frame = ctx.get_frame();
+      for col in 0..flexed_widths.len() {
+        let prev_frame = ctx.get_frame();
+        // factor-in the column separator
+        the_x += if col > 0 {
           let mut child_ctx = ctx.child_ctx(Rect::new(
             Point2D::new(
               ctx.get_frame().min_x() + the_x,
-              ctx.get_frame().min_y() + r + 1, /*col*/
+              ctx.get_frame().min_y() + row + heading_height,
             ),
-            Size2D::new(flexed_widths[c], 1),
+            Size2D::new(flexed_widths[col], 1 /* TODO: height */),
+          ));
+          ctx.renderer().print(self.layout.column_separator.to_string().as_str());
+          ctx.set_frame(prev_frame);
+          self.layout.column_separator.len_utf8().min(1) // char len: one or zero!
+        } else {
+          0
+        };
+        // render cell
+        if let Some(cell) = data.cell(row, col) {
+          let mut child_ctx = ctx.child_ctx(Rect::new(
+            Point2D::new(
+              ctx.get_frame().min_x() + the_x,
+              ctx.get_frame().min_y() + row + heading_height,
+            ),
+            Size2D::new(flexed_widths[col], 1 /* TODO: height */),
           ));
           cell.render(&mut child_ctx);
           ctx.set_frame(prev_frame);
         }
-        the_x += flexed_widths[c];
+        the_x += flexed_widths[col];
         // ctx.renderer.move_to_column_relative((the_x + 1) as u16);
       }
       // ctx.renderer.next_line();
