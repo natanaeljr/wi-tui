@@ -25,6 +25,7 @@ pub use table::Table;
 #[derive(Debug)]
 pub enum LayoutError {
   InsufficientSpace,
+  Unknown,
 }
 
 impl Display for LayoutError {
@@ -32,6 +33,9 @@ impl Display for LayoutError {
     match self {
       LayoutError::InsufficientSpace => {
         write!(f, "Layout error: insufficient space")
+      }
+      LayoutError::Unknown => {
+        write!(f, "Layout error: unknown")
       }
     }
   }

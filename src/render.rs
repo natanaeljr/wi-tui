@@ -18,22 +18,27 @@ pub struct Renderer {
   frame: Rect<usize>,
   frame_cursor: Point2D<usize>,
   nl_counter: usize,
+  alternate: bool,
 }
 
 impl Renderer {
-  pub fn new() -> Self {
-    // println!();
+  pub fn new(alternate: bool) -> Self {
+    let mut stdout = std::io::stdout();
+    if alternate {
+      execute!(stdout, terminal::EnterAlternateScreen);
+      execute!(stdout, cursor::MoveTo(0, 0));
+    }
     terminal::enable_raw_mode().unwrap();
     let (cols, rows) = terminal::size().unwrap();
     let (pos_c, pos_r) = cursor::position().unwrap();
     let mut stdout = std::io::stdout();
-    // execute!(stdout, terminal::EnterAlternateScreen);
     let mut this = Self {
       size: Size2D::new(cols as usize, rows as usize),
       reset_pos: Point2D::new(pos_c as usize, pos_r as usize),
       frame: Default::default(),
       frame_cursor: Point2D::new(0, 0),
       nl_counter: 0,
+      alternate,
     };
     this.set_frame(Rect::from_size(Size2D::new(cols as usize, rows as usize)));
     this
@@ -132,12 +137,15 @@ impl Renderer {
 impl Drop for Renderer {
   fn drop(&mut self) {
     let mut stdout = std::io::stdout();
-    // execute!(stdout, terminal::LeaveAlternateScreen);
+    if self.alternate {
+      std::thread::sleep(std::time::Duration::from_secs(20));
+      execute!(stdout, terminal::LeaveAlternateScreen);
+    }
     // self.move_to(0, (self.size.height) as u16);
     execute!(stdout, cursor::MoveTo(0, (self.reset_pos.y + self.nl_counter) as u16),);
-    // std::thread::sleep(std::time::Duration::from_secs(1));
     terminal::disable_raw_mode().unwrap();
     println!();
+    stdout.flush();
   }
 }
 
@@ -148,9 +156,9 @@ pub struct RenderCtx {
 }
 
 impl RenderCtx {
-  pub fn new() -> Self {
+  pub fn new(alternate: bool) -> Self {
     let mut this = Self {
-      renderer: Rc::new(RefCell::new(Renderer::new())),
+      renderer: Rc::new(RefCell::new(Renderer::new(alternate))),
       frame_size: Default::default(),
     };
     let tmp = this.renderer().frame.size.clone();

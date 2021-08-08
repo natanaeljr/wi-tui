@@ -7,7 +7,7 @@ use std::num::NonZeroUsize;
 use std::ops::{Deref, DerefMut};
 
 fn main() {
-  let mut render_ctx = RenderCtx::new();
+  let mut render_ctx = RenderCtx::new(false);
   let prev_frame = render_ctx.get_frame();
 
   let button = Button::new("Button");

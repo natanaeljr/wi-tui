@@ -17,7 +17,7 @@ impl App {
   }
 
   pub fn render(&self) {
-    let mut render_ctx = RenderCtx::new();
+    let mut render_ctx = RenderCtx::new(false);
     // render_ctx.set_frame(Rect::from_size(Size2D::new(60, 20)));
     self.root.as_ref().unwrap().render(&mut render_ctx);
   }
