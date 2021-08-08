@@ -33,8 +33,8 @@ pub enum ColumnWidthValue {
   Fixed(usize),
   /// Use value computed from the auto setting
   Auto,
-  // /// Use heading length
-  // Heading,
+  /// Use heading length
+  Heading,
 }
 
 /// Combinations for "abcdefghijklmnopqrswxyz"
