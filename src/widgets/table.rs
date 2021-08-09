@@ -179,7 +179,7 @@ where
   }
 }
 
-pub trait TableColumns {
+pub trait TableColumns: 'static {
   fn len(&self) -> usize;
   fn column(&self, idx: usize) -> Option<Scoped<dyn TableColumn>>;
   fn as_any(&self) -> &dyn Any;
