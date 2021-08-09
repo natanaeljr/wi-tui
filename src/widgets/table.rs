@@ -67,7 +67,7 @@ impl ColumnWidth {
     Self {
       min: ColumnWidthValue::Fixed(1),
       max: ColumnWidthValue::Auto,
-      auto_mode: ColumnWidthAuto::AllCells, // TODO: default AllCellsOrHeading when implemented
+      auto_mode: ColumnWidthAuto::AllCellsOrHeading,
       flex_weight: 1,
     }
   }
@@ -409,6 +409,87 @@ impl Table {
     }
   }
 
+  /// Calculate the largest width of cells in a column
+  fn layout_column_width_auto_cells(
+    &self, col: usize, avail_size: &Size2D<usize>, visible_only: bool,
+  ) -> Result<usize, LayoutError> {
+    let mut avail_size = avail_size.clone();
+    // Remove heading height from cells available height
+    if !self.layout.hide_headings {
+      // BUG: we are hardcoding the table headings height to 1 here,
+      // because at this point we cannot know yet the actual final height
+      avail_size.height = avail_size.height.checked_sub(1).unwrap_or(0);
+    }
+    // Figure out the largest possible width by looping through the rows/cells of this column
+    match self.data_ref() {
+      None => Ok(0), // no width if no data
+      Some(data) => {
+        let mut largest_cell_width = 0;
+        for row in 0..data.rows_len() {
+          // Treatment for VisibleCells variant
+          if visible_only && avail_size.height == 0 {
+            break;
+          }
+          if let Some(cell) = data.cell(row, col) {
+            // Get the underlying cell layout
+            let cell_layout_result = cell.layout(&avail_size);
+            if let Err(err) = cell_layout_result {
+              match err {
+                LayoutError::InsufficientSpace => {
+                  if self.layout.must_render_fit_all_columns {
+                    return Err(err);
+                  } else {
+                    // BUG: hardcoded height in 1, because we do not know the final row height
+                    if visible_only {
+                      avail_size.height = avail_size.height.checked_sub(1).unwrap_or(0);
+                    }
+                    // Do not consider Insufficient Space as error, we are just not going to render this cell
+                    continue;
+                  }
+                }
+                _ => return Err(err),
+              }
+            }
+            let cell_layout = cell_layout_result.unwrap();
+            if visible_only {
+              avail_size.height = avail_size.height.checked_sub(cell_layout.min.height).unwrap_or(0);
+            }
+            // Update largest cell width
+            largest_cell_width = std::cmp::max(largest_cell_width, cell_layout.max.width);
+          } else {
+            // BUG: hardcoded height in 1, because we do not know the final row height
+            if visible_only {
+              avail_size.height = avail_size.height.checked_sub(1).unwrap_or(0);
+            }
+          }
+        } // for all rows
+        Ok(largest_cell_width)
+      } // Some(data)
+    } // match self.data_ref()
+  }
+
+  /// Calculate the Auto width of a column based on the configured mode.
+  fn layout_column_width_auto(
+    &self, col: usize, column_width_auto_mode: &ColumnWidthAuto, column_layout: &LayoutSize, avail_size: &Size2D<usize>,
+  ) -> Result<usize, LayoutError> {
+    match column_width_auto_mode {
+      ColumnWidthAuto::Off => Ok(0),
+      ColumnWidthAuto::Heading => Ok(column_layout.max.width),
+      ColumnWidthAuto::AllCells => self.layout_column_width_auto_cells(col, &avail_size, false),
+      ColumnWidthAuto::VisibleCells => self.layout_column_width_auto_cells(col, &avail_size, true),
+      ColumnWidthAuto::AllCellsOrHeading => {
+        let cells_width = self.layout_column_width_auto_cells(col, &avail_size, false)?;
+        let heading_width = column_layout.max.width;
+        Ok(std::cmp::max(cells_width, heading_width))
+      }
+      ColumnWidthAuto::VisibleCellsOrHeading => {
+        let cells_width = self.layout_column_width_auto_cells(col, &avail_size, true)?;
+        let heading_width = column_layout.max.width;
+        Ok(std::cmp::max(cells_width, heading_width))
+      }
+    }
+  }
+
   fn layout_table(&self, parent_size: &Size2D<usize>) -> Result<(LayoutSize, Vec<ColumnLayoutFlexInput>), LayoutError> {
     // Initial validation checks
     if self.columns.is_none() {
@@ -485,50 +566,8 @@ impl Table {
 
       // Compute automatic column width value, that should be the max value possible
       let column_width_settings = column.get_width();
-      let column_auto_width = match column_width_settings.auto_mode {
-        ColumnWidthAuto::Off => 0,
-        ColumnWidthAuto::Heading => column_layout.max.width,
-        ColumnWidthAuto::AllCells => {
-          match self.data_ref() {
-            None => 0, // no width if no data
-            Some(data) => {
-              let mut largest_cell_width = 0;
-              for row in 0..data.rows_len() {
-                if let Some(cell) = data.cell(row, col) {
-                  // Get the underlying cell layout
-                  let cell_layout_result = cell.layout(&avail_table_size);
-                  if let Err(err) = cell_layout_result {
-                    match err {
-                      LayoutError::InsufficientSpace => {
-                        if self.layout.must_render_fit_all_columns {
-                          return Err(err);
-                        } else {
-                          // Do not consider Insufficient Space as error, we are just not going to render the remaining columns
-                          continue;
-                        }
-                      }
-                      _ => return Err(err),
-                    }
-                  }
-                  let cell_layout = cell_layout_result.unwrap();
-                  // Check for the largest cell width
-                  largest_cell_width = std::cmp::max(largest_cell_width, cell_layout.max.width);
-                } // if let Some(cell)
-              } // for all rows
-              largest_cell_width
-            } // Some(data)
-          } // match self.data_ref()
-        }
-        ColumnWidthAuto::VisibleCells => {
-          todo!()
-        }
-        ColumnWidthAuto::AllCellsOrHeading => {
-          todo!()
-        }
-        ColumnWidthAuto::VisibleCellsOrHeading => {
-          todo!()
-        }
-      }; // let column_auto_width = match column_width_settings.auto_mode;
+      let column_auto_width =
+        self.layout_column_width_auto(col, &column_width_settings.auto_mode, &column_layout, &avail_table_size)?;
 
       // Constrain the auto width to the maximum and minimum values
       let column_auto_width = match column_width_settings.max {
@@ -583,6 +622,11 @@ impl Table {
     } // for all columns
 
     // We consider the minimum table height to be: { heading + at least 1 row }.
+    table_headings_height = if self.layout.hide_headings {
+      MinMax::default() // zero
+    } else {
+      table_headings_height
+    };
     // So let's compute the first row min/max height or leave a hard space of at least 1 unit.
     let avail_data_height = parent_size.height - table_headings_height.min;
     let mut first_row_height = MinMax::new(1, 1);
