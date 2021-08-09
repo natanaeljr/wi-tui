@@ -1,3 +1,4 @@
+use crossterm::terminal::ClearType;
 use crossterm::{cursor, execute, terminal};
 use euclid::default::{Box2D, Point2D, Rect, Size2D};
 use std::borrow::BorrowMut;
@@ -11,6 +12,8 @@ use std::rc::Rc;
 // TODO:
 //  PUSH settings on Context creation
 //  POP settings on Context drop
+
+// TODO: push/pop context with widget ID, for event hierarchy tracking later
 
 pub struct Renderer {
   size: Size2D<usize>,
@@ -42,6 +45,16 @@ impl Renderer {
     };
     this.set_frame(Rect::from_size(Size2D::new(cols as usize, rows as usize)));
     this
+  }
+
+  fn resize(&mut self, cols: usize, rows: usize) {
+    assert!(self.alternate);
+    self.size.width = cols;
+    self.size.height = rows;
+    self.nl_counter = 0;
+    self.set_frame(Rect::from_size(Size2D::new(cols as usize, rows as usize)));
+    let mut stdout = std::io::stdout();
+    execute!(stdout, terminal::Clear(ClearType::All));
   }
 
   pub fn print(&mut self, buf: &str) {
@@ -138,7 +151,7 @@ impl Drop for Renderer {
   fn drop(&mut self) {
     let mut stdout = std::io::stdout();
     if self.alternate {
-      std::thread::sleep(std::time::Duration::from_secs(20));
+      // std::thread::sleep(std::time::Duration::from_secs(20));
       execute!(stdout, terminal::LeaveAlternateScreen);
     }
     // self.move_to(0, (self.size.height) as u16);
@@ -185,5 +198,11 @@ impl RenderCtx {
   }
   pub fn get_frame_size(&self) -> &Size2D<usize> {
     &self.frame_size
+  }
+
+  pub(crate) fn resize(&mut self, cols: usize, rows: usize) {
+    self.renderer.deref().borrow_mut().resize(cols, rows);
+    let tmp = self.renderer().frame.size.clone();
+    self.frame_size = tmp;
   }
 }

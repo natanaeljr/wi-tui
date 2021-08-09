@@ -443,12 +443,8 @@ impl Table {
       } else {
         0
       };
-      // note: do not care with insufficient space error here, as the next calculations for column width should take care of that
-      avail_table_size.width = avail_table_size.width.checked_sub(separator_len).unwrap_or(0);
-      table_width.min = table_width.min.checked_add(separator_len).unwrap_or(table_width.min);
-      table_width.max = table_width.max.checked_add(separator_len).unwrap_or(table_width.max);
 
-      // Check if we still have space for minimum column width/height
+      // Check if we still have space for minimum column separator
       if !avail_table_size.contains(Size2D::new(separator_len, 1)) {
         if self.layout.must_render_fit_all_columns {
           return Err(LayoutError::InsufficientSpace);
@@ -457,6 +453,11 @@ impl Table {
           break;
         }
       }
+
+      // Update overall table width values with the separator here, so the column width calculation knows the separator took space
+      avail_table_size.width = avail_table_size.width.checked_sub(separator_len).unwrap_or(0);
+      table_width.min = table_width.min.checked_add(separator_len).unwrap_or(table_width.min);
+      table_width.max = table_width.max.checked_add(separator_len).unwrap_or(table_width.max);
 
       // Get the underlying column layout
       let column_layout_result = column.layout(&avail_table_size);
@@ -618,7 +619,6 @@ impl Table {
     } // if let Some(data)
 
     // TODO: compute sizes for all visible rows in order to support row heights > 1 for when rendering with context
-    // TODO: constrain max layout in parent scope too
 
     // Generate final table min/max layout sizes
     let table_height_min = table_headings_height.min + first_row_height.min;
@@ -704,7 +704,7 @@ impl Widget for Table {
     // ctx.renderer.next_line();
 
     let data = self.data_ref().unwrap();
-    for row in 0..data.rows_len() {
+    for row in 0..data.rows_len().min(ctx.get_frame_size().height - heading_height) {
       let mut the_x = 0;
       for col in 0..flexed_widths.len() {
         let prev_frame = ctx.get_frame();

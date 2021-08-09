@@ -17,6 +17,7 @@ impl<'r, Type: ?Sized> Deref for Scoped<'r, Type> {
   }
 }
 
+#[derive(Debug)]
 pub struct MinMax<T> {
   pub min: T,
   pub max: T,

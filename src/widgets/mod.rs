@@ -60,13 +60,14 @@ impl Display for RenderError {
 
 impl Error for RenderError {}
 
+#[derive(Debug)]
 pub struct LayoutSize {
   min: Size2D<usize>,
   max: Size2D<usize>,
 }
 
-type LayoutResult = Result<LayoutSize, LayoutError>;
-type RenderResult = Result<(), RenderError>;
+pub type LayoutResult = Result<LayoutSize, LayoutError>;
+pub type RenderResult = Result<(), RenderError>;
 
 pub trait Widget {
   fn event(&mut self);
@@ -107,8 +108,8 @@ impl Widget for &str {
     let min = Size2D::new(1, 1);
     let mut max = Size2D::new(self.len(), 1);
     // clamp max size to parent size
-    max.width = std::cmp::min(max.width, parent_size.width);
-    max.height = std::cmp::min(max.height, parent_size.height);
+    // max.width = std::cmp::min(max.width, parent_size.width);
+    // max.height = std::cmp::min(max.height, parent_size.height);
     // check for minimum space in parent size
     if parent_size.contains(min.clone()) {
       Ok(LayoutSize { min, max })
@@ -144,8 +145,8 @@ impl Widget for String {
     let min = Size2D::new(1, 1);
     let mut max = Size2D::new(self.len(), 1);
     // clamp max size to parent size
-    max.width = std::cmp::min(max.width, parent_size.width);
-    max.height = std::cmp::min(max.height, parent_size.height);
+    // max.width = std::cmp::min(max.width, parent_size.width);
+    // max.height = std::cmp::min(max.height, parent_size.height);
     // check for minimum space in parent size
     if parent_size.contains(min.clone()) {
       Ok(LayoutSize { min, max })

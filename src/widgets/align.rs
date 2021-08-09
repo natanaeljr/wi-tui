@@ -61,7 +61,9 @@ where
 
   fn render(&self, ctx: &mut RenderCtx) -> RenderResult {
     let parent_size = ctx.get_frame_size();
-    let child_size = self.child.layout(parent_size).map_err(|e| RenderError::Layout(e))?;
+    let mut child_size = self.child.layout(parent_size).map_err(|e| RenderError::Layout(e))?;
+    child_size.max.width = std::cmp::min(child_size.max.width, parent_size.width);
+    child_size.max.height = std::cmp::min(child_size.max.height, parent_size.height);
     let remainder_size = parent_size.sub(child_size.max);
 
     let offsets = match self.horizontal {
