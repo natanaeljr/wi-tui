@@ -206,6 +206,41 @@ where
   }
 }
 
+pub struct TableColumnsFn {
+  pub len: usize,
+  pub fn_column: Box<dyn Fn(usize) -> Option<Scoped<'static, dyn TableColumn>>>,
+}
+
+impl TableColumnsFn {
+  pub fn generator<F: 'static>(len: usize, fn_column: F) -> Self
+  where
+    F: Fn(usize) -> Option<Scoped<'static, dyn TableColumn>>,
+  {
+    Self {
+      len,
+      fn_column: Box::new(fn_column),
+    }
+  }
+}
+
+impl TableColumns for TableColumnsFn {
+  fn len(&self) -> usize {
+    self.len
+  }
+
+  fn column(&self, idx: usize) -> Option<Scoped<dyn TableColumn>> {
+    (self.fn_column)(idx)
+  }
+
+  fn as_any(&self) -> &dyn Any {
+    self
+  }
+
+  fn as_any_mut(&mut self) -> &mut dyn Any {
+    self
+  }
+}
+
 #[derive(Clone)]
 pub enum RowHeightAuto {
   /// Do not adjust column width automatically
@@ -390,6 +425,41 @@ where
   }
 }
 
+pub struct TableRowsFn {
+  pub len: usize,
+  pub fn_row: Box<dyn Fn(usize) -> Option<Scoped<'static, dyn TableRow>>>,
+}
+
+impl TableRowsFn {
+  pub fn generator<F: 'static>(len: usize, fn_row: F) -> Self
+  where
+    F: Fn(usize) -> Option<Scoped<'static, dyn TableRow>>,
+  {
+    Self {
+      len,
+      fn_row: Box::new(fn_row),
+    }
+  }
+}
+
+impl TableRows for TableRowsFn {
+  fn len(&self) -> usize {
+    self.len
+  }
+
+  fn row(&self, idx: usize) -> Option<Scoped<dyn TableRow>> {
+    (self.fn_row)(idx)
+  }
+
+  fn as_any(&self) -> &dyn Any {
+    self
+  }
+
+  fn as_any_mut(&mut self) -> &mut dyn Any {
+    self
+  }
+}
+
 pub trait TableData {
   fn rows_len(&self) -> usize;
   fn cell(&self, row: usize, col: usize) -> Option<Scoped<dyn Widget>>;
@@ -421,14 +491,18 @@ where
 }
 
 pub struct TableLayout {
+  // /// Number of fixed left rows
+  // TODO: pub fixed_cols: usize,
   // /// Number of fixed top rows
   // TODO: pub fixed_rows: usize,
-  // /// Number of
-  // TODO: pub fixed_cols: usize,
   /// Whether to render column headings or not
   pub hide_column_headings: bool,
+  // /// Whether to render row headings or not
+  // TODO: pub hide_row_headings: bool,
   /// Column separator
   pub column_separator: char,
+  // /// Row separator
+  // TODO: pub row_separator: char,
   /// Rendering must fit all columns or render nothing at all (declare insufficient space)
   pub must_render_fit_all_columns: bool,
 }
@@ -502,6 +576,33 @@ impl Table {
   pub fn columns_mut_as<C: TableColumns + 'static>(&mut self) -> Option<&mut C> {
     self
       .columns
+      .as_mut()
+      .and_then(|cols| cols.deref_mut().as_any_mut().downcast_mut::<C>())
+  }
+
+  pub fn rows<C: TableRows + 'static>(mut self, rows: C) -> Self {
+    self.rows = Some(Box::new(rows));
+    self
+  }
+
+  pub fn rows_ref(&self) -> Option<&dyn TableRows> {
+    self.rows.as_ref().and_then(|cols| Some(cols.deref()))
+  }
+
+  pub fn rows_mut(&mut self) -> Option<&mut (dyn TableRows + 'static)> {
+    self.rows.as_mut().and_then(|cols| Some(cols.deref_mut()))
+  }
+
+  pub fn rows_ref_as<C: TableRows + 'static>(&self) -> Option<&C> {
+    self
+      .rows
+      .as_ref()
+      .and_then(|cols| cols.deref().as_any().downcast_ref::<C>())
+  }
+
+  pub fn rows_mut_as<C: TableRows + 'static>(&mut self) -> Option<&mut C> {
+    self
+      .rows
       .as_mut()
       .and_then(|cols| cols.deref_mut().as_any_mut().downcast_mut::<C>())
   }
@@ -610,7 +711,7 @@ impl Table {
       None => Ok(0), // no width if no data
       Some(data) => {
         let mut largest_cell_width = 0;
-        for row in 0..data.rows_len() {
+        for row in 0..self.rows.as_ref().map(|rows| rows.len()).unwrap_or(data.rows_len()) {
           // Treatment for VisibleCells variant
           if visible_only && avail_size.height == 0 {
             break;
@@ -818,7 +919,7 @@ impl Table {
 
     // Compute the min/max height for the first row only
     if let Some(data) = self.data_ref() {
-      if data.rows_len() > 1 {
+      if self.rows.as_ref().map(|rows| rows.len()).unwrap_or(data.rows_len()) > 1 {
         // Get min height for all *visible* columns
         for (col, column_flex) in column_layouts_flex_input.iter().enumerate() {
           if let Some(cell) = data.cell(0, col) {
@@ -844,7 +945,7 @@ impl Table {
             first_row_height.max = std::cmp::min(first_row_height.max, cell_layout.max.height);
           } // if let Some(cell)
         } // for all visible cols
-      } // if data.rows_len() > 1
+      } // if rows len > 1
     } // if let Some(data)
 
     // TODO: compute sizes for all visible rows in order to support row heights > 1 for when rendering with context
@@ -899,9 +1000,9 @@ impl Widget for Table {
     let columns = self.columns_ref().unwrap();
 
     // render table headings
-    let mut heading_height = 0;
+    let mut column_heading_height = 0;
     if !self.layout.hide_column_headings {
-      heading_height = 1 /*TODO: other heights */;
+      column_heading_height = 1 /*TODO: other heights */;
       let mut the_x = 0;
       for col in 0..flexed_widths.len() {
         let prev_frame = ctx.get_frame();
@@ -933,7 +1034,13 @@ impl Widget for Table {
     // ctx.renderer.next_line();
 
     let data = self.data_ref().unwrap();
-    for row in 0..data.rows_len().min(ctx.get_frame_size().height - heading_height) {
+    for row in 0..self
+      .rows
+      .as_ref()
+      .map(|rows| rows.len())
+      .unwrap_or(data.rows_len())
+      .min(ctx.get_frame_size().height - column_heading_height)
+    {
       let mut the_x = 0;
       for col in 0..flexed_widths.len() {
         let prev_frame = ctx.get_frame();
@@ -942,7 +1049,7 @@ impl Widget for Table {
           let mut child_ctx = ctx.child_ctx(Rect::new(
             Point2D::new(
               ctx.get_frame().min_x() + the_x,
-              ctx.get_frame().min_y() + row + heading_height,
+              ctx.get_frame().min_y() + row + column_heading_height,
             ),
             Size2D::new(flexed_widths[col], 1 /* TODO: height */),
           ));
@@ -957,7 +1064,7 @@ impl Widget for Table {
           let mut child_ctx = ctx.child_ctx(Rect::new(
             Point2D::new(
               ctx.get_frame().min_x() + the_x,
-              ctx.get_frame().min_y() + row + heading_height,
+              ctx.get_frame().min_y() + row + column_heading_height,
             ),
             Size2D::new(flexed_widths[col], 1 /* TODO: height */),
           ));
