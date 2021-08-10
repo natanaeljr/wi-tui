@@ -247,3 +247,20 @@ impl Widget for Box<dyn Widget> {
     Ok(())
   }
 }
+
+impl Widget for () {
+  fn event(&mut self) {}
+
+  fn update(&mut self) {}
+
+  fn layout(&self, parent_size: &Size2D<usize>) -> LayoutResult {
+    Ok(LayoutSize {
+      min: Default::default(),
+      max: Default::default(),
+    })
+  }
+
+  fn render(&self, ctx: &mut RenderCtx) -> RenderResult {
+    Ok(())
+  }
+}
