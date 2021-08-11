@@ -7,488 +7,17 @@ use std::ops::{Deref, DerefMut, Sub, SubAssign};
 use crossterm::style::{ContentStyle, StyledContent, Stylize};
 use euclid::default::{Point2D, Rect, Size2D};
 
+use column::{ColumnWidthAuto, ColumnWidthValue, TableColumn, TableColumns};
+use data::TableData;
+use row::TableRows;
+
 use crate::render::RenderCtx;
 use crate::util::{MinMax, Scoped};
 use crate::widgets::{LayoutError, LayoutResult, LayoutSize, RenderError, RenderResult, Widget};
 
-#[derive(Clone)]
-pub enum ColumnWidthAuto {
-  /// Do not adjust column width automatically
-  Off,
-  /// Adjust column width to the width of the heading
-  Heading,
-  /// Adjust column width to the width of the largest cell in that column
-  AllCells,
-  /// Adjust column width to the width of the largest _visible_ cell in that column
-  VisibleCells,
-  /// Adjust column width to the width of the largest cell in that column or the heading
-  AllCellsOrHeading,
-  /// Adjust column width to the width of the largest _visible_ cell in that column or the heading
-  VisibleCellsOrHeading,
-}
-
-#[derive(Clone)]
-pub enum ColumnWidthValue {
-  /// Use a fixed value
-  Fixed(usize),
-  /// Use value computed from the auto setting
-  Auto,
-  /// Use heading length
-  Heading,
-}
-
-/// Combinations for "abcdefghijklmnopqrswxyz"
-///  Fixed:           { min: 10, max: 10,      auto: None,        flex_weight: 0 } => "abcdefghij"
-///  Min:             { min: 5,  max: 10,      auto: None,        flex_weight: 0 } => "abcde"
-///  Distributed:     { min: 5,  max: 10|Auto, auto: None,        flex_weight: 1 } => "abcdef...j"
-///  AutoFixed:       { min: 1,  max: Auto,    auto: LargestCell, flex_weight: 0 } => "abcdefghijklmnopqrswxyz"
-///  AutoFlexed:      { min: 1,  max: Auto,    auto: LargestCell, flex_weight: 1 } => "a..z"
-///  AutoFlexedBeyond:{ min: 1,  max: Inf,     auto: LargestCell, flex_weight: 1 } => "abc... "
-#[derive(Clone)]
-pub struct ColumnWidth {
-  /// Minimum column width
-  pub min: ColumnWidthValue,
-  /// Maximum column width
-  pub max: ColumnWidthValue,
-  /// Automatic column width adjustment
-  pub auto_mode: ColumnWidthAuto,
-  /// Flex column width to available space based on weight; zero is no flex.
-  pub flex_weight: usize,
-}
-
-impl Default for ColumnWidth {
-  fn default() -> Self {
-    Self::new()
-  }
-}
-
-impl ColumnWidth {
-  pub fn new() -> Self {
-    Self {
-      min: ColumnWidthValue::Fixed(1),
-      max: ColumnWidthValue::Auto,
-      auto_mode: ColumnWidthAuto::AllCellsOrHeading,
-      flex_weight: 1,
-    }
-  }
-
-  pub fn min(mut self, min: ColumnWidthValue) -> Self {
-    self.min = min;
-    self
-  }
-
-  pub fn min_auto(mut self) -> Self {
-    self.min = ColumnWidthValue::Auto;
-    self
-  }
-
-  pub fn min_heading(mut self) -> Self {
-    self.min = ColumnWidthValue::Heading;
-    self
-  }
-
-  pub fn min_fixed(mut self, min: usize) -> Self {
-    self.min = ColumnWidthValue::Fixed(min);
-    self
-  }
-
-  pub fn max(mut self, max: ColumnWidthValue) -> Self {
-    self.max = max;
-    self
-  }
-
-  pub fn max_heading(mut self) -> Self {
-    self.max = ColumnWidthValue::Heading;
-    self
-  }
-
-  pub fn max_fixed(mut self, fixed: usize) -> Self {
-    self.max = ColumnWidthValue::Fixed(fixed);
-    self
-  }
-
-  pub fn max_auto(mut self) -> Self {
-    self.max = ColumnWidthValue::Auto;
-    self
-  }
-
-  pub fn auto_mode(mut self, auto_mode: ColumnWidthAuto) -> Self {
-    self.auto_mode = auto_mode;
-    self
-  }
-
-  pub fn flex_weight(mut self, weight: usize) -> Self {
-    self.flex_weight = weight;
-    self
-  }
-}
-
-pub struct Column<Heading> {
-  pub heading: Heading,
-  pub width: ColumnWidth,
-}
-
-impl<Heading> Column<Heading>
-where
-  Heading: Widget,
-{
-  pub fn new(heading: Heading) -> Self {
-    Self {
-      heading,
-      width: ColumnWidth::default(),
-    }
-  }
-  pub fn width(mut self, width: ColumnWidth) -> Self {
-    self.width = width;
-    self
-  }
-}
-
-impl<Heading> Widget for Column<Heading>
-where
-  Heading: Widget,
-{
-  fn event(&mut self) {
-    todo!()
-  }
-
-  fn update(&mut self) {
-    todo!()
-  }
-
-  fn layout(&self, parent_size: &Size2D<usize>) -> LayoutResult {
-    self.heading.layout(parent_size)
-  }
-
-  fn render(&self, ctx: &mut RenderCtx) -> RenderResult {
-    self.heading.render(ctx)
-  }
-}
-
-pub trait TableColumn: Widget {
-  fn get_width(&self) -> Cow<ColumnWidth>;
-}
-
-impl<Heading> TableColumn for Column<Heading>
-where
-  Heading: Widget,
-{
-  fn get_width(&self) -> Cow<ColumnWidth> {
-    Cow::Borrowed(&self.width)
-  }
-}
-
-pub trait TableColumns: 'static {
-  fn len(&self) -> usize;
-  fn column(&self, idx: usize) -> Option<Scoped<dyn TableColumn>>;
-  fn as_any(&self) -> &dyn Any;
-  fn as_any_mut(&mut self) -> &mut dyn Any;
-}
-
-impl<C> TableColumns for Vec<C>
-where
-  C: TableColumn + 'static,
-{
-  fn len(&self) -> usize {
-    Self::len(self)
-  }
-
-  fn column(&self, idx: usize) -> Option<Scoped<dyn TableColumn>> {
-    self.get(idx).and_then(|col| Some(Scoped::Ref(col as &dyn TableColumn)))
-  }
-
-  fn as_any(&self) -> &dyn Any {
-    self
-  }
-
-  fn as_any_mut(&mut self) -> &mut dyn Any {
-    self
-  }
-}
-
-pub struct TableColumnsFn {
-  pub len: usize,
-  pub fn_column: Box<dyn Fn(usize) -> Option<Scoped<'static, dyn TableColumn>>>,
-}
-
-impl TableColumnsFn {
-  pub fn generator<F: 'static>(len: usize, fn_column: F) -> Self
-  where
-    F: Fn(usize) -> Option<Scoped<'static, dyn TableColumn>>,
-  {
-    Self {
-      len,
-      fn_column: Box::new(fn_column),
-    }
-  }
-}
-
-impl TableColumns for TableColumnsFn {
-  fn len(&self) -> usize {
-    self.len
-  }
-
-  fn column(&self, idx: usize) -> Option<Scoped<dyn TableColumn>> {
-    (self.fn_column)(idx)
-  }
-
-  fn as_any(&self) -> &dyn Any {
-    self
-  }
-
-  fn as_any_mut(&mut self) -> &mut dyn Any {
-    self
-  }
-}
-
-#[derive(Clone)]
-pub enum RowHeightAuto {
-  /// Do not adjust column width automatically
-  Off,
-  /// Adjust column width to the width of the largest cell in that column
-  Cells,
-  /// Adjust column width to the width of the heading
-  Heading,
-  /// Adjust column width to the width of the largest cell in that column or the heading
-  CellsOrHeading,
-}
-
-#[derive(Clone)]
-pub enum RowHeightValue {
-  /// Use a fixed value
-  Fixed(usize),
-  /// Use value computed from the auto setting
-  Auto,
-  /// Use heading height
-  Heading,
-}
-
-#[derive(Clone)]
-pub struct RowHeight {
-  /// Minimum row height
-  pub min: RowHeightValue,
-  /// Maximum row height
-  pub max: RowHeightValue,
-  /// Automatic row height adjustment
-  pub auto_mode: RowHeightAuto,
-  /// Flex row height to available space based on weight; zero is no flex.
-  pub flex_weight: usize,
-}
-
-impl Default for RowHeight {
-  fn default() -> Self {
-    Self::new()
-  }
-}
-
-impl RowHeight {
-  pub fn new() -> Self {
-    Self {
-      min: RowHeightValue::Fixed(1),
-      max: RowHeightValue::Fixed(1),
-      auto_mode: RowHeightAuto::CellsOrHeading,
-      flex_weight: 1,
-    }
-  }
-
-  pub fn min(mut self, min: RowHeightValue) -> Self {
-    self.min = min;
-    self
-  }
-
-  pub fn min_auto(mut self) -> Self {
-    self.min = RowHeightValue::Auto;
-    self
-  }
-
-  pub fn min_heading(mut self) -> Self {
-    self.min = RowHeightValue::Heading;
-    self
-  }
-
-  pub fn min_fixed(mut self, min: usize) -> Self {
-    self.min = RowHeightValue::Fixed(min);
-    self
-  }
-
-  pub fn max(mut self, max: RowHeightValue) -> Self {
-    self.max = max;
-    self
-  }
-
-  pub fn max_heading(mut self) -> Self {
-    self.max = RowHeightValue::Heading;
-    self
-  }
-
-  pub fn max_fixed(mut self, fixed: usize) -> Self {
-    self.max = RowHeightValue::Fixed(fixed);
-    self
-  }
-
-  pub fn max_auto(mut self) -> Self {
-    self.max = RowHeightValue::Auto;
-    self
-  }
-
-  pub fn auto_mode(mut self, auto_mode: RowHeightAuto) -> Self {
-    self.auto_mode = auto_mode;
-    self
-  }
-
-  pub fn flex_weight(mut self, weight: usize) -> Self {
-    self.flex_weight = weight;
-    self
-  }
-}
-
-pub struct Row<Heading> {
-  pub heading: Heading,
-  pub height: RowHeight,
-}
-
-impl<Heading> Row<Heading>
-where
-  Heading: Widget,
-{
-  pub fn new(heading: Heading) -> Self {
-    Self {
-      heading,
-      height: RowHeight::default(),
-    }
-  }
-  pub fn height(mut self, height: RowHeight) -> Self {
-    self.height = height;
-    self
-  }
-}
-
-impl<Heading> Widget for Row<Heading>
-where
-  Heading: Widget,
-{
-  fn event(&mut self) {
-    todo!()
-  }
-
-  fn update(&mut self) {
-    todo!()
-  }
-
-  fn layout(&self, parent_size: &Size2D<usize>) -> LayoutResult {
-    self.heading.layout(parent_size)
-  }
-
-  fn render(&self, ctx: &mut RenderCtx) -> RenderResult {
-    self.heading.render(ctx)
-  }
-}
-
-pub trait TableRow: Widget {
-  fn get_height(&self) -> Cow<RowHeight>;
-}
-
-impl<Heading> TableRow for Row<Heading>
-where
-  Heading: Widget,
-{
-  fn get_height(&self) -> Cow<RowHeight> {
-    Cow::Borrowed(&self.height)
-  }
-}
-
-pub trait TableRows: 'static {
-  fn len(&self) -> usize;
-  fn row(&self, idx: usize) -> Option<Scoped<dyn TableRow>>;
-  fn as_any(&self) -> &dyn Any;
-  fn as_any_mut(&mut self) -> &mut dyn Any;
-}
-
-impl<R> TableRows for Vec<R>
-where
-  R: TableRow + 'static,
-{
-  fn len(&self) -> usize {
-    Self::len(self)
-  }
-
-  fn row(&self, idx: usize) -> Option<Scoped<dyn TableRow>> {
-    self.get(idx).and_then(|row| Some(Scoped::Ref(row as &dyn TableRow)))
-  }
-
-  fn as_any(&self) -> &dyn Any {
-    self
-  }
-
-  fn as_any_mut(&mut self) -> &mut dyn Any {
-    self
-  }
-}
-
-pub struct TableRowsFn {
-  pub len: usize,
-  pub fn_row: Box<dyn Fn(usize) -> Option<Scoped<'static, dyn TableRow>>>,
-}
-
-impl TableRowsFn {
-  pub fn generator<F: 'static>(len: usize, fn_row: F) -> Self
-  where
-    F: Fn(usize) -> Option<Scoped<'static, dyn TableRow>>,
-  {
-    Self {
-      len,
-      fn_row: Box::new(fn_row),
-    }
-  }
-}
-
-impl TableRows for TableRowsFn {
-  fn len(&self) -> usize {
-    self.len
-  }
-
-  fn row(&self, idx: usize) -> Option<Scoped<dyn TableRow>> {
-    (self.fn_row)(idx)
-  }
-
-  fn as_any(&self) -> &dyn Any {
-    self
-  }
-
-  fn as_any_mut(&mut self) -> &mut dyn Any {
-    self
-  }
-}
-
-pub trait TableData {
-  fn rows_len(&self) -> usize;
-  fn cell(&self, row: usize, col: usize) -> Option<Scoped<dyn Widget>>;
-  fn as_any(&self) -> &dyn Any;
-  fn as_any_mut(&mut self) -> &mut dyn Any;
-}
-
-impl<Item> TableData for Vec<Vec<Item>>
-where
-  Item: Widget + 'static,
-{
-  fn rows_len(&self) -> usize {
-    self.len()
-  }
-
-  fn cell(&self, row: usize, col: usize) -> Option<Scoped<dyn Widget>> {
-    self
-      .get(row)
-      .and_then(|vec| vec.get(col).and_then(|cell| Some(Scoped::Ref(cell as &dyn Widget))))
-  }
-
-  fn as_any(&self) -> &dyn Any {
-    self
-  }
-
-  fn as_any_mut(&mut self) -> &mut dyn Any {
-    self
-  }
-}
+pub mod column;
+pub mod data;
+pub mod row;
 
 pub struct TableLayout {
   // /// Number of fixed left rows
@@ -496,7 +25,7 @@ pub struct TableLayout {
   // /// Number of fixed top rows
   // TODO: pub fixed_rows: usize,
   /// Whether to render column headings or not
-  pub hide_column_headings: bool,
+  pub show_column_headings: bool,
   // /// Whether to render row headings or not
   // TODO: pub hide_row_headings: bool,
   /// Column separator
@@ -512,7 +41,7 @@ pub struct TableLayout {
 impl Default for TableLayout {
   fn default() -> Self {
     Self {
-      hide_column_headings: false,
+      show_column_headings: false,
       column_separator: ' ',
       must_render_fit_all_columns: false,
     }
@@ -520,8 +49,8 @@ impl Default for TableLayout {
 }
 
 impl TableLayout {
-  pub fn hide_headings(mut self, hide_headings: bool) -> Self {
-    self.hide_column_headings = hide_headings;
+  pub fn show_column_headings(mut self, show_column_headings: bool) -> Self {
+    self.show_column_headings = show_column_headings;
     self
   }
 
@@ -706,7 +235,7 @@ impl Table {
   ) -> Result<usize, LayoutError> {
     let mut avail_size = avail_size.clone();
     // Remove heading height from cells available height
-    if !self.layout.hide_column_headings {
+    if self.layout.show_column_headings {
       // BUG: we are hardcoding the table headings height to 1 here,
       // because at this point we cannot know yet the actual final height
       avail_size.height = avail_size.height.checked_sub(1).unwrap_or(0);
@@ -849,10 +378,10 @@ impl Table {
       let column_layout = column_layout_result.unwrap();
 
       // Figure out min/max column height
-      let column_height = if self.layout.hide_column_headings {
-        MinMax::new(0, 0)
-      } else {
+      let column_height = if self.layout.show_column_headings {
         MinMax::new(column_layout.min.height, column_layout.max.height)
+      } else {
+        MinMax::new(0, 0)
       };
 
       // Compute automatic column width value, that should be the max value possible
@@ -913,10 +442,10 @@ impl Table {
     } // for all columns
 
     // We consider the minimum table height to be: { heading + at least 1 row }.
-    table_headings_height = if self.layout.hide_column_headings {
-      MinMax::default() // zero
-    } else {
+    table_headings_height = if self.layout.show_column_headings {
       table_headings_height
+    } else {
+      MinMax::default() // zero
     };
     // So let's compute the first row min/max height or leave a hard space of at least 1 unit.
     let avail_data_height = parent_size.height - table_headings_height.min;
@@ -1006,7 +535,7 @@ impl Widget for Table {
 
     // render table headings
     let mut column_heading_height = 0;
-    if !self.layout.hide_column_headings {
+    if self.layout.show_column_headings {
       column_heading_height = 1 /*TODO: other heights */;
       let mut the_x = 0;
       for col in 0..flexed_widths.len() {

@@ -1,10 +1,12 @@
-use witui::render::{RenderCtx, Renderer};
-use witui::widgets::table::{Column, ColumnWidth};
-use witui::widgets::{Align, Button, Padding, Table, Widget};
-use euclid::default::{Rect, Size2D};
 use std::io::Read;
 use std::num::NonZeroUsize;
 use std::ops::{Deref, DerefMut};
+
+use euclid::default::{Rect, Size2D};
+
+use witui::render::{RenderCtx, Renderer};
+use witui::widgets::{Align, Button, Padding, Table, Widget};
+use witui::widgets::table::column::{Column, ColumnWidth};
 
 fn main() {
   let mut render_ctx = RenderCtx::new(false);

@@ -1,4 +1,4 @@
-use witui::widgets::table::Column;
+use witui::widgets::table::column::Column;
 use witui::widgets::Table;
 use witui::WiTui;
 
