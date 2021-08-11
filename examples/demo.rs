@@ -119,7 +119,10 @@ fn main() {
       vec!["p2p-dev-wlp8s0", "wifi-p2p", "disconnected", "--"], //
       vec!["enp7s0", "ethernet", "unavailable", "--"],          //
       vec!["lo", "loopback", "unmanaged", "--"],                //
-    ]);
+    ])
+    // .number_rows()
+    ;
+
   render_ctx.set_frame(prev_frame);
   let table = Padding::around(table).left(0).top(10);
   table.render(&mut render_ctx).unwrap();

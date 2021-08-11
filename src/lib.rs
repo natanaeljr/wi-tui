@@ -1,7 +1,7 @@
 extern crate euclid;
 
 use crate::render::RenderCtx;
-use crate::widgets::{Widget, RenderResult};
+use crate::widgets::{RenderResult, Widget};
 use crossterm::event::{Event, KeyCode, KeyModifiers};
 use std::io::Write;
 
@@ -9,32 +9,38 @@ pub mod render;
 pub mod util;
 pub mod widgets;
 
-pub struct TuiController {
+pub struct WiTui {
   alternate: bool,
   render_ctx: RenderCtx,
-  pub root_widget: Box<dyn Widget>,
+  pub root: Box<dyn Widget>,
 }
 
-impl TuiController {
-  pub fn new(alternate: bool) -> Self {
+impl WiTui {
+  pub fn root_widget<W: Widget + 'static>(root: W) -> Self {
     Self {
-      alternate,
-      render_ctx: RenderCtx::new(alternate),
-      root_widget: Box::new(""),
+      alternate: false,
+      render_ctx: RenderCtx::new(false),
+      root: Box::new(root) as Box<dyn Widget>,
     }
   }
 
-  pub fn root_widget<'a, W>(mut self, root_widget: W) -> Self
-  where
-    W: Widget + 'static,
-  {
-    self.root_widget = Box::new(root_widget);
+  pub fn alternate(mut self, alternate: bool) -> Self {
+    if self.alternate != alternate {
+      self.alternate = alternate;
+      self.render_ctx = RenderCtx::new(alternate);
+    }
     self
   }
 
-  pub fn run(&mut self) -> RenderResult {
+  pub fn print(&mut self) -> RenderResult {
+    self.root.render(&mut self.render_ctx)
+  }
+
+  pub fn quit(mut self) {}
+
+  pub fn run_loop(&mut self) -> RenderResult {
     loop {
-      self.root_widget.render(&mut self.render_ctx)?;
+      self.print();
       if !self.alternate {
         break;
       }
