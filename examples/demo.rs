@@ -1,6 +1,6 @@
-use cui::render::{RenderCtx, Renderer};
-use cui::widgets::table::{Column, ColumnWidth};
-use cui::widgets::{Align, Button, Padding, Table, Widget};
+use witui::render::{RenderCtx, Renderer};
+use witui::widgets::table::{Column, ColumnWidth};
+use witui::widgets::{Align, Button, Padding, Table, Widget};
 use euclid::default::{Rect, Size2D};
 use std::io::Read;
 use std::num::NonZeroUsize;

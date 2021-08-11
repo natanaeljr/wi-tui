@@ -1,5 +1,5 @@
-use cui::render::{RenderCtx, Renderer};
-use cui::widgets::{Align, Button, Table, VerticalContainer, Widget};
+use witui::render::{RenderCtx, Renderer};
+use witui::widgets::{Align, Button, Table, VerticalContainer, Widget};
 use euclid::default::{Rect, Size2D};
 
 struct App {
