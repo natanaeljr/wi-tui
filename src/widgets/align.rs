@@ -20,7 +20,7 @@ impl<Child> Align<Child>
 where
   Child: Widget,
 {
-  pub fn centered(child: Child) -> Self {
+  pub fn center(child: Child) -> Self {
     Self {
       child,
       vertical: 0,

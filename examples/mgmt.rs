@@ -24,7 +24,7 @@ impl App {
 }
 
 fn main() {
-  let app = App::new().root_widget(Align::centered(
+  let app = App::new().root_widget(Align::center(
     VerticalContainer::new()
       .child("Hello")
       .child(String::from("Welt"))

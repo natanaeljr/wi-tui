@@ -505,6 +505,8 @@ pub struct TableLayout {
   // TODO: pub row_separator: char,
   /// Rendering must fit all columns or render nothing at all (declare insufficient space)
   pub must_render_fit_all_columns: bool,
+  // TODO: Global header style (Container Widget?) for applying to the entire header box
+  // TODO: Headers, Rows and Column (underlay) Container Widgets for default appliance?
 }
 
 impl Default for TableLayout {
@@ -534,8 +536,11 @@ impl TableLayout {
   }
 }
 
-// TODO: how to merge cells
-// TODO: Scoped<> columns and data
+// https://api.flutter.dev/flutter/widgets/Table-class.html
+// TODO: How to merge cells?
+// TODO: How to serialize?
+// TODO: ScrollView widget on table, ref: https://api.flutter.dev/flutter/widgets/Table/defaultColumnWidth.html
+// TODO: Action properties, ref: https://www.activestate.com/resources/quick-reads/how-to-display-data-in-a-table-using-tkinter/
 pub struct Table {
   columns: Option<Box<dyn TableColumns>>,
   rows: Option<Box<dyn TableRows>>,

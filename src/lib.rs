@@ -3,6 +3,7 @@ extern crate euclid;
 use crate::render::RenderCtx;
 use crate::widgets::{Widget, RenderResult};
 use crossterm::event::{Event, KeyCode, KeyModifiers};
+use std::io::Write;
 
 pub mod render;
 pub mod util;

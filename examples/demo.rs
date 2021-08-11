@@ -23,17 +23,17 @@ fn main() {
   let table = Table::new().data(data);
 
   let aligned_data = vec![vec![
-    Align::centered("Hello"),
-    Align::centered("World"),
-    Align::centered("Bye"),
-    Align::centered("Heaven"),
+    Align::center("Hello"),
+    Align::center("World"),
+    Align::center("Bye"),
+    Align::center("Heaven"),
   ]];
 
   let columns = vec![
-    Column::new(Align::centered("A")),
-    Column::new(Align::centered("B")),
-    Column::new(Align::centered("C")),
-    Column::new(Align::centered("D")),
+    Column::new(Align::center("A")),
+    Column::new(Align::center("B")),
+    Column::new(Align::center("C")),
+    Column::new(Align::center("D")),
   ];
 
   let table = Table::new().columns(columns).data(aligned_data);
@@ -64,7 +64,7 @@ fn main() {
   let table: Table = Table::new()
     .columns(vec![
       Column::new(Box::new("Hi") as Box<dyn Widget>).width(ColumnWidth::new().max_fixed(3)),
-      Column::new(Box::new(Align::centered("Hey")) as Box<dyn Widget>), //
+      Column::new(Box::new(Align::center("Hey")) as Box<dyn Widget>), //
     ])
     .data(vec![vec![
       Box::new("Bye") as Box<dyn Widget>,
