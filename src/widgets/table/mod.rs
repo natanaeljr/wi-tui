@@ -41,7 +41,7 @@ pub struct TableLayout {
 impl Default for TableLayout {
   fn default() -> Self {
     Self {
-      show_column_headings: false,
+      show_column_headings: true,
       column_separator: ' ',
       must_render_fit_all_columns: false,
     }

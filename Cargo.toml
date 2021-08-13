@@ -16,3 +16,6 @@ name = "mgmt"
 
 [[example]]
 name = "nmcli"
+
+[[example]]
+name = "spreadsheet"

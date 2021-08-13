@@ -167,6 +167,34 @@ impl Widget for String {
   }
 }
 
+impl Widget for char {
+  fn event(&mut self) {
+    todo!()
+  }
+
+  fn update(&mut self) {
+    todo!()
+  }
+
+  fn layout(&self, parent_size: &Size2D<usize>) -> LayoutResult {
+    let size = Size2D::new(1, 1);
+    // check for minimum space in parent size
+    if parent_size.contains(size.clone()) {
+      Ok(LayoutSize {
+        min: size.clone(),
+        max: size,
+      })
+    } else {
+      Err(LayoutError::InsufficientSpace)
+    }
+  }
+
+  fn render(&self, ctx: &mut RenderCtx) -> RenderResult {
+    ctx.renderer().print(self.to_string().as_str());
+    Ok(())
+  }
+}
+
 impl Widget for u32 {
   fn event(&mut self) {
     todo!()

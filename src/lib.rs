@@ -25,11 +25,13 @@ impl WiTui {
   }
 
   pub fn alternate(mut self, alternate: bool) -> Self {
-    if self.alternate != alternate {
-      self.alternate = alternate;
-      self.render_ctx = RenderCtx::new(alternate);
+    // temporary hack to recreate renderer
+    drop(self.render_ctx);
+    Self {
+      alternate,
+      render_ctx: RenderCtx::new(alternate),
+      root: self.root
     }
-    self
   }
 
   pub fn print(&mut self) -> RenderResult {
