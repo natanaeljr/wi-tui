@@ -186,11 +186,7 @@ impl Table {
     // Compute fixed columns total width and accumulate the weight for flexible columns for later distribution
     for (col, column) in input_layout.iter().enumerate() {
       // Prepend the column separator, starting from the second column on
-      let separator_len = if col > 0 {
-        self.layout.column_separator.len_utf8().min(1) // char len: one or zero!
-      } else {
-        0
-      };
+      let separator_len = if col > 0 { 1 } else { 0 };
       fixed_width += column.min + separator_len;
       final_widths.push(column.min);
       flex_total_weight += column.weight;
@@ -326,7 +322,6 @@ impl Table {
     let mut column_layouts_flex_input = Vec::new();
     // self fields shorthand
     let columns = self.columns_ref().unwrap();
-    let column_separator_str = self.layout.column_separator.to_string();
     // local helpers
     let mut avail_table_size = parent_size.clone();
     let mut table_width = MinMax::<usize>::default();
@@ -339,11 +334,7 @@ impl Table {
       let column = columns.column(col).unwrap();
 
       // Prepend the column separator, starting from the second column on
-      let separator_len = if col > 0 {
-        self.layout.column_separator.len_utf8().min(1) // char len: one or zero!
-      } else {
-        0
-      };
+      let separator_len = if col > 0 { 1 } else { 0 };
 
       // Check if we still have space for minimum column separator
       if !avail_table_size.contains(Size2D::new(separator_len, 1)) {
@@ -548,7 +539,7 @@ impl Widget for Table {
           ));
           ctx.renderer().print(self.layout.column_separator.to_string().as_str());
           ctx.set_frame(prev_frame);
-          self.layout.column_separator.len_utf8().min(1) // char len: one or zero!
+          1
         } else {
           0
         };
@@ -589,7 +580,7 @@ impl Widget for Table {
           ));
           ctx.renderer().print(self.layout.column_separator.to_string().as_str());
           ctx.set_frame(prev_frame);
-          self.layout.column_separator.len_utf8().min(1) // char len: one or zero!
+          1
         } else {
           0
         };

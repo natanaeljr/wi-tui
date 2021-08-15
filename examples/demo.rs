@@ -5,8 +5,8 @@ use std::ops::{Deref, DerefMut};
 use euclid::default::{Rect, Size2D};
 
 use witui::render::{RenderCtx, Renderer};
-use witui::widgets::{Align, Button, Padding, Table, Widget};
 use witui::widgets::table::column::{Column, ColumnWidth};
+use witui::widgets::{Align, Button, Padding, Table, Widget};
 
 fn main() {
   let mut render_ctx = RenderCtx::new(false);

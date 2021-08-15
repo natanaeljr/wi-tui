@@ -30,7 +30,7 @@ impl WiTui {
     Self {
       alternate,
       render_ctx: RenderCtx::new(alternate),
-      root: self.root
+      root: self.root,
     }
   }
 

@@ -1,3 +1,1 @@
-struct Flex {
-
-}
+struct Flex {}
