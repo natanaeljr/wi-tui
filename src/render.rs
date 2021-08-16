@@ -1,3 +1,5 @@
+use crate::canvas::Canvas;
+use crossterm::style::{Attributes, Color};
 use crossterm::terminal::ClearType;
 use crossterm::{cursor, execute, terminal};
 use euclid::default::{Box2D, Point2D, Rect, Size2D};
@@ -22,10 +24,11 @@ pub struct Renderer {
   frame_cursor: Point2D<usize>,
   nl_counter: usize,
   alternate: bool,
+  canvas: Canvas,
 }
 
 impl Renderer {
-  pub fn new(alternate: bool) -> Self {
+  pub(crate) fn new(alternate: bool) -> Self {
     let mut stdout = std::io::stdout();
     if alternate {
       execute!(stdout, terminal::EnterAlternateScreen);
@@ -42,6 +45,7 @@ impl Renderer {
       frame_cursor: Point2D::new(0, 0),
       nl_counter: 0,
       alternate,
+      canvas: Canvas::new(Size2D::new(cols as usize, rows as usize)),
     };
     this.set_frame(Rect::from_size(Size2D::new(cols as usize, rows as usize)));
     this
@@ -53,22 +57,41 @@ impl Renderer {
     self.size.height = rows;
     self.nl_counter = 0;
     self.set_frame(Rect::from_size(Size2D::new(cols as usize, rows as usize)));
+    self.canvas.resize(Size2D::new(cols as usize, rows as usize));
     let mut stdout = std::io::stdout();
     execute!(stdout, terminal::Clear(ClearType::All));
   }
 
-  pub fn print(&mut self, buf: &str) {
+  pub fn write(&mut self, buf: &str) {
     // std::thread::sleep(std::time::Duration::from_millis(500));
     let space = self.frame.width() - (self.frame_cursor.x - self.frame.origin.x);
     if buf.chars().count() > space {
       let (buf, _) = buf.split_at(space);
       print!("{}", buf);
+      self.canvas.write(&self.frame_cursor, buf);
       self.frame_cursor.x += space;
     } else {
       print!("{}", buf);
+      self.canvas.write(&self.frame_cursor, buf);
       self.frame_cursor.x += buf.len();
     }
     std::io::stdout().flush();
+  }
+
+  pub fn set_background(&mut self, color: &Color) {
+    self.canvas.fill_background(&self.frame, color);
+  }
+
+  pub fn set_foreground(&mut self, color: &Color) {
+    self.canvas.fill_foreground(&self.frame, color);
+  }
+
+  pub fn set_attributes(&mut self, attributes: Attributes) {
+    self.canvas.overwrite_attributes(&self.frame, attributes);
+  }
+
+  pub fn add_attributes(&mut self, attributes: Attributes) {
+    self.canvas.merge_attributes(&self.frame, attributes);
   }
 
   pub fn next_line(&mut self) {
@@ -150,14 +173,19 @@ impl Renderer {
 impl Drop for Renderer {
   fn drop(&mut self) {
     let mut stdout = std::io::stdout();
+
     if self.alternate {
       // std::thread::sleep(std::time::Duration::from_secs(20));
       execute!(stdout, terminal::LeaveAlternateScreen);
+    } else {
+      execute!(stdout, cursor::MoveTo(0, (self.reset_pos.y + self.nl_counter) as u16),);
     }
-    // self.move_to(0, (self.size.height) as u16);
-    execute!(stdout, cursor::MoveTo(0, (self.reset_pos.y + self.nl_counter) as u16),);
+
     terminal::disable_raw_mode().unwrap();
-    println!();
+
+    if !self.alternate {
+      println!();
+    }
     stdout.flush();
   }
 }
@@ -169,7 +197,7 @@ pub struct RenderCtx {
 }
 
 impl RenderCtx {
-  pub fn new(alternate: bool) -> Self {
+  pub(crate) fn new(alternate: bool) -> Self {
     let mut this = Self {
       renderer: Rc::new(RefCell::new(Renderer::new(alternate))),
       frame_size: Default::default(),

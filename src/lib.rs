@@ -5,6 +5,7 @@ use crate::widgets::{RenderResult, Widget};
 use crossterm::event::{Event, KeyCode, KeyModifiers};
 use std::io::Write;
 
+pub mod canvas;
 pub mod render;
 pub mod util;
 pub mod widgets;

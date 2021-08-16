@@ -122,10 +122,10 @@ impl Widget for &str {
     let parent_size = ctx.get_frame_size();
     if parent_size.width < self.len() {
       let buf = self.split_at(parent_size.width.checked_sub(1).unwrap_or(0)).0;
-      ctx.renderer().print(buf);
-      ctx.renderer().print("…");
+      ctx.renderer().write(buf);
+      ctx.renderer().write("…");
     } else {
-      ctx.renderer().print(self);
+      ctx.renderer().write(self);
     }
     Ok(())
   }
@@ -158,10 +158,10 @@ impl Widget for String {
     let parent_size = ctx.get_frame_size();
     if parent_size.width < self.len() {
       let buf = self.split_at(parent_size.width.checked_sub(1).unwrap_or(0)).0;
-      ctx.renderer().print(buf);
-      ctx.renderer().print("…");
+      ctx.renderer().write(buf);
+      ctx.renderer().write("…");
     } else {
-      ctx.renderer().print(self);
+      ctx.renderer().write(self);
     }
     Ok(())
   }
@@ -190,7 +190,7 @@ impl Widget for char {
   }
 
   fn render(&self, ctx: &mut RenderCtx) -> RenderResult {
-    ctx.renderer().print(self.to_string().as_str());
+    ctx.renderer().write(self.to_string().as_str());
     Ok(())
   }
 }
@@ -221,7 +221,7 @@ impl Widget for u32 {
 
   fn render(&self, ctx: &mut RenderCtx) -> RenderResult {
     let val = format!("{}", self);
-    ctx.renderer().print(&val);
+    ctx.renderer().write(&val);
     Ok(())
   }
 }
@@ -252,7 +252,7 @@ impl Widget for usize {
 
   fn render(&self, ctx: &mut RenderCtx) -> RenderResult {
     let val = format!("{}", self);
-    ctx.renderer().print(&val);
+    ctx.renderer().write(&val);
     Ok(())
   }
 }

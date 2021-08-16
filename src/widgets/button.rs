@@ -30,7 +30,7 @@ impl Widget for Button<&str> {
   }
 
   fn render(&self, ctx: &mut RenderCtx) -> RenderResult {
-    ctx.renderer().print(&self.child);
+    ctx.renderer().write(&self.child);
     Ok(())
   }
 }

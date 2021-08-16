@@ -537,7 +537,7 @@ impl Widget for Table {
             Point2D::new(ctx.get_frame().min_x() + the_x, ctx.get_frame().min_y()),
             Size2D::new(1, 1 /* TODO: height */),
           ));
-          ctx.renderer().print(self.layout.column_separator.to_string().as_str());
+          ctx.renderer().write(self.layout.column_separator.to_string().as_str());
           ctx.set_frame(prev_frame);
           1
         } else {
@@ -578,7 +578,7 @@ impl Widget for Table {
             ),
             Size2D::new(flexed_widths[col], 1 /* TODO: height */),
           ));
-          ctx.renderer().print(self.layout.column_separator.to_string().as_str());
+          ctx.renderer().write(self.layout.column_separator.to_string().as_str());
           ctx.set_frame(prev_frame);
           1
         } else {

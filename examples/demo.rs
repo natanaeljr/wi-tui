@@ -9,12 +9,7 @@ use witui::widgets::table::column::{Column, ColumnWidth};
 use witui::widgets::{Align, Button, Padding, Table, Widget};
 
 fn main() {
-  let mut render_ctx = RenderCtx::new(false);
-  let prev_frame = render_ctx.get_frame();
-
   let button = Button::new("Button");
-  // button.render(&mut render_ctx);
-  // render_ctx.renderer.next_line();
 
   let data = vec![
     vec!["A1", "B2", "C1"], //
@@ -55,13 +50,8 @@ fn main() {
       vec!["A6", "B6", "C6"],     //
       vec!["A72", "B7", "C7"],    //
     ]);
-  render_ctx.set_frame(prev_frame);
   let table = Padding::around(table).left(5).top(0);
-  table.render(&mut render_ctx).unwrap();
-
-  render_ctx.set_frame(prev_frame);
-  // render_ctx.renderer.next_line();
-  // std::thread::sleep(std::time::Duration::from_secs(5));
+  // table.render(&mut render_ctx).unwrap();
 
   let table: Table = Table::new()
     .columns(vec![
@@ -77,8 +67,7 @@ fn main() {
   data[0][1] = Box::new("Tschuss");
 
   let table = Padding::around(table).left(20).top(2);
-  table.render(&mut render_ctx).unwrap();
-  // render_ctx.renderer.next_line();
+  // table.render(&mut render_ctx).unwrap();
   let table = table.child;
 
   let table = table;
@@ -125,7 +114,6 @@ fn main() {
     // .number_rows()
     ;
 
-  render_ctx.set_frame(prev_frame);
   let table = Padding::around(table).left(0).top(10);
-  table.render(&mut render_ctx).unwrap();
+  // table.render(&mut render_ctx).unwrap();
 }
