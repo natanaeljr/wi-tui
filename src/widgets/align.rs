@@ -3,6 +3,7 @@ use crate::widgets::{LayoutResult, RenderError, RenderResult, Widget};
 use euclid::default::Size2D;
 use euclid::SideOffsets2D;
 use std::ops::Sub;
+use std::rc::Rc;
 
 pub enum HorizontalAlignment {
   Left,
@@ -59,13 +60,12 @@ where
     self.child.layout(parent_size)
   }
 
-  fn render(&self, ctx: &mut RenderCtx) -> RenderResult {
-    let parent_size = ctx.get_frame_size();
-    let mut child_size = self.child.layout(parent_size).map_err(|e| RenderError::Layout(e))?;
+  fn render(&self, ctx: &RenderCtx) -> RenderResult {
+    let parent_size = ctx.get_frame().size.clone();
+    let mut child_size = self.child.layout(&parent_size).map_err(|e| RenderError::Layout(e))?;
     child_size.max.width = std::cmp::min(child_size.max.width, parent_size.width);
     child_size.max.height = std::cmp::min(child_size.max.height, parent_size.height);
     let remainder_size = parent_size.sub(child_size.max);
-
     let offsets = match self.horizontal {
       HorizontalAlignment::Left => SideOffsets2D::new(0, remainder_size.width, 0, 0),
       HorizontalAlignment::Right => SideOffsets2D::new(0, 0, 0, remainder_size.width),
@@ -77,12 +77,9 @@ where
       }
     };
 
-    let parent_frame = ctx.get_frame();
-    let child_frame = parent_frame.inner_rect(offsets);
-    let mut child_ctx = ctx.child_ctx(child_frame);
-    self.child.render(&mut child_ctx)?;
-    ctx.set_frame(parent_frame);
-
-    Ok(())
+    let child_frame = ctx.get_frame().inner_rect(offsets);
+    // let mut child_ctx = myctx.into_child_ctx(child_frame);
+    // self.child.render(&child_ctx);
+    ctx.render_child(child_frame, &self.child)
   }
 }

@@ -74,7 +74,7 @@ pub trait Widget {
   fn update(&mut self);
   /// layout must return the **minimum** required space for drawing this widget
   fn layout(&self, parent_size: &Size2D<usize>) -> LayoutResult;
-  fn render(&self, ctx: &mut RenderCtx) -> RenderResult;
+  fn render(&self, ctx: &RenderCtx) -> RenderResult;
 }
 
 // Wrapping Widgets
@@ -118,8 +118,8 @@ impl Widget for &str {
     }
   }
 
-  fn render(&self, ctx: &mut RenderCtx) -> RenderResult {
-    let parent_size = ctx.get_frame_size();
+  fn render(&self, ctx: &RenderCtx) -> RenderResult {
+    let parent_size = ctx.get_frame().size.clone();
     if parent_size.width < self.len() {
       let buf = self.split_at(parent_size.width.checked_sub(1).unwrap_or(0)).0;
       ctx.renderer().write(buf);
@@ -154,8 +154,8 @@ impl Widget for String {
     }
   }
 
-  fn render(&self, ctx: &mut RenderCtx) -> RenderResult {
-    let parent_size = ctx.get_frame_size();
+  fn render(&self, ctx: &RenderCtx) -> RenderResult {
+    let parent_size = ctx.get_frame().size.clone();
     if parent_size.width < self.len() {
       let buf = self.split_at(parent_size.width.checked_sub(1).unwrap_or(0)).0;
       ctx.renderer().write(buf);
@@ -189,7 +189,7 @@ impl Widget for char {
     }
   }
 
-  fn render(&self, ctx: &mut RenderCtx) -> RenderResult {
+  fn render(&self, ctx: &RenderCtx) -> RenderResult {
     ctx.renderer().write(self.to_string().as_str());
     Ok(())
   }
@@ -219,7 +219,7 @@ impl Widget for u32 {
     }
   }
 
-  fn render(&self, ctx: &mut RenderCtx) -> RenderResult {
+  fn render(&self, ctx: &RenderCtx) -> RenderResult {
     let val = format!("{}", self);
     ctx.renderer().write(&val);
     Ok(())
@@ -250,7 +250,7 @@ impl Widget for usize {
     }
   }
 
-  fn render(&self, ctx: &mut RenderCtx) -> RenderResult {
+  fn render(&self, ctx: &RenderCtx) -> RenderResult {
     let val = format!("{}", self);
     ctx.renderer().write(&val);
     Ok(())
@@ -270,7 +270,7 @@ impl Widget for Box<dyn Widget> {
     self.deref().layout(parent_size)
   }
 
-  fn render(&self, ctx: &mut RenderCtx) -> RenderResult {
+  fn render(&self, ctx: &RenderCtx) -> RenderResult {
     self.deref().render(ctx);
     Ok(())
   }
@@ -288,7 +288,7 @@ impl Widget for () {
     })
   }
 
-  fn render(&self, ctx: &mut RenderCtx) -> RenderResult {
+  fn render(&self, ctx: &RenderCtx) -> RenderResult {
     Ok(())
   }
 }

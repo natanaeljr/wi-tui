@@ -145,7 +145,7 @@ where
     self.heading.layout(parent_size)
   }
 
-  fn render(&self, ctx: &mut RenderCtx) -> RenderResult {
+  fn render(&self, ctx: &RenderCtx) -> RenderResult {
     self.heading.render(ctx)
   }
 }

@@ -1,13 +1,17 @@
-use crate::canvas::Canvas;
+use std::borrow::{Borrow, BorrowMut};
+use std::cell::{Cell, Ref, RefCell, RefMut};
+use std::io::Write;
+use std::ops::{Deref, DerefMut};
+use std::rc::Rc;
+
 use crossterm::style::{Attributes, Color};
 use crossterm::terminal::ClearType;
 use crossterm::{cursor, execute, terminal};
 use euclid::default::{Box2D, Point2D, Rect, Size2D};
-use std::borrow::BorrowMut;
-use std::cell::{Cell, RefCell, RefMut};
-use std::io::Write;
-use std::ops::Deref;
-use std::rc::Rc;
+
+use crate::canvas::Canvas;
+use crate::util::{Immut, Immutable};
+use crate::widgets::{RenderResult, Widget};
 
 // TODO: Check https://docs.rs/sdl2/0.34.5/sdl2/render/
 
@@ -193,44 +197,71 @@ impl Drop for Renderer {
 pub struct RenderCtx {
   // widget constraints box
   renderer: Rc<RefCell<Renderer>>,
-  frame_size: Size2D<usize>,
+  frame: Rect<usize>,
+  depth: usize,
+  // parent: Option<Box<RenderCtx>>,
 }
 
 impl RenderCtx {
   pub(crate) fn new(alternate: bool) -> Self {
     let mut this = Self {
       renderer: Rc::new(RefCell::new(Renderer::new(alternate))),
-      frame_size: Default::default(),
+      frame: Default::default(),
+      depth: 0,
+      // parent: None,
     };
-    let tmp = this.renderer().frame.size.clone();
-    this.frame_size = tmp;
+    let frame = this.renderer().frame.clone();
+    this.frame = frame;
     this
-  }
-  pub fn child_ctx(&self, frame: Rect<usize>) -> Self {
-    let mut this = Self {
-      renderer: self.renderer.clone(),
-      frame_size: Default::default(),
-    };
-    this.set_frame(frame);
-    this
-  }
-  pub fn renderer(&mut self) -> RefMut<'_, Renderer> {
-    self.renderer.deref().borrow_mut()
-  }
-  pub fn set_frame(&mut self, frame: Rect<usize>) {
-    self.frame_size = frame.size.clone();
-    self.renderer().set_frame(frame);
-  }
-  pub fn get_frame(&self) -> Rect<usize> {
-    self.renderer.deref().borrow().frame.clone()
-  }
-  pub fn get_frame_size(&self) -> &Size2D<usize> {
-    &self.frame_size
   }
 
-  pub(crate) fn resize(&mut self, cols: usize, rows: usize) {
-    self.renderer.deref().borrow_mut().resize(cols, rows);
-    let tmp = self.renderer().frame.size.clone();
-    self.frame_size = tmp;
+  // pub fn into_child_ctx(self, frame: Rect<usize>) -> Self {
+  //   let mut child = Self {
+  //     renderer: self.renderer.clone(),
+  //     frame: Default::default(),
+  //     depth: self.depth + 1,
+  //     parent: Some(Box::new(self)),
+  //   };
+  //   child.set_frame(frame);
+  //   child
+  // }
+  //
+  // pub fn into_parent_ctx(mut self) -> Immut<Self> {
+  //   let mut parent = *self.parent.unwrap();
+  //   parent.set_frame(parent.frame);
+  //   parent.immut()
+  // }
+
+  pub fn renderer(&self) -> RefMut<'_, Renderer> {
+    self.renderer.deref().borrow_mut()
   }
+
+  pub fn get_frame(&self) -> &Rect<usize> {
+    &self.frame
+  }
+
+  fn set_frame(&mut self, frame: Rect<usize>) {
+    self.frame = frame.clone();
+    self.renderer().set_frame(frame);
+  }
+
+  pub fn render_child(&self, frame: Rect<usize>, child: &dyn Widget) -> RenderResult {
+    let mut ctx = Self {
+      renderer: self.renderer.clone(),
+      frame,
+      depth: self.depth + 1,
+    };
+    self.renderer().set_frame(ctx.frame.clone());
+    let result = child.render(&ctx);
+    self.renderer().set_frame(self.frame.clone());
+    result
+  }
+
+  // pub(crate) fn resize(&mut self, cols: usize, rows: usize) {
+  //   self.renderer.deref().borrow_mut().resize(cols, rows);
+  //   let frame = self.renderer().frame.clone();
+  //   self.frame = frame;
+  // }
 }
+
+impl Immutable for RenderCtx {}

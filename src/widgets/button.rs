@@ -29,7 +29,7 @@ impl Widget for Button<&str> {
     todo!()
   }
 
-  fn render(&self, ctx: &mut RenderCtx) -> RenderResult {
+  fn render(&self, ctx: &RenderCtx) -> RenderResult {
     ctx.renderer().write(&self.child);
     Ok(())
   }

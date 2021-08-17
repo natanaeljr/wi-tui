@@ -514,12 +514,12 @@ impl Widget for Table {
     self.layout_table(parent_size).map(|ok| ok.0)
   }
 
-  fn render(&self, ctx: &mut RenderCtx) -> RenderResult {
+  fn render(&self, ctx: &RenderCtx) -> RenderResult {
     let (_, layout) = self
-      .layout_table(ctx.get_frame_size())
+      .layout_table(&ctx.get_frame().size)
       .map_err(|err| RenderError::Layout(err))?;
     let flexed_widths = self
-      .layout_flex(ctx.get_frame_size(), layout)
+      .layout_flex(&ctx.get_frame().size, layout)
       .map_err(|err| RenderError::Layout(err))?;
 
     let columns = self.columns_ref().unwrap();
@@ -530,27 +530,27 @@ impl Widget for Table {
       column_heading_height = 1 /*TODO: other heights */;
       let mut the_x = 0;
       for col in 0..flexed_widths.len() {
-        let prev_frame = ctx.get_frame();
         // factor-in the column separator
         the_x += if col > 0 {
-          let mut child_ctx = ctx.child_ctx(Rect::new(
+          // let mut child_ctx = ctx.push_ctx(rect);
+          // let mut parent_ctx = child_ctx.pop_ctx();
+
+          let mut child_ctx = ctx.into_child_ctx(Rect::new(
             Point2D::new(ctx.get_frame().min_x() + the_x, ctx.get_frame().min_y()),
             Size2D::new(1, 1 /* TODO: height */),
           ));
           ctx.renderer().write(self.layout.column_separator.to_string().as_str());
-          ctx.set_frame(prev_frame);
           1
         } else {
           0
         };
         // render column heading
         let column = columns.column(col).unwrap();
-        let mut child_ctx = ctx.child_ctx(Rect::new(
+        let mut child_ctx = ctx.into_child_ctx(Rect::new(
           Point2D::new(ctx.get_frame().min_x() + the_x, ctx.get_frame().min_y()),
           Size2D::new(flexed_widths[col], 1 /* TODO: height */),
         ));
         column.render(&mut child_ctx);
-        ctx.set_frame(prev_frame);
         the_x += flexed_widths[col];
         // ctx.renderer.move_to_column_relative((the_x + 1) as u16);
       }
@@ -564,14 +564,13 @@ impl Widget for Table {
       .as_ref()
       .map(|rows| rows.len())
       .unwrap_or(data.rows_len())
-      .min(ctx.get_frame_size().height - column_heading_height)
+      .min(ctx.get_frame().size.height - column_heading_height)
     {
       let mut the_x = 0;
       for col in 0..flexed_widths.len() {
-        let prev_frame = ctx.get_frame();
         // factor-in the column separator
         the_x += if col > 0 {
-          let mut child_ctx = ctx.child_ctx(Rect::new(
+          let mut child_ctx = ctx.into_child_ctx(Rect::new(
             Point2D::new(
               ctx.get_frame().min_x() + the_x,
               ctx.get_frame().min_y() + row + column_heading_height,
@@ -579,14 +578,13 @@ impl Widget for Table {
             Size2D::new(flexed_widths[col], 1 /* TODO: height */),
           ));
           ctx.renderer().write(self.layout.column_separator.to_string().as_str());
-          ctx.set_frame(prev_frame);
           1
         } else {
           0
         };
         // render cell
         if let Some(cell) = data.cell(row, col) {
-          let mut child_ctx = ctx.child_ctx(Rect::new(
+          let mut child_ctx = ctx.into_child_ctx(Rect::new(
             Point2D::new(
               ctx.get_frame().min_x() + the_x,
               ctx.get_frame().min_y() + row + column_heading_height,
@@ -594,7 +592,6 @@ impl Widget for Table {
             Size2D::new(flexed_widths[col], 1 /* TODO: height */),
           ));
           cell.render(&mut child_ctx);
-          ctx.set_frame(prev_frame);
         }
         the_x += flexed_widths[col];
         // ctx.renderer.move_to_column_relative((the_x + 1) as u16);

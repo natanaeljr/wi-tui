@@ -1,5 +1,6 @@
-use crossterm::event::KeyCode::Delete;
 use std::ops::Deref;
+
+use crossterm::event::KeyCode::Delete;
 
 pub enum Scoped<'r, Type: ?Sized> {
   Ref(&'r Type),
@@ -38,5 +39,32 @@ where
       min: Default::default(),
       max: Default::default(),
     }
+  }
+}
+
+pub struct Immut<Inner> {
+  inner: Inner,
+}
+
+impl<Inner> Immut<Inner> {
+  pub fn new(inner: Inner) -> Self {
+    Self { inner }
+  }
+}
+
+impl<Inner> Deref for Immut<Inner> {
+  type Target = Inner;
+
+  fn deref(&self) -> &Self::Target {
+    &self.inner
+  }
+}
+
+pub trait Immutable {
+  fn immut(self) -> Immut<Self>
+  where
+    Self: Sized,
+  {
+    Immut::new(self)
   }
 }

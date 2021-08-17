@@ -60,10 +60,8 @@ where
     todo!()
   }
 
-  fn render(&self, ctx: &mut RenderCtx) -> RenderResult {
-    let mut child_ctx = ctx.child_ctx(ctx.get_frame().inner_rect(self.offsets.clone()));
-    self.child.render(&mut child_ctx)?;
-    ctx.set_frame(Rect::from_size(ctx.get_frame_size().clone()));
-    Ok(())
+  fn render(&self, ctx: &RenderCtx) -> RenderResult {
+    let child_frame = ctx.get_frame().inner_rect(self.offsets.clone());
+    ctx.render_child(child_frame, &self.child)
   }
 }

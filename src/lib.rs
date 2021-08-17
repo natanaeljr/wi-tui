@@ -73,7 +73,7 @@ impl WiTui {
         Event::Mouse(_) => {}
         Event::Resize(cols, rows) => {
           if self.alternate {
-            self.render_ctx.resize(cols as usize, rows as usize);
+            // self.render_ctx.resize(cols as usize, rows as usize);
             break;
           }
         }

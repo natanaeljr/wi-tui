@@ -44,7 +44,7 @@ impl Widget for VerticalContainer {
     todo!()
   }
 
-  fn render(&self, ctx: &mut RenderCtx) -> RenderResult {
+  fn render(&self, ctx: &RenderCtx) -> RenderResult {
     let len = self.children.len();
     for (idx, child) in self.children.iter().enumerate() {
       child.render(ctx);
