@@ -36,7 +36,9 @@ impl WiTui {
   }
 
   pub fn print(&mut self) -> RenderResult {
-    self.root.render(&mut self.render_ctx)
+    let result = self.root.render(&mut self.render_ctx);
+    self.render_ctx.renderer().flush();
+    result
   }
 
   pub fn quit(mut self) {}
@@ -73,7 +75,7 @@ impl WiTui {
         Event::Mouse(_) => {}
         Event::Resize(cols, rows) => {
           if self.alternate {
-            // self.render_ctx.resize(cols as usize, rows as usize);
+            self.render_ctx.resize(cols as usize, rows as usize);
             break;
           }
         }

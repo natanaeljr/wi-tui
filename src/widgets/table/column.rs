@@ -6,6 +6,7 @@ use euclid::default::Size2D;
 use crate::render::RenderCtx;
 use crate::util::Scoped;
 use crate::widgets::{LayoutResult, RenderResult, Widget};
+use crossterm::style::{Color, Attributes, Attribute, Stylize};
 
 #[derive(Clone)]
 pub enum ColumnWidthAuto {
@@ -157,12 +158,17 @@ where
   }
 
   fn render(&self, ctx: &RenderCtx) -> RenderResult {
+    // ctx.renderer().set_background(&Color::Grey);
+    // ctx.renderer().set_foreground(&Color::Black);
+    ctx.renderer().set_attributes(Attributes::default() | Attribute::Reverse);
     self.heading.render(ctx)
   }
 }
 
 pub trait TableColumn: Widget {
   fn get_width(&self) -> Cow<ColumnWidth>;
+  fn as_widget(&self) -> &dyn Widget;
+  fn as_mut_widget(&mut self) -> &mut dyn Widget;
 }
 
 impl<Heading> TableColumn for Column<Heading>
@@ -171,6 +177,14 @@ where
 {
   fn get_width(&self) -> Cow<ColumnWidth> {
     Cow::Borrowed(&self.width)
+  }
+
+  fn as_widget(&self) -> &dyn Widget {
+    self
+  }
+
+  fn as_mut_widget(&mut self) -> &mut dyn Widget {
+    self
   }
 }
 

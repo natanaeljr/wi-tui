@@ -4,7 +4,7 @@ use std::cmp::max;
 use std::num::NonZeroUsize;
 use std::ops::{Deref, DerefMut, Sub, SubAssign};
 
-use crossterm::style::{ContentStyle, StyledContent, Stylize};
+use crossterm::style::{ContentStyle, StyledContent, Stylize, Color};
 use euclid::default::{Point2D, Rect, Size2D};
 
 use column::{ColumnWidthAuto, ColumnWidthValue, TableColumn, TableColumns};
@@ -532,9 +532,6 @@ impl Widget for Table {
       for col in 0..flexed_widths.len() {
         // factor-in the column separator
         the_x += if col > 0 {
-          // let mut child_ctx = ctx.push_ctx(rect);
-          // let mut parent_ctx = child_ctx.pop_ctx();
-
           let child_frame = Rect::new(
             Point2D::new(ctx.get_frame().min_x() + the_x, ctx.get_frame().min_y()),
             Size2D::new(1, 1 /* TODO: height */),
@@ -550,7 +547,8 @@ impl Widget for Table {
           Point2D::new(ctx.get_frame().min_x() + the_x, ctx.get_frame().min_y()),
           Size2D::new(flexed_widths[col], 1 /* TODO: height */),
         );
-        ctx.render_child_widget(child_frame, column.deref() as &dyn Widget);
+        // ctx.renderer().set_background(&Color::Black);
+        ctx.render_child_widget(child_frame, column.as_widget());
         the_x += flexed_widths[col];
       }
     }
@@ -588,7 +586,7 @@ impl Widget for Table {
             ),
             Size2D::new(flexed_widths[col], 1 /* TODO: height */),
           );
-          ctx.render_child_widget(child_frame, &cell.deref() as &dyn Widget);
+          ctx.render_child_widget(child_frame, cell.deref());
         }
         the_x += flexed_widths[col];
         // ctx.renderer.move_to_column_relative((the_x + 1) as u16);

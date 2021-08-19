@@ -63,7 +63,7 @@ impl Renderer {
     self.set_frame(Rect::from_size(Size2D::new(cols as usize, rows as usize)));
     self.canvas.resize(Size2D::new(cols as usize, rows as usize));
     let mut stdout = std::io::stdout();
-    execute!(stdout, terminal::Clear(ClearType::All));
+    // execute!(stdout, terminal::Clear(ClearType::All));
   }
 
   pub fn write(&mut self, buf: &str) {
@@ -71,15 +71,19 @@ impl Renderer {
     let space = self.frame.width() - (self.frame_cursor.x - self.frame.origin.x);
     if buf.chars().count() > space {
       let (buf, _) = buf.split_at(space);
-      print!("{}", buf);
+      // print!("{}", buf);
       self.canvas.write(&self.frame_cursor, buf);
       self.frame_cursor.x += space;
     } else {
-      print!("{}", buf);
+      // print!("{}", buf);
       self.canvas.write(&self.frame_cursor, buf);
       self.frame_cursor.x += buf.len();
     }
-    std::io::stdout().flush();
+    // std::io::stdout().flush();
+  }
+
+  pub(crate) fn flush(&mut self) {
+    self.canvas.render();
   }
 
   pub fn set_background(&mut self, color: &Color) {
@@ -134,10 +138,10 @@ impl Renderer {
     self.frame = frame;
     self.frame_cursor = frame.min();
     let mut stdout = std::io::stdout();
-    execute!(
-      stdout,
-      cursor::MoveTo(frame.min_x() as u16, (frame.min_y() + self.reset_pos.y) as u16)
-    );
+    // execute!(
+    //   stdout,
+    //   cursor::MoveTo(frame.min_x() as u16, (frame.min_y() + self.reset_pos.y) as u16)
+    // );
 
     if self.reset_pos.y + self.frame_cursor.y + 1 >= self.size.height {
       let diff = self.reset_pos.y + self.frame_cursor.y + 1 - self.size.height;
@@ -158,7 +162,7 @@ impl Renderer {
     }
     self.frame_cursor = Point2D::new(x as usize, y as usize);
     let mut stdout = std::io::stdout();
-    execute!(stdout, cursor::MoveTo(x, y + self.reset_pos.y as u16));
+    // execute!(stdout, cursor::MoveTo(x, y + self.reset_pos.y as u16));
     Some(())
   }
 
@@ -169,7 +173,7 @@ impl Renderer {
     }
     self.frame_cursor.x = the_x as usize;
     let mut stdout = std::io::stdout();
-    execute!(stdout, cursor::MoveToColumn(the_x));
+    // execute!(stdout, cursor::MoveToColumn(the_x));
     Some(())
   }
 }
@@ -215,23 +219,6 @@ impl RenderCtx {
     this
   }
 
-  // pub fn into_child_ctx(self, frame: Rect<usize>) -> Self {
-  //   let mut child = Self {
-  //     renderer: self.renderer.clone(),
-  //     frame: Default::default(),
-  //     depth: self.depth + 1,
-  //     parent: Some(Box::new(self)),
-  //   };
-  //   child.set_frame(frame);
-  //   child
-  // }
-  //
-  // pub fn into_parent_ctx(mut self) -> Immut<Self> {
-  //   let mut parent = *self.parent.unwrap();
-  //   parent.set_frame(parent.frame);
-  //   parent.immut()
-  // }
-
   pub fn renderer(&self) -> RefMut<'_, Renderer> {
     self.renderer.deref().borrow_mut()
   }
@@ -262,11 +249,11 @@ impl RenderCtx {
     result
   }
 
-  // pub(crate) fn resize(&mut self, cols: usize, rows: usize) {
-  //   self.renderer.deref().borrow_mut().resize(cols, rows);
-  //   let frame = self.renderer().frame.clone();
-  //   self.frame = frame;
-  // }
+  pub(crate) fn resize(&mut self, cols: usize, rows: usize) {
+    self.renderer.deref().borrow_mut().resize(cols, rows);
+    let frame = self.renderer().frame.clone();
+    self.frame = frame;
+  }
 }
 
 impl Immutable for RenderCtx {}
