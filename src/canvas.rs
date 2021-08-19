@@ -18,85 +18,104 @@ pub struct Cell {
 
 pub struct Canvas {
   frame: Rect<usize>,
-  draw_buffer: Vec<Cell>,
-  active_buffer: Vec<Cell>,
+  draw_buffer: Vec<Vec<Cell>>,   // Rows<Cols<Cells>>
+  active_buffer: Vec<Vec<Cell>>, // Rows<Cols<Cells>>
 }
 
 impl Canvas {
   pub(crate) fn new(size: Size2D<usize>) -> Self {
     assert_ne!(size.area(), 0);
     let frame = Rect::from_size(size);
-    let mut buffer = Vec::<Cell>::new();
-    buffer.resize(size.area(), Default::default());
+    let mut rows = Vec::<Vec<Cell>>::new();
+    rows.resize_with(size.height, || {
+      let mut cols = Vec::<Cell>::new();
+      cols.resize(size.width, Cell::default());
+      cols
+    });
     Self {
       frame,
-      draw_buffer: buffer.clone(),
-      active_buffer: buffer,
+      draw_buffer: rows.clone(),
+      active_buffer: rows,
     }
   }
 
   pub(crate) fn resize(&mut self, size: Size2D<usize>) {
     assert_ne!(size.area(), 0);
-    let new_len = size.area();
-    self.frame = Rect::from_size(size);
+    self.frame = Rect::from_size(size.clone());
     // --- maybe tmp? yes! TODO: remove
-    self.draw_buffer.clear();
-    self.active_buffer.clear();
-    execute!(std::io::stdout(), terminal::Clear(ClearType::All));
+    // self.draw_buffer.clear();
+    // self.active_buffer.clear();
+    // execute!(std::io::stdout(), terminal::Clear(ClearType::All));
     // ---
-    self.draw_buffer.resize(new_len, Default::default());
-    self.active_buffer.resize(new_len, Default::default());
+    self.draw_buffer.resize_with(size.height, || {
+      let mut cols = Vec::<Cell>::new();
+      cols.resize(size.width, Cell::default());
+      cols
+    });
+    self.active_buffer.resize_with(size.height, || {
+      let mut cols = Vec::<Cell>::new();
+      cols.resize(size.width, Cell::default());
+      cols
+    });
+    // updater older rows
+    self
+      .draw_buffer
+      .iter_mut()
+      .for_each(|row| row.resize(size.width, Cell::default()));
+    self
+      .active_buffer
+      .iter_mut()
+      .for_each(|row| row.resize(size.width, Cell::default()));
   }
 
   pub(crate) fn write(&mut self, point: &Point2D<usize>, data: &str) {
     assert!(self.frame.contains(point.clone()));
-    let begin = (point.y * self.frame.width()) + point.x;
-    let end = (begin + data.chars().count()).min(self.draw_buffer.len());
-    for (idx, value) in (begin..end).zip(data.chars()) {
-      self.draw_buffer[idx].data = Some(value);
+    for (idx, char) in data.chars().take(self.frame.width()).enumerate() {
+      self.draw_buffer[point.y][point.x + idx].data = Some(char);
     }
   }
 
   pub(crate) fn fill_background(&mut self, rect: &Rect<usize>, color: &Color) {
     assert!(self.frame.contains_rect(rect));
-    Self::traverse_buffer(self.frame.width(), rect, |idx| {
-      self.draw_buffer[idx].style.background_color = Some(color.clone());
-    });
+    for row in rect.y_range() {
+      for col in rect.x_range() {
+        self.draw_buffer[row][col].style.background_color = Some(color.clone());
+      }
+    }
   }
 
   pub(crate) fn fill_foreground(&mut self, rect: &Rect<usize>, color: &Color) {
     assert!(self.frame.contains_rect(rect));
-    Self::traverse_buffer(self.frame.width(), rect, |idx| {
-      self.draw_buffer[idx].style.foreground_color = Some(color.clone());
-    });
+    for row in rect.y_range() {
+      for col in rect.x_range() {
+        self.draw_buffer[row][col].style.foreground_color = Some(color.clone());
+      }
+    }
   }
 
   pub(crate) fn merge_attributes(&mut self, rect: &Rect<usize>, attributes: Attributes) {
     assert!(self.frame.contains_rect(rect));
-    Self::traverse_buffer(self.frame.width(), rect, |idx| {
-      self.draw_buffer[idx].style.attributes = self.draw_buffer[idx].style.attributes | attributes;
-    });
+    for row in rect.y_range() {
+      for col in rect.x_range() {
+        self.draw_buffer[row][col].style.attributes = self.draw_buffer[row][col].style.attributes | attributes;
+      }
+    }
   }
 
   pub(crate) fn overwrite_attributes(&mut self, rect: &Rect<usize>, attributes: Attributes) {
     assert!(self.frame.contains_rect(rect));
-    Self::traverse_buffer(self.frame.width(), rect, |idx| {
-      self.draw_buffer[idx].style.attributes = attributes;
-    });
+    for row in rect.y_range() {
+      for col in rect.x_range() {
+        self.draw_buffer[row][col].style.attributes = attributes;
+      }
+    }
   }
 
   pub(crate) fn clear_attributes(&mut self, rect: &Rect<usize>) {
     assert!(self.frame.contains_rect(rect));
-    Self::traverse_buffer(self.frame.width(), rect, |idx| {
-      self.draw_buffer[idx].style.attributes = Attributes::default();
-    });
-  }
-
-  fn traverse_buffer<F: FnMut(/*idx:*/ usize)>(width: usize, rect: &Rect<usize>, mut func: F) {
     for row in rect.y_range() {
       for col in rect.x_range() {
-        let idx = width * row + col;
-        func(idx);
+        self.draw_buffer[row][col].style.attributes = Attributes::default();
       }
     }
   }
@@ -119,7 +138,8 @@ impl Canvas {
     for (idx, (draw_cell, active_cell)) in self
       .draw_buffer
       .iter_mut()
-      .zip(self.active_buffer.iter_mut())
+      .flatten()
+      .zip(self.active_buffer.iter_mut().flatten())
       .enumerate()
     {
       // if idx > self.frame.width() * 12 {
@@ -144,7 +164,7 @@ impl Canvas {
       // modifiers
       if draw_cell.style.attributes != attributes {
         active_cell.style.attributes = draw_cell.style.attributes.clone();
-        update_cursor(&mut stdout);
+        // update_cursor(&mut stdout);
         if !attributes.is_empty() {
           queue!(stdout, SetAttribute(Attribute::Reset));
         }
@@ -158,7 +178,7 @@ impl Canvas {
       {
         active_cell.style.background_color = draw_cell.style.background_color.clone();
         bg = draw_cell.style.background_color.unwrap_or(Color::Reset);
-        update_cursor(&mut stdout);
+        // update_cursor(&mut stdout);
         queue!(
           stdout,
           SetBackgroundColor(draw_cell.style.background_color.unwrap_or(Color::Reset))
@@ -171,7 +191,7 @@ impl Canvas {
       {
         active_cell.style.foreground_color = draw_cell.style.foreground_color.clone();
         fg = draw_cell.style.foreground_color.unwrap_or(Color::Reset);
-        update_cursor(&mut stdout);
+        // update_cursor(&mut stdout);
         queue!(
           stdout,
           SetForegroundColor(draw_cell.style.foreground_color.unwrap_or(Color::Reset))
@@ -180,7 +200,7 @@ impl Canvas {
 
       // character
       active_cell.data = draw_cell.data;
-      update_cursor(&mut stdout);
+      // update_cursor(&mut stdout);
       queue!(stdout, Print(draw_cell.data.unwrap_or(' ')));
 
       // cursor move
@@ -190,6 +210,9 @@ impl Canvas {
         cursor_pos.x = 0;
         cursor_pos.y += 1;
       }
+
+      // clear the draw cell
+      *draw_cell = Cell::default();
     }
 
     // Pro Tip from VIM analysis: always reset the cursor to (0,0) after the rendering!
