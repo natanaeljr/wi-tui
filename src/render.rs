@@ -40,7 +40,7 @@ impl Renderer {
     }
     terminal::enable_raw_mode().unwrap();
     let (cols, rows) = terminal::size().unwrap();
-    let (pos_c, pos_r) = cursor::position().unwrap();
+    let (pos_c, pos_r) = cursor::position().unwrap_or((0,0));
     let mut stdout = std::io::stdout();
     let mut this = Self {
       size: Size2D::new(cols as usize, rows as usize),

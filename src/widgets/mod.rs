@@ -79,6 +79,7 @@ pub trait Widget {
 
 // Wrapping Widgets
 pub use align::Align;
+use crossterm::style::StyledContent;
 pub use padding::Padding;
 use std::error::Error;
 use std::fmt::{Display, Formatter};
@@ -290,5 +291,35 @@ impl Widget for () {
 
   fn render(&self, ctx: &RenderCtx) -> RenderResult {
     Ok(())
+  }
+}
+
+impl<T> Widget for StyledContent<T>
+where
+  T: Widget + std::fmt::Display,
+{
+  fn event(&mut self) {
+    todo!()
+  }
+
+  fn update(&mut self) {
+    todo!()
+  }
+
+  fn layout(&self, parent_size: &Size2D<usize>) -> LayoutResult {
+    self.content().layout(parent_size)
+  }
+
+  fn render(&self, ctx: &RenderCtx) -> RenderResult {
+    if let Some(bg) = self.style().background_color.as_ref() {
+      ctx.renderer().set_background(bg);
+    }
+    if let Some(fg) = self.style().foreground_color.as_ref() {
+      ctx.renderer().set_foreground(fg);
+    }
+    if !self.style().attributes.is_empty() {
+      ctx.renderer().set_attributes(self.style().attributes);
+    }
+    self.content().render(ctx)
   }
 }

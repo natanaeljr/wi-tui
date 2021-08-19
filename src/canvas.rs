@@ -49,7 +49,6 @@ impl Canvas {
     assert!(self.frame.contains(point.clone()));
     let begin = (point.y * self.frame.width()) + point.x;
     let end = (begin + data.chars().count()).min(self.draw_buffer.len());
-    eprintln!("[{},{}] write [{}]: {}", point.y, point.x, begin, data);
     for (idx, value) in (begin..end).zip(data.chars()) {
       self.draw_buffer[idx].data = Some(value);
     }
@@ -58,7 +57,6 @@ impl Canvas {
   pub(crate) fn fill_background(&mut self, rect: &Rect<usize>, color: &Color) {
     assert!(self.frame.contains_rect(rect));
     Self::traverse_buffer(self.frame.width(), rect, |idx| {
-      eprintln!("[{}]: fill_background", idx);
       self.draw_buffer[idx].style.background_color = Some(color.clone());
     });
   }
@@ -107,7 +105,7 @@ impl Canvas {
     let mut cursor_pos = Point2D::<usize>::zero();
     let mut bg = Color::Reset;
     let mut fg = Color::Reset;
-    let mut attributes = Attributes::default() | Attribute::Reset;
+    let mut attributes = Attributes::default();
 
     for (idx, (draw_cell, active_cell)) in self.draw_buffer.iter_mut().zip(self.active_buffer.iter_mut()).enumerate() {
       // cursor set
@@ -127,15 +125,15 @@ impl Canvas {
       };
 
       // modifiers
-      // if draw_cell.style.attributes != active_cell.style.attributes || draw_cell.style.attributes != attributes {
-      //   if draw_cell.style.attributes.is_empty() {
-      //     draw_cell.style.attributes = Attributes::default() | Attribute::Reset;
-      //   }
-      //   active_cell.style.attributes = draw_cell.style.attributes.clone();
-      //   attributes = draw_cell.style.attributes.clone();
-      //   update_cursor(&mut stdout);
-      //   queue!(stdout, SetAttributes(draw_cell.style.attributes));
-      // }
+      if draw_cell.style.attributes != attributes {
+        active_cell.style.attributes = draw_cell.style.attributes.clone();
+        update_cursor(&mut stdout);
+        if !attributes.is_empty() {
+          queue!(stdout, SetAttribute(Attribute::Reset));
+        }
+        attributes = draw_cell.style.attributes.clone();
+        queue!(stdout, SetAttributes(draw_cell.style.attributes));
+      }
 
       // background
       if draw_cell.style.background_color != active_cell.style.background_color || draw_cell.style.background_color.unwrap_or(Color::Reset) != bg {
@@ -163,7 +161,6 @@ impl Canvas {
       active_cell.data = draw_cell.data;
       update_cursor(&mut stdout);
       queue!(stdout, Print(draw_cell.data.unwrap_or(' ')));
-      eprintln!("[{},{}]: {}", row, col, draw_cell.data.unwrap_or(' '));
 
       // cursor move
       cursor_pos.x += 1;
@@ -173,12 +170,6 @@ impl Canvas {
         cursor_pos.y += 1;
       }
     }
-
-    eprintln!();
-    for cell in self.draw_buffer.iter() {
-      eprint!("{}", cell.data.unwrap_or(' '));
-    }
-    eprintln!();
 
     stdout.flush();
   }
