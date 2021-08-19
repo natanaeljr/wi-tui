@@ -5,7 +5,7 @@ use std::ops::{Deref, DerefMut};
 use std::rc::Rc;
 
 use crossterm::style::{Attributes, Color};
-use crossterm::terminal::ClearType;
+use crossterm::terminal::{ClearType, DisableLineWrap, EnableLineWrap, ScrollUp, ScrollDown};
 use crossterm::{cursor, execute, terminal};
 use euclid::default::{Box2D, Point2D, Rect, Size2D};
 
@@ -37,6 +37,7 @@ impl Renderer {
     if alternate {
       execute!(stdout, terminal::EnterAlternateScreen);
       execute!(stdout, cursor::MoveTo(0, 0));
+      execute!(stdout, DisableLineWrap);
     }
     terminal::enable_raw_mode().unwrap();
     let (cols, rows) = terminal::size().unwrap();
@@ -56,6 +57,7 @@ impl Renderer {
   }
 
   fn resize(&mut self, cols: usize, rows: usize) {
+    // return; // TODO: remove
     assert!(self.alternate);
     self.size.width = cols;
     self.size.height = rows;
@@ -184,6 +186,7 @@ impl Drop for Renderer {
 
     if self.alternate {
       // std::thread::sleep(std::time::Duration::from_secs(20));
+      execute!(stdout, EnableLineWrap);
       execute!(stdout, terminal::LeaveAlternateScreen);
     } else {
       execute!(stdout, cursor::MoveTo(0, (self.reset_pos.y + self.nl_counter) as u16),);

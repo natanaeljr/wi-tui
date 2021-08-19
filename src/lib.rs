@@ -76,7 +76,7 @@ impl WiTui {
         Event::Resize(cols, rows) => {
           if self.alternate {
             self.render_ctx.resize(cols as usize, rows as usize);
-            break;
+            break; // TODO: uncomment
           }
         }
       }

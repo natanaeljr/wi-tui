@@ -1,5 +1,8 @@
 use crossterm::cursor::{MoveTo, MoveToColumn, MoveToNextLine, MoveToRow};
-use crossterm::style::{Attributes, Color, ContentStyle, Print, SetAttributes, SetBackgroundColor, SetForegroundColor, Attribute, SetAttribute};
+use crossterm::style::{
+  Attribute, Attributes, Color, ContentStyle, Print, SetAttribute, SetAttributes, SetBackgroundColor,
+  SetForegroundColor,
+};
 use crossterm::terminal::ClearType;
 use crossterm::{cursor, execute, queue, terminal};
 use euclid::default::{Point2D, Rect, Size2D};
@@ -36,7 +39,7 @@ impl Canvas {
     assert_ne!(size.area(), 0);
     let new_len = size.area();
     self.frame = Rect::from_size(size);
-    // --- maybe tmp?
+    // --- maybe tmp? yes! TODO: remove
     self.draw_buffer.clear();
     self.active_buffer.clear();
     execute!(std::io::stdout(), terminal::Clear(ClearType::All));
@@ -101,13 +104,27 @@ impl Canvas {
   pub(crate) fn render(&mut self) {
     let mut stdout = std::io::stdout();
 
-    queue!(stdout, MoveTo(0, 0), SetBackgroundColor(Color::Reset), SetForegroundColor(Color::Reset), SetAttribute(Attribute::Reset));
+    queue!(
+      stdout,
+      MoveTo(0, 0),
+      SetBackgroundColor(Color::Reset),
+      SetForegroundColor(Color::Reset),
+      SetAttribute(Attribute::Reset)
+    );
     let mut cursor_pos = Point2D::<usize>::zero();
     let mut bg = Color::Reset;
     let mut fg = Color::Reset;
     let mut attributes = Attributes::default();
 
-    for (idx, (draw_cell, active_cell)) in self.draw_buffer.iter_mut().zip(self.active_buffer.iter_mut()).enumerate() {
+    for (idx, (draw_cell, active_cell)) in self
+      .draw_buffer
+      .iter_mut()
+      .zip(self.active_buffer.iter_mut())
+      .enumerate()
+    {
+      // if idx > self.frame.width() * 12 {
+      //   break;
+      // }
       // cursor set
       let row = idx / self.frame.width();
       let col = idx % self.frame.width();
@@ -136,7 +153,9 @@ impl Canvas {
       }
 
       // background
-      if draw_cell.style.background_color != active_cell.style.background_color || draw_cell.style.background_color.unwrap_or(Color::Reset) != bg {
+      if draw_cell.style.background_color != active_cell.style.background_color
+        || draw_cell.style.background_color.unwrap_or(Color::Reset) != bg
+      {
         active_cell.style.background_color = draw_cell.style.background_color.clone();
         bg = draw_cell.style.background_color.unwrap_or(Color::Reset);
         update_cursor(&mut stdout);
@@ -147,7 +166,9 @@ impl Canvas {
       }
 
       // foreground
-      if draw_cell.style.foreground_color != active_cell.style.foreground_color || draw_cell.style.foreground_color.unwrap_or(Color::Reset) != fg {
+      if draw_cell.style.foreground_color != active_cell.style.foreground_color
+        || draw_cell.style.foreground_color.unwrap_or(Color::Reset) != fg
+      {
         active_cell.style.foreground_color = draw_cell.style.foreground_color.clone();
         fg = draw_cell.style.foreground_color.unwrap_or(Color::Reset);
         update_cursor(&mut stdout);
@@ -170,6 +191,10 @@ impl Canvas {
         cursor_pos.y += 1;
       }
     }
+
+    // Pro Tip from VIM analysis: always reset the cursor to (0,0) after the rendering!
+    // this makes the terminal not cause an auto-scroll that flickers the screen when resizing the window to smaller rows values.
+    queue!(stdout, MoveTo(0, 0));
 
     stdout.flush();
   }
