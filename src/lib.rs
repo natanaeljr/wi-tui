@@ -4,6 +4,7 @@ use crate::render::RenderCtx;
 use crate::widgets::{RenderResult, Widget};
 use crossterm::event::{Event, KeyCode, KeyModifiers};
 use std::io::Write;
+use std::time::Duration;
 
 pub mod canvas;
 pub mod render;
@@ -74,6 +75,9 @@ impl WiTui {
         }
         Event::Mouse(_) => {}
         Event::Resize(cols, rows) => {
+          let (original_size, new_size) = flush_resize_events(Event::Resize(cols, rows));
+          let (cols, rows) = new_size;
+          // eprintln!("Resize from: {:?}, to: {:?}", original_size, new_size);
           if self.alternate {
             self.render_ctx.resize(cols as usize, rows as usize);
             break; // TODO: uncomment
@@ -82,4 +86,20 @@ impl WiTui {
       }
     }
   }
+}
+
+// Resize events can occur in batches.
+// With a simple loop they can be flushed.
+// This function will keep the first and last resize event.
+fn flush_resize_events(event: Event) -> ((u16, u16), (u16, u16)) {
+  if let Event::Resize(x, y) = event {
+    let mut last_resize = (x, y);
+    // while let Ok(true) = crossterm::event::poll(Duration::from_millis(50)) {
+    //   if let Ok(Event::Resize(x, y)) = crossterm::event::read() {
+    //     last_resize = (x, y);
+    //   }
+    // }
+    return ((x, y), last_resize);
+  }
+  ((0, 0), (0, 0))
 }

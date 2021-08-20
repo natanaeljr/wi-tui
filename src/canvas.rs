@@ -47,6 +47,7 @@ impl Canvas {
     // self.active_buffer.clear();
     // execute!(std::io::stdout(), terminal::Clear(ClearType::All));
     // ---
+    eprintln!("RESIZE: ({},{})", size.height, size.width);
     self.draw_buffer.resize_with(size.height, || {
       let mut cols = Vec::<Cell>::new();
       cols.resize(size.width, Cell::default());
@@ -153,19 +154,22 @@ impl Canvas {
           if cursor_pos.y != row {
             eprintln!("[{},{}]: MoveTo  ({}, {})", cursor_pos.y, cursor_pos.x, row, col);
             queue!(stdout, MoveTo(col as u16, row as u16));
-          } else if col > cursor_pos.x + 5 {
+          } else // if col > cursor_pos.x + 5
+          {
             // MoveToColumn begins on 1 for some reason
             eprintln!("[{},{}]: MoveToColumn  ({}, {})", cursor_pos.y, cursor_pos.x, row, col);
             queue!(stdout, MoveToColumn(col as u16 + 1));
-          } else {
-            let space = "        ";
-            let diff = col - cursor_pos.x;
-            eprintln!("[{},{}]: Print({})", row, col, space.split_at(diff).0);
-            queue!(stdout, Print(space.split_at(diff).0));
           }
+          // else {
+          //   let space = "        ";
+          //   let diff = col - cursor_pos.x;
+          //   eprintln!("[{},{}]: Print({})", row, col, space.split_at(diff).0);
+          //   queue!(stdout, Print(space.split_at(diff).0));
+          // }
         } else if cursor_pos.y != row {
+          // MoveToRow also begins on 1 for some reason
           eprintln!("[{},{}]: MoveToRow  ({}, {})", cursor_pos.y, cursor_pos.x, row, col);
-          queue!(stdout, MoveToRow(row as u16));
+          queue!(stdout, MoveToRow(row as u16 + 1));
         }
         cursor_pos.x = col;
         cursor_pos.y = row;
