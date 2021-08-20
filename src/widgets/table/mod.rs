@@ -536,7 +536,7 @@ impl Widget for Table {
             Point2D::new(ctx.get_frame().min_x() + the_x, ctx.get_frame().min_y()),
             Size2D::new(1, 1 /* TODO: height */),
           );
-          ctx.render_child(child_frame, &self.layout.column_separator.reverse());
+          ctx.render_child(child_frame, &self.layout.column_separator.reverse().blue());
           1
         } else {
           0

@@ -149,22 +149,73 @@ impl Canvas {
       let row = idx / self.frame.width();
       let col = idx % self.frame.width();
       let mut update_cursor = |stdout: &mut Stdout| {
-        // TODO: optimization for short diff values (use space then)
-        // if cursor_pos.x != col {
-        //   if cursor_pos.y != row {
-        //     queue!(stdout, MoveTo(col as u16, row as u16));
-        //   } else {
-        //     queue!(stdout, MoveToColumn(col as u16));
-        //   }
-        // } else if cursor_pos.y != row {
-        //   queue!(stdout, MoveToRow(row as u16));
-        // }
+        if cursor_pos.x != col {
+          if cursor_pos.y != row {
+            eprintln!("[{},{}]: MoveTo  ({}, {})", cursor_pos.y, cursor_pos.x, row, col);
+            queue!(stdout, MoveTo(col as u16, row as u16));
+          } else if col > cursor_pos.x + 5 {
+            // MoveToColumn begins on 1 for some reason
+            eprintln!("[{},{}]: MoveToColumn  ({}, {})", cursor_pos.y, cursor_pos.x, row, col);
+            queue!(stdout, MoveToColumn(col as u16 + 1));
+          } else {
+            let space = "        ";
+            let diff = col - cursor_pos.x;
+            eprintln!("[{},{}]: Print({})", row, col, space.split_at(diff).0);
+            queue!(stdout, Print(space.split_at(diff).0));
+          }
+        } else if cursor_pos.y != row {
+          eprintln!("[{},{}]: MoveToRow  ({}, {})", cursor_pos.y, cursor_pos.x, row, col);
+          queue!(stdout, MoveToRow(row as u16));
+        }
+        cursor_pos.x = col;
+        cursor_pos.y = row;
       };
 
+      let mut attr_changed = false;
+      let mut bg_changed = false;
+      let mut fg_changed = false;
+      let mut print_char = false;
+
       // modifiers
-      if draw_cell.style.attributes != attributes {
+      if draw_cell.style.attributes != active_cell.style.attributes {
+        eprintln!("[{},{}]: attr_changed", row, col);
+        attr_changed = true;
         active_cell.style.attributes = draw_cell.style.attributes.clone();
-        // update_cursor(&mut stdout);
+      }
+
+      // background
+      if draw_cell.style.background_color != active_cell.style.background_color {
+        eprintln!("[{},{}]: bg_changed", row, col);
+        bg_changed = true;
+        active_cell.style.background_color = draw_cell.style.background_color.clone();
+      }
+
+      // foreground
+      if draw_cell.style.foreground_color != active_cell.style.foreground_color {
+        eprintln!("[{},{}]: fg_changed", row, col);
+        fg_changed = true;
+        active_cell.style.foreground_color = draw_cell.style.foreground_color.clone();
+      }
+
+      // character
+      if attr_changed || bg_changed || fg_changed || active_cell.data != draw_cell.data {
+        // eprintln!(
+        //   "[{},{}]: char: {}       changed: attr {}, bg: {}, fg: {}, diff: {}",
+        //   row,
+        //   col,
+        //   draw_cell.data.unwrap_or(' '),
+        //   attr_changed,
+        //   bg_changed,
+        //   fg_changed,
+        //   active_cell.data != draw_cell.data
+        // );
+        print_char = true;
+        active_cell.data = draw_cell.data;
+      }
+
+      if print_char && draw_cell.style.attributes != attributes {
+        update_cursor(&mut stdout);
+        eprintln!("[{},{}]: ATTR", row, col);
         if !attributes.is_empty() {
           queue!(stdout, SetAttribute(Attribute::Reset));
         }
@@ -172,44 +223,40 @@ impl Canvas {
         queue!(stdout, SetAttributes(draw_cell.style.attributes));
       }
 
-      // background
-      if draw_cell.style.background_color != active_cell.style.background_color
-        || draw_cell.style.background_color.unwrap_or(Color::Reset) != bg
-      {
-        active_cell.style.background_color = draw_cell.style.background_color.clone();
+      if print_char && draw_cell.style.background_color.unwrap_or(Color::Reset) != bg {
+        update_cursor(&mut stdout);
+        eprintln!("[{},{}]: BG", row, col);
         bg = draw_cell.style.background_color.unwrap_or(Color::Reset);
-        // update_cursor(&mut stdout);
         queue!(
           stdout,
           SetBackgroundColor(draw_cell.style.background_color.unwrap_or(Color::Reset))
         );
       }
 
-      // foreground
-      if draw_cell.style.foreground_color != active_cell.style.foreground_color
-        || draw_cell.style.foreground_color.unwrap_or(Color::Reset) != fg
-      {
-        active_cell.style.foreground_color = draw_cell.style.foreground_color.clone();
+      if print_char && draw_cell.style.foreground_color.unwrap_or(Color::Reset) != fg {
+        update_cursor(&mut stdout);
+        eprintln!("[{},{}]: FG", row, col);
         fg = draw_cell.style.foreground_color.unwrap_or(Color::Reset);
-        // update_cursor(&mut stdout);
         queue!(
           stdout,
           SetForegroundColor(draw_cell.style.foreground_color.unwrap_or(Color::Reset))
         );
       }
 
-      // character
-      active_cell.data = draw_cell.data;
-      // update_cursor(&mut stdout);
-      queue!(stdout, Print(draw_cell.data.unwrap_or(' ')));
+      if print_char {
+        update_cursor(&mut stdout);
+        eprintln!("[{},{}]: char: {}", row, col, draw_cell.data.unwrap_or(' '));
+        queue!(stdout, Print(draw_cell.data.unwrap_or(' ')));
+        cursor_pos.x += 1;
+      }
 
       // cursor move
-      cursor_pos.x += 1;
-      if cursor_pos.x >= self.frame.width() {
-        queue!(stdout, MoveToNextLine(1));
-        cursor_pos.x = 0;
-        cursor_pos.y += 1;
-      }
+      // cursor_pos.x += 1;
+      // if cursor_pos.x >= self.frame.width() {
+      //   // queue!(stdout, MoveToNextLine(1));
+      //   cursor_pos.x = 0;
+      //   cursor_pos.y += 1;
+      // }
 
       // clear the draw cell
       *draw_cell = Cell::default();
