@@ -5,7 +5,7 @@ use std::ops::{Deref, DerefMut};
 use std::rc::Rc;
 
 use crossterm::style::{Attributes, Color};
-use crossterm::terminal::{ClearType, DisableLineWrap, EnableLineWrap, ScrollUp, ScrollDown};
+use crossterm::terminal::{ClearType, DisableLineWrap, EnableLineWrap, ScrollUp, ScrollDown, Clear};
 use crossterm::{cursor, execute, terminal};
 use euclid::default::{Box2D, Point2D, Rect, Size2D};
 
@@ -36,6 +36,7 @@ impl Renderer {
     let mut stdout = std::io::stdout();
     if alternate {
       execute!(stdout, terminal::EnterAlternateScreen);
+      execute!(stdout, Clear(ClearType::All));
       execute!(stdout, cursor::MoveTo(0, 0));
       execute!(stdout, DisableLineWrap);
     }

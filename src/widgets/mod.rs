@@ -318,7 +318,7 @@ where
       ctx.renderer().set_foreground(fg);
     }
     if !self.style().attributes.is_empty() {
-      ctx.renderer().set_attributes(self.style().attributes);
+      ctx.renderer().add_attributes(self.style().attributes);
     }
     self.content().render(ctx)
   }
