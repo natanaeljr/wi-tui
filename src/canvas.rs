@@ -280,5 +280,6 @@ impl Canvas {
 
     // stdout.flush();
     std::io::stdout().write_all(stdout.as_slice());
+    std::io::stdout().flush();
   }
 }

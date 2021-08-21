@@ -223,7 +223,14 @@ impl Widget for u32 {
 
   fn render(&self, ctx: &RenderCtx) -> RenderResult {
     let val = format!("{}", self);
-    ctx.renderer().write(&val);
+    let parent_size = ctx.get_frame().size.clone();
+    if parent_size.width < val.len() {
+      let buf = val.split_at(parent_size.width.checked_sub(1).unwrap_or(0)).0;
+      ctx.renderer().write(buf);
+      ctx.renderer().write("…");
+    } else {
+      ctx.renderer().write(val.as_str());
+    }
     Ok(())
   }
 }
@@ -254,7 +261,14 @@ impl Widget for usize {
 
   fn render(&self, ctx: &RenderCtx) -> RenderResult {
     let val = format!("{}", self);
-    ctx.renderer().write(&val);
+    let parent_size = ctx.get_frame().size.clone();
+    if parent_size.width < val.len() {
+      let buf = val.split_at(parent_size.width.checked_sub(1).unwrap_or(0)).0;
+      ctx.renderer().write(buf);
+      ctx.renderer().write("…");
+    } else {
+      ctx.renderer().write(val.as_str());
+    }
     Ok(())
   }
 }

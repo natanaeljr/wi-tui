@@ -1008,9 +1008,6 @@ impl Widget for Table {
 
     let columns = self.columns_ref().unwrap();
 
-    ctx.renderer().set_background(&Color::DarkGrey);
-    ctx.renderer().set_foreground(&Color::White);
-
     // render table headings
     let mut column_heading_height = 0;
     if self.layout.show_column_headings {
