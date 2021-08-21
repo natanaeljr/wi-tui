@@ -5,7 +5,7 @@ use std::ops::{Deref, DerefMut};
 use std::rc::Rc;
 
 use crossterm::style::{Attributes, Color};
-use crossterm::terminal::{ClearType, DisableLineWrap, EnableLineWrap, ScrollUp, ScrollDown, Clear};
+use crossterm::terminal::{Clear, ClearType, DisableLineWrap, EnableLineWrap, ScrollDown, ScrollUp};
 use crossterm::{cursor, execute, terminal};
 use euclid::default::{Box2D, Point2D, Rect, Size2D};
 
@@ -38,11 +38,12 @@ impl Renderer {
       execute!(stdout, terminal::EnterAlternateScreen);
       execute!(stdout, Clear(ClearType::All));
       execute!(stdout, cursor::MoveTo(0, 0));
+      execute!(stdout, cursor::Hide);
       execute!(stdout, DisableLineWrap);
     }
     terminal::enable_raw_mode().unwrap();
     let (cols, rows) = terminal::size().unwrap();
-    let (pos_c, pos_r) = cursor::position().unwrap_or((0,0));
+    let (pos_c, pos_r) = if alternate { (0, 0) } else { cursor::position().unwrap_or((0, 0)) };
     let mut stdout = std::io::stdout();
     let mut this = Self {
       size: Size2D::new(cols as usize, rows as usize),
@@ -188,6 +189,7 @@ impl Drop for Renderer {
     if self.alternate {
       // std::thread::sleep(std::time::Duration::from_secs(20));
       execute!(stdout, EnableLineWrap);
+      execute!(stdout, cursor::Show);
       execute!(stdout, terminal::LeaveAlternateScreen);
     } else {
       execute!(stdout, cursor::MoveTo(0, (self.reset_pos.y + self.nl_counter) as u16),);

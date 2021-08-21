@@ -6,7 +6,7 @@ use crossterm::style::{
 use crossterm::terminal::ClearType;
 use crossterm::{cursor, execute, queue, terminal};
 use euclid::default::{Point2D, Rect, Size2D};
-use std::io::{Stdout, Write};
+use std::io::{BufWriter, Stdout, Write};
 use std::iter::{Map, Zip};
 use std::ops::BitOr;
 
@@ -122,7 +122,10 @@ impl Canvas {
   }
 
   pub(crate) fn render(&mut self) {
+    // buffer stdout to flush all at the end, and decrease screen flickering
+    // TODO: we still have delays on really large screens
     let mut stdout = std::io::stdout();
+    let mut stdout = BufWriter::new(stdout);
 
     queue!(
       stdout,
@@ -149,12 +152,13 @@ impl Canvas {
       // cursor set
       let row = idx / self.frame.width();
       let col = idx % self.frame.width();
-      let mut update_cursor = |stdout: &mut Stdout| {
+      let mut update_cursor = |stdout: &mut BufWriter<Stdout>| {
         if cursor_pos.x != col {
           if cursor_pos.y != row {
             eprintln!("[{},{}]: MoveTo  ({}, {})", cursor_pos.y, cursor_pos.x, row, col);
             queue!(stdout, MoveTo(col as u16, row as u16));
-          } else // if col > cursor_pos.x + 5
+          } else
+          // if col > cursor_pos.x + 5
           {
             // MoveToColumn begins on 1 for some reason
             eprintln!("[{},{}]: MoveToColumn  ({}, {})", cursor_pos.y, cursor_pos.x, row, col);
@@ -214,13 +218,16 @@ impl Canvas {
         //   active_cell.data != draw_cell.data
         // );
         print_char = true;
-        active_cell.data = draw_cell.data;
+        active_cell.data = draw_cell.data.clone();
       }
 
       if print_char && draw_cell.style.attributes != attributes {
         update_cursor(&mut stdout);
         eprintln!("[{},{}]: ATTR", row, col);
         if !attributes.is_empty() {
+          // attribute reset causes the color to also reset
+          bg = Color::Reset;
+          fg = Color::Reset;
           queue!(stdout, SetAttribute(Attribute::Reset));
         }
         attributes = draw_cell.style.attributes.clone();
