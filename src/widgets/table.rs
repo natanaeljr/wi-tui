@@ -161,9 +161,9 @@ where
   fn render(&self, ctx: &RenderCtx) -> RenderResult {
     // ctx.renderer().set_background(&Color::Grey);
     // ctx.renderer().set_foreground(&Color::Black);
-    ctx
-      .renderer()
-      .set_attributes(Attributes::default() | Attribute::Reverse);
+    // ctx
+    //   .renderer()
+    //   .set_attributes(Attributes::default() | Attribute::Reverse);
     self.heading.render(ctx)
   }
 }
@@ -1020,7 +1020,7 @@ impl Widget for Table {
             Point2D::new(ctx.get_frame().min_x() + the_x, ctx.get_frame().min_y()),
             Size2D::new(1, 1 /* TODO: height */),
           );
-          ctx.render_child(child_frame, &self.layout.column_separator.reverse().blue());
+          ctx.render_child(child_frame, &self.layout.column_separator);
           1
         } else {
           0

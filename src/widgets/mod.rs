@@ -12,6 +12,7 @@ mod line;
 mod padding;
 mod progressbar;
 mod scrollbar;
+pub mod style;
 pub mod table;
 mod tabs;
 mod textbox;
