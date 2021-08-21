@@ -1,8 +1,7 @@
 use witui::util::Scoped;
-use witui::widgets::table::column::{Column, ColumnWidth};
-use witui::widgets::table::row::Row;
-use witui::widgets::table::TableLayout;
 use witui::widgets::{Align, Table};
+use witui::widgets::table::{Column, ColumnWidth, TableLayout};
+use witui::widgets::table::Row;
 use witui::WiTui;
 
 /// Spreadsheet example to show off the Table Widget.
