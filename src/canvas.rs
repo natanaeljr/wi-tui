@@ -122,10 +122,11 @@ impl Canvas {
   }
 
   pub(crate) fn render(&mut self) {
-    // buffer stdout to flush all at the end, and decrease screen flickering
-    // TODO: we still have delays on really large screens
-    let mut stdout = std::io::stdout();
-    let mut stdout = BufWriter::new(stdout);
+    // Pro tip: fastest way to write to stdout is buffering first on a vector, specifically
+    // and then, after the render, flush all to stdout at once.
+    // BufWriter is not as fast, it seems to flush in batches, and that's perceivable!
+    // So we will stick with the Vec;
+    let mut stdout = Vec::<u8>::with_capacity(self.frame.area() * 4 /*unicode*/);
 
     queue!(
       stdout,
@@ -152,7 +153,7 @@ impl Canvas {
       // cursor set
       let row = idx / self.frame.width();
       let col = idx % self.frame.width();
-      let mut update_cursor = |stdout: &mut BufWriter<Stdout>| {
+      let mut update_cursor = |stdout: &mut Vec::<u8>| {
         if cursor_pos.x != col {
           if cursor_pos.y != row {
             eprintln!("[{},{}]: MoveTo  ({}, {})", cursor_pos.y, cursor_pos.x, row, col);
@@ -277,6 +278,7 @@ impl Canvas {
     // this makes the terminal not cause an auto-scroll that flickers the screen when resizing the window to smaller rows values.
     queue!(stdout, MoveTo(0, 0));
 
-    stdout.flush();
+    // stdout.flush();
+    std::io::stdout().write_all(stdout.as_slice());
   }
 }
