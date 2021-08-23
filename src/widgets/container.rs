@@ -1,5 +1,5 @@
 use crate::render::RenderCtx;
-use crate::widgets::{LayoutResult, RenderResult, Widget};
+use crate::widgets::{LayoutResult, RenderResult, Widget, AnyEvent};
 use euclid::default::Size2D;
 use std::iter::FromIterator;
 
@@ -32,7 +32,7 @@ impl VerticalContainer {
 }
 
 impl Widget for VerticalContainer {
-  fn event(&mut self) {
+  fn event(&mut self, event: &AnyEvent, size: &Size2D<usize>) {
     todo!()
   }
 

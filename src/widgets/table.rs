@@ -6,8 +6,9 @@ use crossterm::style::{Attribute, Attributes, Color, ContentStyle, StyledContent
 use euclid::default::{Point2D, Rect, Size2D};
 
 use crate::render::RenderCtx;
-use crate::util::{MinMax, Scoped};
-use crate::widgets::{LayoutError, LayoutResult, LayoutSize, RenderError, RenderResult, Widget};
+use crate::util::{MinMax, Scoped, ScopedMut};
+use crate::widgets::{AnyEvent, LayoutError, LayoutResult, LayoutSize, RenderError, RenderResult, Widget};
+use crossterm::event::{Event, MouseButton, MouseEventKind};
 
 #[derive(Clone)]
 pub enum ColumnWidthAuto {
@@ -146,7 +147,7 @@ impl<Heading> Widget for Column<Heading>
 where
   Heading: Widget,
 {
-  fn event(&mut self) {
+  fn event(&mut self, event: &AnyEvent, size: &Size2D<usize>) {
     todo!()
   }
 
@@ -170,6 +171,7 @@ where
 
 pub trait TableColumn: Widget {
   fn get_width(&self) -> Cow<ColumnWidth>;
+  fn set_width(&mut self, width: ColumnWidth);
   fn as_widget(&self) -> &dyn Widget;
   fn as_mut_widget(&mut self) -> &mut dyn Widget;
 }
@@ -180,6 +182,10 @@ where
 {
   fn get_width(&self) -> Cow<ColumnWidth> {
     Cow::Borrowed(&self.width)
+  }
+
+  fn set_width(&mut self, width: ColumnWidth) {
+    self.width = width;
   }
 
   fn as_widget(&self) -> &dyn Widget {
@@ -194,6 +200,7 @@ where
 pub trait TableColumns: 'static {
   fn len(&self) -> usize;
   fn column(&self, idx: usize) -> Option<Scoped<dyn TableColumn>>;
+  fn column_mut(&mut self, idx: usize) -> Option<ScopedMut<dyn TableColumn>>;
   fn as_any(&self) -> &dyn Any;
   fn as_any_mut(&mut self) -> &mut dyn Any;
 }
@@ -208,6 +215,12 @@ where
 
   fn column(&self, idx: usize) -> Option<Scoped<dyn TableColumn>> {
     self.get(idx).and_then(|col| Some(Scoped::Ref(col as &dyn TableColumn)))
+  }
+
+  fn column_mut(&mut self, idx: usize) -> Option<ScopedMut<dyn TableColumn>> {
+    self
+      .get_mut(idx)
+      .and_then(|col| Some(ScopedMut::Ref(col as &mut dyn TableColumn)))
   }
 
   fn as_any(&self) -> &dyn Any {
@@ -243,6 +256,10 @@ impl TableColumns for TableColumnsFn {
 
   fn column(&self, idx: usize) -> Option<Scoped<dyn TableColumn>> {
     (self.fn_column)(idx)
+  }
+
+  fn column_mut(&mut self, idx: usize) -> Option<ScopedMut<dyn TableColumn>> {
+    todo!()
   }
 
   fn as_any(&self) -> &dyn Any {
@@ -380,7 +397,7 @@ impl<Heading> Widget for Row<Heading>
 where
   Heading: Widget,
 {
-  fn event(&mut self) {
+  fn event(&mut self, event: &AnyEvent, size: &Size2D<usize>) {
     todo!()
   }
 
@@ -984,10 +1001,60 @@ struct ColumnLayoutFlexInput {
 }
 
 impl Widget for Table {
-  fn event(&mut self) {
+  fn event(&mut self, event: &AnyEvent, size: &Size2D<usize>) {
     // NOTE: pass down to the column, make it possible for the column to spawn a Popup Menu with filled options,
     // as we go back up the hierarchy the Popup can be filled up.
-    todo!()
+
+    let (_, layout) = self.layout_table(size).unwrap();
+    let flexed_widths = self.layout_flex(size, layout).unwrap();
+    let mut column_starts = Vec::new();
+    for (idx, width) in flexed_widths.iter().enumerate() {
+      let prev = *column_starts.get(idx.checked_sub(1).unwrap_or(0)).unwrap_or(&0);
+      let new = prev + 1 + *width;
+      column_starts.push(new);
+    }
+
+    match event {
+      AnyEvent::Input(input) => match input {
+        Event::Key(_) => {}
+        Event::Mouse(mouse) => {
+          let mut col = None;
+          for idx in 0..column_starts.len() {
+            if mouse.column >= *column_starts.get(idx.checked_sub(1).unwrap_or(0)).unwrap_or(&0) as u16
+              && mouse.column < *column_starts.get(idx).unwrap_or(&std::usize::MAX) as u16
+            {
+              col = Some(idx);
+              break;
+            }
+          }
+          eprintln!("YESYESYES");
+          dbg!(&mouse, &col, &column_starts);
+
+          if mouse.modifiers.is_empty() {
+            match mouse.kind {
+              MouseEventKind::Down(button) => match button {
+                MouseButton::Left => {}
+                MouseButton::Right => {}
+                MouseButton::Middle => {
+                  if let Some(col) = col {
+                    let mut column = self.columns.as_mut().unwrap().column_mut(col).unwrap();
+                    let mut width = column.get_width().into_owned();
+                    width.max = match width.max {
+                      ColumnWidthValue::Fixed(_) => ColumnWidthValue::Auto,
+                      ColumnWidthValue::Auto => ColumnWidthValue::Fixed(1),
+                      ColumnWidthValue::Heading => ColumnWidthValue::Fixed(1),
+                    };
+                    column.set_width(width);
+                  }
+                }
+              },
+              _ => {}
+            }
+          }
+        }
+        Event::Resize(_, _) => {}
+      },
+    }
   }
 
   fn update(&mut self) {

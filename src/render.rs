@@ -12,6 +12,7 @@ use euclid::default::{Box2D, Point2D, Rect, Size2D};
 use crate::canvas::Canvas;
 use crate::util::{Immut, Immutable};
 use crate::widgets::{RenderResult, Widget};
+use crossterm::event;
 
 // TODO: Check https://docs.rs/sdl2/0.34.5/sdl2/render/
 
@@ -36,10 +37,11 @@ impl Renderer {
     let mut stdout = std::io::stdout();
     if alternate {
       execute!(stdout, terminal::EnterAlternateScreen);
-      execute!(stdout, Clear(ClearType::All));
+      execute!(stdout, terminal::Clear(ClearType::All));
       execute!(stdout, cursor::MoveTo(0, 0));
       execute!(stdout, cursor::Hide);
-      execute!(stdout, DisableLineWrap);
+      execute!(stdout, terminal::DisableLineWrap);
+      execute!(stdout, event::EnableMouseCapture);
     }
     terminal::enable_raw_mode().unwrap();
     let (cols, rows) = terminal::size().unwrap();
@@ -188,8 +190,9 @@ impl Drop for Renderer {
 
     if self.alternate {
       // std::thread::sleep(std::time::Duration::from_secs(20));
-      execute!(stdout, EnableLineWrap);
+      execute!(stdout, terminal::EnableLineWrap);
       execute!(stdout, cursor::Show);
+      execute!(stdout, event::DisableMouseCapture);
       execute!(stdout, terminal::LeaveAlternateScreen);
     } else {
       execute!(stdout, cursor::MoveTo(0, (self.reset_pos.y + self.nl_counter) as u16),);

@@ -1,8 +1,8 @@
 extern crate euclid;
 
 use crate::render::RenderCtx;
-use crate::widgets::{RenderResult, Widget};
-use crossterm::event::{Event, KeyCode, KeyModifiers};
+use crate::widgets::{AnyEvent, RenderResult, Widget};
+use crossterm::event::{Event, KeyCode, KeyModifiers, MouseEventKind};
 use std::io::Write;
 use std::time::Duration;
 
@@ -73,7 +73,12 @@ impl WiTui {
             }
           }
         }
-        Event::Mouse(_) => {}
+        Event::Mouse(mouse) => {
+          if let MouseEventKind::Down(_) = mouse.kind {
+            self.root.event(&AnyEvent::Input(Event::Mouse(mouse)), &self.render_ctx.get_frame().size);
+            break;
+          }
+        }
         Event::Resize(cols, rows) => {
           let (original_size, new_size) = flush_resize_events(Event::Resize(cols, rows));
           let (cols, rows) = new_size;

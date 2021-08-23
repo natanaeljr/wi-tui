@@ -1,5 +1,5 @@
 use crate::render::RenderCtx;
-use crate::widgets::{LayoutResult, RenderError, RenderResult, Widget};
+use crate::widgets::{LayoutResult, RenderError, RenderResult, Widget, AnyEvent};
 use euclid::default::Size2D;
 use euclid::SideOffsets2D;
 use std::ops::Sub;
@@ -48,7 +48,7 @@ impl<Child> Widget for Align<Child>
 where
   Child: Widget,
 {
-  fn event(&mut self) {
+  fn event(&mut self, event: &AnyEvent, size: &Size2D<usize>) {
     todo!()
   }
 

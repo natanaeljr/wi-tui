@@ -1,6 +1,6 @@
 use crate::render::{RenderCtx, Renderer};
 use euclid::default::Size2D;
-use std::ops::Deref;
+use std::ops::{Deref, DerefMut};
 
 mod align;
 mod button;
@@ -70,8 +70,12 @@ pub struct LayoutSize {
 pub type LayoutResult = Result<LayoutSize, LayoutError>;
 pub type RenderResult = Result<(), RenderError>;
 
+pub enum AnyEvent {
+  Input(crossterm::event::Event)
+}
+
 pub trait Widget {
-  fn event(&mut self);
+  fn event(&mut self, event: &AnyEvent, size: &Size2D<usize>);
   fn update(&mut self);
   /// layout must return the **minimum** required space for drawing this widget
   fn layout(&self, parent_size: &Size2D<usize>) -> LayoutResult;
@@ -98,7 +102,7 @@ pub struct Text;
 // impl Widget for RefCell {}
 
 impl Widget for &str {
-  fn event(&mut self) {
+  fn event(&mut self, event: &AnyEvent, size: &Size2D<usize>) {
     todo!()
   }
 
@@ -134,7 +138,7 @@ impl Widget for &str {
 }
 
 impl Widget for String {
-  fn event(&mut self) {
+  fn event(&mut self, event: &AnyEvent, size: &Size2D<usize>) {
     todo!()
   }
 
@@ -170,7 +174,7 @@ impl Widget for String {
 }
 
 impl Widget for char {
-  fn event(&mut self) {
+  fn event(&mut self, event: &AnyEvent, size: &Size2D<usize>) {
     todo!()
   }
 
@@ -198,7 +202,7 @@ impl Widget for char {
 }
 
 impl Widget for u32 {
-  fn event(&mut self) {
+  fn event(&mut self, event: &AnyEvent, size: &Size2D<usize>) {
     todo!()
   }
 
@@ -236,7 +240,7 @@ impl Widget for u32 {
 }
 
 impl Widget for usize {
-  fn event(&mut self) {
+  fn event(&mut self, event: &AnyEvent, size: &Size2D<usize>) {
     todo!()
   }
 
@@ -274,8 +278,8 @@ impl Widget for usize {
 }
 
 impl Widget for Box<dyn Widget> {
-  fn event(&mut self) {
-    todo!()
+  fn event(&mut self, event: &AnyEvent, size: &Size2D<usize>) {
+    self.deref_mut().event(event, size)
   }
 
   fn update(&mut self) {
@@ -293,7 +297,7 @@ impl Widget for Box<dyn Widget> {
 }
 
 impl Widget for () {
-  fn event(&mut self) {}
+  fn event(&mut self, event: &AnyEvent, size: &Size2D<usize>) {}
 
   fn update(&mut self) {}
 
@@ -313,7 +317,7 @@ impl<T> Widget for StyledContent<T>
 where
   T: Widget + std::fmt::Display,
 {
-  fn event(&mut self) {
+  fn event(&mut self, event: &AnyEvent, size: &Size2D<usize>) {
     todo!()
   }
 

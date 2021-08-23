@@ -1,4 +1,4 @@
-use std::ops::Deref;
+use std::ops::{Deref, DerefMut};
 
 use crossterm::event::KeyCode::Delete;
 
@@ -14,6 +14,30 @@ impl<'r, Type: ?Sized> Deref for Scoped<'r, Type> {
     match self {
       Scoped::Ref(r) => &**r,
       Scoped::Box(b) => b.deref(),
+    }
+  }
+}
+
+pub enum ScopedMut<'r, Type: ?Sized> {
+  Ref(&'r mut Type),
+  Box(Box<Type>),
+}
+
+impl<'r, Type: ?Sized> Deref for ScopedMut<'r, Type> {
+  type Target = Type;
+
+  fn deref(&self) -> &Self::Target {
+    match self {
+      ScopedMut::Ref(r) => &**r,
+      ScopedMut::Box(b) => b.deref(),
+    }
+  }
+}
+impl<'r, Type: ?Sized> DerefMut for ScopedMut<'r, Type> {
+  fn deref_mut(&mut self) -> &mut Self::Target {
+    match self {
+      ScopedMut::Ref(r) => &mut **r,
+      ScopedMut::Box(b) => b.deref_mut(),
     }
   }
 }
