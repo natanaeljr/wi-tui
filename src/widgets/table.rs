@@ -148,7 +148,30 @@ where
   Heading: Widget,
 {
   fn event(&mut self, event: &AnyEvent, size: &Size2D<usize>) {
-    todo!()
+    match event {
+      AnyEvent::Input(input) => match input {
+        Event::Key(_) => {}
+        Event::Mouse(mouse) => {
+          if mouse.modifiers.is_empty() {
+            match mouse.kind {
+              MouseEventKind::Down(button) => match button {
+                MouseButton::Left => {}
+                MouseButton::Right => {}
+                MouseButton::Middle => {
+                  self.width.max = match self.width.max {
+                    ColumnWidthValue::Fixed(_) => ColumnWidthValue::Auto,
+                    ColumnWidthValue::Auto => ColumnWidthValue::Fixed(1),
+                    ColumnWidthValue::Heading => ColumnWidthValue::Fixed(1),
+                  };
+                }
+              },
+              _ => {}
+            }
+          }
+        }
+        Event::Resize(_, _) => {}
+      },
+    }
   }
 
   fn update(&mut self) {
@@ -171,7 +194,6 @@ where
 
 pub trait TableColumn: Widget {
   fn get_width(&self) -> Cow<ColumnWidth>;
-  fn set_width(&mut self, width: ColumnWidth);
   fn as_widget(&self) -> &dyn Widget;
   fn as_mut_widget(&mut self) -> &mut dyn Widget;
 }
@@ -182,10 +204,6 @@ where
 {
   fn get_width(&self) -> Cow<ColumnWidth> {
     Cow::Borrowed(&self.width)
-  }
-
-  fn set_width(&mut self, width: ColumnWidth) {
-    self.width = width;
   }
 
   fn as_widget(&self) -> &dyn Widget {
@@ -1027,8 +1045,6 @@ impl Widget for Table {
               break;
             }
           }
-          eprintln!("YESYESYES");
-          dbg!(&mouse, &col, &column_starts);
 
           if mouse.modifiers.is_empty() {
             match mouse.kind {
@@ -1038,13 +1054,7 @@ impl Widget for Table {
                 MouseButton::Middle => {
                   if let Some(col) = col {
                     let mut column = self.columns.as_mut().unwrap().column_mut(col).unwrap();
-                    let mut width = column.get_width().into_owned();
-                    width.max = match width.max {
-                      ColumnWidthValue::Fixed(_) => ColumnWidthValue::Auto,
-                      ColumnWidthValue::Auto => ColumnWidthValue::Fixed(1),
-                      ColumnWidthValue::Heading => ColumnWidthValue::Fixed(1),
-                    };
-                    column.set_width(width);
+                    column.as_mut_widget().event(event, size);
                   }
                 }
               },
