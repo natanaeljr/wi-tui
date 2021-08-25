@@ -37,12 +37,12 @@ pub enum ColumnWidthValue {
 }
 
 /// Combinations for "abcdefghijklmnopqrswxyz"
-///  Fixed:           { min: 10, max: 10,      auto: None,        flex_weight: 0 } => "abcdefghij"
-///  Min:             { min: 5,  max: 10,      auto: None,        flex_weight: 0 } => "abcde"
-///  Distributed:     { min: 5,  max: 10|Auto, auto: None,        flex_weight: 1 } => "abcdef...j"
-///  AutoFixed:       { min: 1,  max: Auto,    auto: LargestCell, flex_weight: 0 } => "abcdefghijklmnopqrswxyz"
-///  AutoFlexed:      { min: 1,  max: Auto,    auto: LargestCell, flex_weight: 1 } => "a..z"
-///  AutoFlexedBeyond:{ min: 1,  max: Inf,     auto: LargestCell, flex_weight: 1 } => "abc... "
+///  Fixed:           { min: 10, max: 10,      auto: None,        flex: 0 } => "abcdefghij"
+///  Min:             { min: 5,  max: 10,      auto: None,        flex: 0 } => "abcde"
+///  Distributed:     { min: 5,  max: 10|Auto, auto: None,        flex: 1 } => "abcdef...j"
+///  AutoFixed:       { min: 1,  max: Auto,    auto: LargestCell, flex: 0 } => "abcdefghijklmnopqrswxyz"
+///  AutoFlexed:      { min: 1,  max: Auto,    auto: LargestCell, flex: 1 } => "a..z"
+///  AutoFlexedBeyond:{ min: 1,  max: Inf,     auto: LargestCell, flex: 1 } => "abc... "
 #[derive(Clone)]
 pub struct ColumnWidth {
   /// Minimum column width
@@ -52,7 +52,7 @@ pub struct ColumnWidth {
   /// Automatic column width adjustment
   pub auto_mode: ColumnWidthAuto,
   /// Flex column width to available space based on weight; zero is no flex.
-  pub flex_weight: usize,
+  pub flex: usize,
 }
 
 impl Default for ColumnWidth {
@@ -67,7 +67,7 @@ impl ColumnWidth {
       min: ColumnWidthValue::Fixed(1),
       max: ColumnWidthValue::Auto,
       auto_mode: ColumnWidthAuto::AllCellsOrHeading,
-      flex_weight: 1,
+      flex: 1,
     }
   }
 
@@ -116,8 +116,8 @@ impl ColumnWidth {
     self
   }
 
-  pub fn flex_weight(mut self, weight: usize) -> Self {
-    self.flex_weight = weight;
+  pub fn flex(mut self, weight: usize) -> Self {
+    self.flex = weight;
     self
   }
 }
@@ -320,7 +320,7 @@ pub struct RowHeight {
   /// Automatic row height adjustment
   pub auto_mode: RowHeightAuto,
   /// Flex row height to available space based on weight; zero is no flex.
-  pub flex_weight: usize,
+  pub flex: usize,
 }
 
 impl Default for RowHeight {
@@ -335,7 +335,7 @@ impl RowHeight {
       min: RowHeightValue::Fixed(1),
       max: RowHeightValue::Fixed(1),
       auto_mode: RowHeightAuto::CellsOrHeading,
-      flex_weight: 1,
+      flex: 1,
     }
   }
 
@@ -384,8 +384,8 @@ impl RowHeight {
     self
   }
 
-  pub fn flex_weight(mut self, weight: usize) -> Self {
-    self.flex_weight = weight;
+  pub fn flex(mut self, weight: usize) -> Self {
+    self.flex = weight;
     self
   }
 }
@@ -947,7 +947,7 @@ impl Table {
       column_layouts_flex_input.push(ColumnLayoutFlexInput {
         min: column_width.min,
         max: column_width.max,
-        weight: column_width_settings.flex_weight,
+        weight: column_width_settings.flex,
       });
     } // for all columns
 
