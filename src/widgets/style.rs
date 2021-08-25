@@ -1,5 +1,5 @@
 use crate::render::RenderCtx;
-use crate::widgets::{LayoutResult, RenderResult, Widget, AnyEvent};
+use crate::widgets::{AnyEvent, LayoutResult, RenderResult, Widget};
 use euclid::default::Size2D;
 use std::ops::BitOr;
 
@@ -87,8 +87,8 @@ impl<Child> Style<Child> {
 }
 
 impl<Child> Widget for Style<Child>
-  where
-    Child: Widget,
+where
+  Child: Widget,
 {
   fn event(&mut self, event: &AnyEvent, size: &Size2D<usize>) {
     self.child.event(event, size)

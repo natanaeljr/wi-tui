@@ -1,7 +1,7 @@
 use witui::util::Scoped;
-use witui::widgets::{Align, Table};
-use witui::widgets::table::{Column, ColumnWidth, TableLayout};
 use witui::widgets::table::Row;
+use witui::widgets::table::{Column, ColumnWidth, TableLayout};
+use witui::widgets::{Align, Table};
 use witui::WiTui;
 
 /// Spreadsheet example to show off the Table Widget.
@@ -22,7 +22,7 @@ use witui::WiTui;
 
 fn main() {
   let columns = (b'A'..b'Z' + 1)
-    .map(|col| Column::new(Align::center(col as char)).width(ColumnWidth::new().min_fixed(5).flex_weight(0)))
+    .map(|col| Column::new(Align::center(col as char)).width(ColumnWidth::new().min_fixed(5).flex(0)))
     .collect::<Vec<_>>();
 
   let rows = (1..11).map(|idx| Row::new(idx)).collect::<Vec<Row<usize>>>();

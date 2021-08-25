@@ -1,5 +1,5 @@
 use crate::render::{RenderCtx, Renderer};
-use crate::widgets::{LayoutResult, RenderResult, Widget, AnyEvent};
+use crate::widgets::{AnyEvent, LayoutResult, RenderResult, Widget};
 use euclid::default::Size2D;
 use std::ops::{Deref, DerefMut};
 

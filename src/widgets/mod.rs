@@ -71,7 +71,7 @@ pub type LayoutResult = Result<LayoutSize, LayoutError>;
 pub type RenderResult = Result<(), RenderError>;
 
 pub enum AnyEvent {
-  Input(crossterm::event::Event)
+  Input(crossterm::event::Event),
 }
 
 pub trait Widget {
@@ -86,8 +86,10 @@ pub trait Widget {
 pub use align::Align;
 use crossterm::style::StyledContent;
 pub use padding::Padding;
+use std::cell::{Cell, RefCell};
 use std::error::Error;
 use std::fmt::{Display, Formatter};
+use std::rc::Rc;
 
 pub struct Border;
 pub struct Bread;
@@ -97,9 +99,6 @@ pub struct Text;
 
 // TODO: Default impl of Widgets
 // impl Widget for Fn {}
-// impl Widget for Rc {}
-// impl Widget for Cell {}
-// impl Widget for RefCell {}
 
 impl Widget for &str {
   fn event(&mut self, event: &AnyEvent, size: &Size2D<usize>) {
@@ -277,13 +276,66 @@ impl Widget for usize {
   }
 }
 
-impl Widget for Box<dyn Widget> {
+impl<T> Widget for Rc<T>
+where
+  T: ?Sized + Widget,
+{
+  fn event(&mut self, event: &AnyEvent, size: &Size2D<usize>) {
+    if let Some(inner) = Rc::get_mut(self) {
+      inner.event(event, size)
+    } else {
+      ()
+    }
+  }
+
+  fn update(&mut self) {
+    if let Some(inner) = Rc::get_mut(self) {
+      inner.update()
+    } else {
+      ()
+    }
+  }
+
+  fn layout(&self, parent_size: &Size2D<usize>) -> LayoutResult {
+    self.deref().layout(parent_size)
+  }
+
+  fn render(&self, ctx: &RenderCtx) -> RenderResult {
+    self.deref().render(ctx)
+  }
+}
+
+impl<T> Widget for RefCell<T>
+where
+  T: ?Sized + Widget,
+{
+  fn event(&mut self, event: &AnyEvent, size: &Size2D<usize>) {
+    self.get_mut().event(event, size)
+  }
+
+  fn update(&mut self) {
+    self.get_mut().update()
+  }
+
+  fn layout(&self, parent_size: &Size2D<usize>) -> LayoutResult {
+    self.deref().layout(parent_size)
+  }
+
+  fn render(&self, ctx: &RenderCtx) -> RenderResult {
+    self.deref().render(ctx)
+  }
+}
+
+impl<T> Widget for Box<T>
+where
+  T: ?Sized + Widget,
+{
   fn event(&mut self, event: &AnyEvent, size: &Size2D<usize>) {
     self.deref_mut().event(event, size)
   }
 
   fn update(&mut self) {
-    todo!()
+    self.deref_mut().update()
   }
 
   fn layout(&self, parent_size: &Size2D<usize>) -> LayoutResult {

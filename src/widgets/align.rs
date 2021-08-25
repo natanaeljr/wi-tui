@@ -1,5 +1,5 @@
 use crate::render::RenderCtx;
-use crate::widgets::{LayoutResult, RenderError, RenderResult, Widget, AnyEvent};
+use crate::widgets::{AnyEvent, LayoutResult, RenderError, RenderResult, Widget};
 use euclid::default::Size2D;
 use euclid::SideOffsets2D;
 use std::ops::Sub;

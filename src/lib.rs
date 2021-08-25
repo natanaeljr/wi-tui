@@ -75,7 +75,9 @@ impl WiTui {
         }
         Event::Mouse(mouse) => {
           if let MouseEventKind::Down(_) = mouse.kind {
-            self.root.event(&AnyEvent::Input(Event::Mouse(mouse)), &self.render_ctx.get_frame().size);
+            self
+              .root
+              .event(&AnyEvent::Input(Event::Mouse(mouse)), &self.render_ctx.get_frame().size);
             break;
           }
         }

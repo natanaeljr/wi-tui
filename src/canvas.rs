@@ -153,7 +153,7 @@ impl Canvas {
       // cursor set
       let row = idx / self.frame.width();
       let col = idx % self.frame.width();
-      let mut update_cursor = |stdout: &mut Vec::<u8>| {
+      let mut update_cursor = |stdout: &mut Vec<u8>| {
         if cursor_pos.x != col {
           if cursor_pos.y != row {
             eprintln!("[{},{}]: MoveTo  ({}, {})", cursor_pos.y, cursor_pos.x, row, col);
