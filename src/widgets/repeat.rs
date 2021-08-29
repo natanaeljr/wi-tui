@@ -19,7 +19,7 @@ where
   Child: Widget,
 {
   fn event(&mut self, event: &AnyEvent, size: &Size2D<usize>) {
-    todo!()
+    self.child.event(event, size)
   }
 
   fn update(&mut self) {

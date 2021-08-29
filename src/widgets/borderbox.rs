@@ -2,7 +2,10 @@ use euclid::default::Size2D;
 use euclid::SideOffsets2D;
 
 use crate::render::{RenderCtx, Renderer};
+use crate::widgets::repeat::Repeat;
+use crate::widgets::style::Style;
 use crate::widgets::{AnyEvent, LayoutError, LayoutResult, RenderError, RenderResult, Widget};
+use crossterm::event::Event;
 
 pub struct BorderBox<Border, Child> {
   // sides
@@ -75,13 +78,68 @@ impl<Border, Child> BorderBox<Border, Child> {
   }
 }
 
+// TODO: Allow Style input in presets
+impl<Child> BorderBox<Style<Repeat<char>>, Child> {
+  pub fn preset_lined(child: Child) -> BorderBox<Style<Repeat<char>>, Child> {
+    let mut this = BorderBox::new(child);
+    this
+      .top(Style::new(Repeat::new('─')))
+      .left(Style::new(Repeat::new('│')))
+      .right(Style::new(Repeat::new('│')))
+      .bottom(Style::new(Repeat::new('─')))
+      .top_left(Style::new(Repeat::new('┌')))
+      .top_right(Style::new(Repeat::new('┐')))
+      .bottom_left(Style::new(Repeat::new('└')))
+      .bottom_right(Style::new(Repeat::new('┘')))
+  }
+
+  pub fn preset_double(child: Child) -> BorderBox<Style<Repeat<char>>, Child> {
+    let mut this = BorderBox::new(child);
+    this
+      .top(Style::new(Repeat::new('═')))
+      .left(Style::new(Repeat::new('║')))
+      .right(Style::new(Repeat::new('║')))
+      .bottom(Style::new(Repeat::new('═')))
+      .top_left(Style::new(Repeat::new('╔')))
+      .top_right(Style::new(Repeat::new('╗')))
+      .bottom_left(Style::new(Repeat::new('╚')))
+      .bottom_right(Style::new(Repeat::new('╝')))
+  }
+
+  pub fn preset_dashed(child: Child) -> BorderBox<Style<Repeat<char>>, Child> {
+    let mut this = BorderBox::new(child);
+    this
+      .top(Style::new(Repeat::new('-')))
+      .left(Style::new(Repeat::new('|')))
+      .right(Style::new(Repeat::new('|')))
+      .bottom(Style::new(Repeat::new('-')))
+      .top_left(Style::new(Repeat::new('+')))
+      .top_right(Style::new(Repeat::new('+')))
+      .bottom_left(Style::new(Repeat::new('+')))
+      .bottom_right(Style::new(Repeat::new('+')))
+  }
+
+  pub fn preset_simple_dashed(child: Child) -> BorderBox<Style<Repeat<char>>, Child> {
+    let mut this = BorderBox::new(child);
+    this
+      .top(Style::new(Repeat::new('-')))
+      .left(Style::new(Repeat::new('|')))
+      .right(Style::new(Repeat::new('|')))
+      .bottom(Style::new(Repeat::new('-')))
+      .top_left(Style::new(Repeat::new('┌')))
+      .top_right(Style::new(Repeat::new('┐')))
+      .bottom_left(Style::new(Repeat::new('└')))
+      .bottom_right(Style::new(Repeat::new('┘')))
+  }
+}
+
 impl<Border, Child> Widget for BorderBox<Border, Child>
 where
   Border: Widget,
   Child: Widget,
 {
   fn event(&mut self, event: &AnyEvent, size: &Size2D<usize>) {
-    todo!()
+    self.child.event(event, size)
   }
 
   fn update(&mut self) {
