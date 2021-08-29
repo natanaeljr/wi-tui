@@ -1,7 +1,9 @@
-use crate::render::RenderCtx;
-use crate::widgets::{AnyEvent, LayoutResult, RenderResult, Widget};
-use euclid::default::Size2D;
 use std::iter::FromIterator;
+
+use euclid::default::Size2D;
+
+use crate::render::RenderCtx;
+use crate::widgets::{AnyEvent, Border, LayoutResult, RenderResult, Widget};
 
 pub struct VerticalContainer {
   children: Vec<Box<dyn Widget>>,

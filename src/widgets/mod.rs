@@ -3,6 +3,7 @@ use euclid::default::Size2D;
 use std::ops::{Deref, DerefMut};
 
 mod align;
+pub mod borderbox;
 mod button;
 mod checkbox;
 mod container;
@@ -11,6 +12,7 @@ mod label;
 mod line;
 mod padding;
 mod progressbar;
+pub mod repeat;
 mod scrollbar;
 pub mod style;
 pub mod table;
