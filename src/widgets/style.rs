@@ -1,18 +1,18 @@
 use crate::render::RenderCtx;
 use crate::widgets::{AnyEvent, LayoutResult, RenderResult, Widget};
 use euclid::default::Size2D;
-use std::ops::BitOr;
+use std::ops::{BitOr, Deref, DerefMut};
 
 pub use crossterm::style::Attribute;
 pub use crossterm::style::Attributes;
 pub use crossterm::style::Color;
 use crossterm::style::Stylize;
 
-pub struct Style<Child> {
+#[derive(Debug, Clone)]
+pub struct Style {
   pub fg: Option<Color>,
   pub bg: Option<Color>,
   pub attrs: Attributes,
-  pub child: Child,
 }
 
 macro_rules! stylize_method {
@@ -31,13 +31,12 @@ macro_rules! stylize_method {
   };
 }
 
-impl<Child> Style<Child> {
-  pub fn new(child: Child) -> Self {
+impl Style {
+  pub fn new() -> Self {
     Self {
       fg: None,
       bg: None,
       attrs: Default::default(),
-      child,
     }
   }
 
@@ -54,6 +53,10 @@ impl<Child> Style<Child> {
   pub fn attr(mut self, attr: Attribute) -> Self {
     self.attrs = self.attrs | attr;
     self
+  }
+
+  pub fn apply<Child: Widget>(self, child: Child) -> Styled<Child> {
+    Styled { style: self, child }
   }
 
   stylize_method!(reset Attribute::Reset);
@@ -86,7 +89,18 @@ impl<Child> Style<Child> {
   stylize_method!(grey, on_grey Color::Grey);
 }
 
-impl<Child> Widget for Style<Child>
+impl Default for Style {
+  fn default() -> Self {
+    Self::new()
+  }
+}
+
+pub struct Styled<Child> {
+  pub style: Style,
+  pub child: Child,
+}
+
+impl<Child> Widget for Styled<Child>
 where
   Child: Widget,
 {
@@ -103,13 +117,13 @@ where
   }
 
   fn render(&self, ctx: &RenderCtx) -> RenderResult {
-    if !self.attrs.is_empty() {
-      ctx.renderer().add_attributes(self.attrs);
+    if !self.style.attrs.is_empty() {
+      ctx.renderer().add_attributes(self.style.attrs);
     }
-    if let Some(bg) = self.bg.as_ref() {
+    if let Some(bg) = self.style.bg.as_ref() {
       ctx.renderer().set_background(bg);
     }
-    if let Some(fg) = self.fg.as_ref() {
+    if let Some(fg) = self.style.fg.as_ref() {
       ctx.renderer().set_foreground(fg);
     }
     self.child.render(ctx)
