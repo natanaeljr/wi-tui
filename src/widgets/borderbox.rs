@@ -141,10 +141,6 @@ where
     self.child.event(event, size)
   }
 
-  fn update(&mut self) {
-    todo!()
-  }
-
   fn layout(&self, parent_size: &Size2D<usize>) -> LayoutResult {
     let borders_width = if self.left.is_some() { 1 } else { 0 } + if self.right.is_some() { 1 } else { 0 };
     let borders_height = if self.top.is_some() { 1 } else { 0 } + if self.bottom.is_some() { 1 } else { 0 };

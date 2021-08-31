@@ -77,8 +77,6 @@ pub enum AnyEvent {
 
 pub trait Widget {
   fn event(&mut self, event: &AnyEvent, size: &Size2D<usize>);
-  fn update(&mut self);
-  /// layout must return the **minimum** required space for drawing this widget
   fn layout(&self, parent_size: &Size2D<usize>) -> LayoutResult;
   fn render(&self, ctx: &RenderCtx) -> RenderResult;
 }
@@ -104,10 +102,6 @@ pub struct Text;
 
 impl Widget for &str {
   fn event(&mut self, event: &AnyEvent, size: &Size2D<usize>) {
-    todo!()
-  }
-
-  fn update(&mut self) {
     todo!()
   }
 
@@ -143,10 +137,6 @@ impl Widget for String {
     todo!()
   }
 
-  fn update(&mut self) {
-    todo!()
-  }
-
   fn layout(&self, parent_size: &Size2D<usize>) -> LayoutResult {
     let min = Size2D::new(1, 1);
     let mut max = Size2D::new(self.len(), 1);
@@ -179,10 +169,6 @@ impl Widget for char {
     todo!()
   }
 
-  fn update(&mut self) {
-    todo!()
-  }
-
   fn layout(&self, parent_size: &Size2D<usize>) -> LayoutResult {
     let size = Size2D::new(1, 1);
     // check for minimum space in parent size
@@ -204,10 +190,6 @@ impl Widget for char {
 
 impl Widget for u32 {
   fn event(&mut self, event: &AnyEvent, size: &Size2D<usize>) {
-    todo!()
-  }
-
-  fn update(&mut self) {
     todo!()
   }
 
@@ -242,10 +224,6 @@ impl Widget for u32 {
 
 impl Widget for usize {
   fn event(&mut self, event: &AnyEvent, size: &Size2D<usize>) {
-    todo!()
-  }
-
-  fn update(&mut self) {
     todo!()
   }
 
@@ -290,14 +268,6 @@ where
     }
   }
 
-  fn update(&mut self) {
-    if let Some(inner) = Rc::get_mut(self) {
-      inner.update()
-    } else {
-      ()
-    }
-  }
-
   fn layout(&self, parent_size: &Size2D<usize>) -> LayoutResult {
     self.deref().layout(parent_size)
   }
@@ -313,10 +283,6 @@ where
 {
   fn event(&mut self, event: &AnyEvent, size: &Size2D<usize>) {
     self.get_mut().event(event, size)
-  }
-
-  fn update(&mut self) {
-    self.get_mut().update()
   }
 
   fn layout(&self, parent_size: &Size2D<usize>) -> LayoutResult {
@@ -336,10 +302,6 @@ where
     self.deref_mut().event(event, size)
   }
 
-  fn update(&mut self) {
-    self.deref_mut().update()
-  }
-
   fn layout(&self, parent_size: &Size2D<usize>) -> LayoutResult {
     self.deref().layout(parent_size)
   }
@@ -352,8 +314,6 @@ where
 
 impl Widget for () {
   fn event(&mut self, event: &AnyEvent, size: &Size2D<usize>) {}
-
-  fn update(&mut self) {}
 
   fn layout(&self, parent_size: &Size2D<usize>) -> LayoutResult {
     Ok(LayoutSize {
@@ -372,10 +332,6 @@ where
   T: Widget + std::fmt::Display,
 {
   fn event(&mut self, event: &AnyEvent, size: &Size2D<usize>) {
-    todo!()
-  }
-
-  fn update(&mut self) {
     todo!()
   }
 

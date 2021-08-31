@@ -52,10 +52,6 @@ where
     todo!()
   }
 
-  fn update(&mut self) {
-    todo!()
-  }
-
   fn layout(&self, parent_size: &Size2D<usize>) -> LayoutResult {
     self.child.layout(parent_size)
   }

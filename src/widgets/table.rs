@@ -174,10 +174,6 @@ where
     }
   }
 
-  fn update(&mut self) {
-    todo!()
-  }
-
   fn layout(&self, parent_size: &Size2D<usize>) -> LayoutResult {
     self.heading.layout(parent_size)
   }
@@ -416,10 +412,6 @@ where
   Heading: Widget,
 {
   fn event(&mut self, event: &AnyEvent, size: &Size2D<usize>) {
-    todo!()
-  }
-
-  fn update(&mut self) {
     todo!()
   }
 
@@ -1065,10 +1057,6 @@ impl Widget for Table {
         Event::Resize(_, _) => {}
       },
     }
-  }
-
-  fn update(&mut self) {
-    todo!()
   }
 
   fn layout(&self, parent_size: &Size2D<usize>) -> LayoutResult {

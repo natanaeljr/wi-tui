@@ -21,10 +21,6 @@ impl Widget for Button<&str> {
     todo!()
   }
 
-  fn update(&mut self) {
-    todo!()
-  }
-
   fn layout(&self, parent_size: &Size2D<usize>) -> LayoutResult {
     todo!()
   }

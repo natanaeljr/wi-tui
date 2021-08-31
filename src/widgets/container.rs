@@ -42,10 +42,6 @@ impl Widget for Container {
     todo!()
   }
 
-  fn update(&mut self) {
-    todo!()
-  }
-
   fn layout(&self, parent_size: &Size2D<usize>) -> LayoutResult {
     let children = self.children.as_ref().unwrap();
 

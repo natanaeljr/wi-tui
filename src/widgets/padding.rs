@@ -52,10 +52,6 @@ where
     self.child.event(event, size)
   }
 
-  fn update(&mut self) {
-    todo!()
-  }
-
   fn layout(&self, parent_size: &Size2D<usize>) -> LayoutResult {
     let frame = Rect::from_size(parent_size.clone()).inner_rect(self.offsets.clone());
     let mut layout = self.child.layout(&frame.size)?;
