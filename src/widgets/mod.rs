@@ -6,7 +6,7 @@ mod align;
 pub mod borderbox;
 mod button;
 mod checkbox;
-mod container;
+pub mod container;
 mod flex;
 mod label;
 mod line;
@@ -22,7 +22,6 @@ mod vertical;
 
 // Built-in Widgets
 pub use button::Button;
-pub use container::VerticalContainer;
 pub use table::Table;
 
 #[derive(Debug)]
@@ -63,7 +62,7 @@ impl Display for RenderError {
 
 impl Error for RenderError {}
 
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub struct LayoutSize {
   min: Size2D<usize>,
   max: Size2D<usize>,
@@ -85,6 +84,7 @@ pub trait Widget {
 }
 
 // Wrapping Widgets
+use crate::util::Scoped;
 pub use align::Align;
 use crossterm::style::StyledContent;
 pub use padding::Padding;

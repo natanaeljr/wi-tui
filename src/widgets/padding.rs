@@ -1,5 +1,5 @@
 use crate::render::RenderCtx;
-use crate::widgets::{AnyEvent, LayoutResult, RenderResult, Widget};
+use crate::widgets::{AnyEvent, LayoutResult, LayoutSize, RenderResult, Widget};
 use euclid::default::{Point2D, Rect, SideOffsets2D, Size2D};
 
 pub struct Padding<Child> {
@@ -8,7 +8,7 @@ pub struct Padding<Child> {
 }
 
 impl<Child> Padding<Child> {
-  pub fn around(child: Child) -> Self {
+  pub fn new(child: Child) -> Self {
     Self {
       child,
       offsets: SideOffsets2D::zero(),
@@ -49,7 +49,7 @@ where
   Child: Widget,
 {
   fn event(&mut self, event: &AnyEvent, size: &Size2D<usize>) {
-    todo!()
+    self.child.event(event, size)
   }
 
   fn update(&mut self) {
@@ -57,7 +57,13 @@ where
   }
 
   fn layout(&self, parent_size: &Size2D<usize>) -> LayoutResult {
-    todo!()
+    let frame = Rect::from_size(parent_size.clone()).inner_rect(self.offsets.clone());
+    let mut layout = self.child.layout(&frame.size)?;
+    layout.min.width += self.offsets.left + self.offsets.right;
+    layout.max.width += self.offsets.left + self.offsets.right;
+    layout.min.height += self.offsets.top + self.offsets.bottom;
+    layout.max.height += self.offsets.top + self.offsets.bottom;
+    Ok(layout)
   }
 
   fn render(&self, ctx: &RenderCtx) -> RenderResult {
