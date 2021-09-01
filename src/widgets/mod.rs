@@ -13,6 +13,7 @@ pub mod bordered;
 pub mod button;
 pub mod checkbox;
 pub mod container;
+pub mod expanded;
 pub mod flex;
 pub mod label;
 pub mod line;
@@ -25,7 +26,6 @@ pub mod table;
 pub mod tabs;
 pub mod textbox;
 pub mod vertical;
-pub mod expanded;
 
 #[derive(Debug)]
 pub enum LayoutError {

@@ -12,7 +12,7 @@ use witui::widgets::table::{Column, ColumnWidth, Table};
 use witui::widgets::Widget;
 
 fn main() {
-  let button = Button::new("Button");
+  let button = Button::child("Button");
 
   let data = vec![
     vec!["A1", "B2", "C1"], //
@@ -53,7 +53,7 @@ fn main() {
       vec!["A6", "B6", "C6"],     //
       vec!["A72", "B7", "C7"],    //
     ]);
-  let table = Padding::new(table).left(5).top(0);
+  let table = Padding::child(table).left(5).top(0);
   // table.render(&mut render_ctx).unwrap();
 
   let table: Table = Table::new()
@@ -69,7 +69,7 @@ fn main() {
   let mut data = table.data_mut_as::<Vec<Vec<Box<dyn Widget>>>>().unwrap();
   data[0][1] = Box::new("Tschuss");
 
-  let table = Padding::new(table).left(20).top(2);
+  let table = Padding::child(table).left(20).top(2);
   // table.render(&mut render_ctx).unwrap();
   let table = table.child;
 
@@ -117,6 +117,6 @@ fn main() {
     // .number_rows()
     ;
 
-  let table = Padding::new(table).left(0).top(10);
+  let table = Padding::child(table).left(0).top(10);
   // table.render(&mut render_ctx).unwrap();
 }

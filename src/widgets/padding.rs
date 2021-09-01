@@ -8,7 +8,7 @@ pub struct Padding<Child> {
 }
 
 impl<Child> Padding<Child> {
-  pub fn new(child: Child) -> Self {
+  pub fn child(child: Child) -> Self {
     Self {
       child,
       offsets: SideOffsets2D::zero(),

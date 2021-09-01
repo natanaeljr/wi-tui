@@ -11,7 +11,7 @@ impl<Child> Button<Child>
 where
   Child: Widget,
 {
-  pub fn new(child: Child) -> Self {
+  pub fn child(child: Child) -> Self {
     Self { child }
   }
 }

@@ -14,7 +14,7 @@ fn main() {
     .child(Bordered::child("World".white()).borders_line(Style::default().red()))
     .child(Bordered::child("Ready to rock?".white().dim()).borders_line(Style::default().dark_grey()))
     .child(
-      Padding::new(
+      Padding::child(
         Bordered::child("This is one true Text-based UI lib".blue().on_dark_grey())
           .borders_double(Style::new().blue().on_dark_grey()),
       )
@@ -23,7 +23,7 @@ fn main() {
     );
 
   let root = Bordered::child(root).borders_line(Style::new().magenta());
-  let root = Padding::new(root).top(1).bottom(1).left(3).right(3);
+  let root = Padding::child(root).top(1).bottom(1).left(3).right(3);
   let root = Bordered::child(root).borders_cross(Style::new().yellow().slow_blink());
   let root = Style::new().child(root);
 
