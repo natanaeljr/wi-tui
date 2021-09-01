@@ -55,7 +55,7 @@ impl Style {
     self
   }
 
-  pub fn apply<Child: Widget>(self, child: Child) -> Styled<Child> {
+  pub fn child<Child: Widget>(self, child: Child) -> Styled<Child> {
     Styled { style: self, child }
   }
 

@@ -11,6 +11,9 @@ pub mod render;
 pub mod util;
 pub mod widgets;
 
+// TODO: Make all Widgets divisible between property and widget so we can have (along with WidgetExt):
+// let widget = "Hello".bordered(Borders::lines());
+
 pub struct WiTui {
   alternate: bool,
   render_ctx: RenderCtx,

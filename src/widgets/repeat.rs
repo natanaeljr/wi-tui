@@ -4,12 +4,15 @@ use euclid::SideOffsets2D;
 use crate::render::RenderCtx;
 use crate::widgets::{AnyEvent, EventResult, LayoutResult, RenderError, RenderResult, Widget};
 
+// TODO: only vertical
+// TODO: only horizontal
+// TODO: repeat count
 pub struct Repeat<Child> {
   pub child: Child,
 }
 
 impl<Child> Repeat<Child> {
-  pub fn new(child: Child) -> Self {
+  pub fn child(child: Child) -> Self {
     Self { child }
   }
 }

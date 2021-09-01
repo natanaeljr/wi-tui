@@ -1,4 +1,4 @@
-use euclid::default::Size2D;
+use euclid::default::{Rect, Size2D};
 use euclid::SideOffsets2D;
 
 use crate::render::{RenderCtx, Renderer};
@@ -88,53 +88,53 @@ where
 {
   pub fn borders_line(mut self, style: Style) -> Self {
     let this = self
-      .top(Box::new(style.clone().apply(Repeat::new('─'))) as Box<dyn Widget>)
-      .left(Box::new(style.clone().apply(Repeat::new('│'))) as Box<dyn Widget>)
-      .right(Box::new(style.clone().apply(Repeat::new('│'))) as Box<dyn Widget>)
-      .bottom(Box::new(style.clone().apply(Repeat::new('─'))) as Box<dyn Widget>)
-      .top_left(Box::new(style.clone().apply(Repeat::new('┌'))) as Box<dyn Widget>)
-      .top_right(Box::new(style.clone().apply(Repeat::new('┐'))) as Box<dyn Widget>)
-      .bottom_left(Box::new(style.clone().apply(Repeat::new('└'))) as Box<dyn Widget>)
-      .bottom_right(Box::new(style.clone().apply(Repeat::new('┘'))) as Box<dyn Widget>);
+      .top(Box::new(style.clone().child(Repeat::child('─'))) as Box<dyn Widget>)
+      .left(Box::new(style.clone().child(Repeat::child('│'))) as Box<dyn Widget>)
+      .right(Box::new(style.clone().child(Repeat::child('│'))) as Box<dyn Widget>)
+      .bottom(Box::new(style.clone().child(Repeat::child('─'))) as Box<dyn Widget>)
+      .top_left(Box::new(style.clone().child(Repeat::child('┌'))) as Box<dyn Widget>)
+      .top_right(Box::new(style.clone().child(Repeat::child('┐'))) as Box<dyn Widget>)
+      .bottom_left(Box::new(style.clone().child(Repeat::child('└'))) as Box<dyn Widget>)
+      .bottom_right(Box::new(style.clone().child(Repeat::child('┘'))) as Box<dyn Widget>);
     this
   }
 
   pub fn borders_double(mut self, style: Style) -> Self {
     let this = self
-      .top(Box::new(style.clone().apply(Repeat::new('═'))) as Box<dyn Widget>)
-      .left(Box::new(style.clone().apply(Repeat::new('║'))) as Box<dyn Widget>)
-      .right(Box::new(style.clone().apply(Repeat::new('║'))) as Box<dyn Widget>)
-      .bottom(Box::new(style.clone().apply(Repeat::new('═'))) as Box<dyn Widget>)
-      .top_left(Box::new(style.clone().apply(Repeat::new('╔'))) as Box<dyn Widget>)
-      .top_right(Box::new(style.clone().apply(Repeat::new('╗'))) as Box<dyn Widget>)
-      .bottom_left(Box::new(style.clone().apply(Repeat::new('╚'))) as Box<dyn Widget>)
-      .bottom_right(Box::new(style.clone().apply(Repeat::new('╝'))) as Box<dyn Widget>);
+      .top(Box::new(style.clone().child(Repeat::child('═'))) as Box<dyn Widget>)
+      .left(Box::new(style.clone().child(Repeat::child('║'))) as Box<dyn Widget>)
+      .right(Box::new(style.clone().child(Repeat::child('║'))) as Box<dyn Widget>)
+      .bottom(Box::new(style.clone().child(Repeat::child('═'))) as Box<dyn Widget>)
+      .top_left(Box::new(style.clone().child(Repeat::child('╔'))) as Box<dyn Widget>)
+      .top_right(Box::new(style.clone().child(Repeat::child('╗'))) as Box<dyn Widget>)
+      .bottom_left(Box::new(style.clone().child(Repeat::child('╚'))) as Box<dyn Widget>)
+      .bottom_right(Box::new(style.clone().child(Repeat::child('╝'))) as Box<dyn Widget>);
     this
   }
 
   pub fn borders_cross(mut self, style: Style) -> Self {
     let this = self
-      .top(Box::new(style.clone().apply(Repeat::new('-'))) as Box<dyn Widget>)
-      .left(Box::new(style.clone().apply(Repeat::new('|'))) as Box<dyn Widget>)
-      .right(Box::new(style.clone().apply(Repeat::new('|'))) as Box<dyn Widget>)
-      .bottom(Box::new(style.clone().apply(Repeat::new('-'))) as Box<dyn Widget>)
-      .top_left(Box::new(style.clone().apply(Repeat::new('+'))) as Box<dyn Widget>)
-      .top_right(Box::new(style.clone().apply(Repeat::new('+'))) as Box<dyn Widget>)
-      .bottom_left(Box::new(style.clone().apply(Repeat::new('+'))) as Box<dyn Widget>)
-      .bottom_right(Box::new(style.clone().apply(Repeat::new('+'))) as Box<dyn Widget>);
+      .top(Box::new(style.clone().child(Repeat::child('-'))) as Box<dyn Widget>)
+      .left(Box::new(style.clone().child(Repeat::child('|'))) as Box<dyn Widget>)
+      .right(Box::new(style.clone().child(Repeat::child('|'))) as Box<dyn Widget>)
+      .bottom(Box::new(style.clone().child(Repeat::child('-'))) as Box<dyn Widget>)
+      .top_left(Box::new(style.clone().child(Repeat::child('+'))) as Box<dyn Widget>)
+      .top_right(Box::new(style.clone().child(Repeat::child('+'))) as Box<dyn Widget>)
+      .bottom_left(Box::new(style.clone().child(Repeat::child('+'))) as Box<dyn Widget>)
+      .bottom_right(Box::new(style.clone().child(Repeat::child('+'))) as Box<dyn Widget>);
     this
   }
 
   pub fn borders_dashes(mut self, style: Style) -> Self {
     let this = self
-      .top(Box::new(style.clone().apply(Repeat::new('-'))) as Box<dyn Widget>)
-      .left(Box::new(style.clone().apply(Repeat::new('|'))) as Box<dyn Widget>)
-      .right(Box::new(style.clone().apply(Repeat::new('|'))) as Box<dyn Widget>)
-      .bottom(Box::new(style.clone().apply(Repeat::new('-'))) as Box<dyn Widget>)
-      .top_left(Box::new(style.clone().apply(Repeat::new('┌'))) as Box<dyn Widget>)
-      .top_right(Box::new(style.clone().apply(Repeat::new('┐'))) as Box<dyn Widget>)
-      .bottom_left(Box::new(style.clone().apply(Repeat::new('└'))) as Box<dyn Widget>)
-      .bottom_right(Box::new(style.clone().apply(Repeat::new('┘'))) as Box<dyn Widget>);
+      .top(Box::new(style.clone().child(Repeat::child('-'))) as Box<dyn Widget>)
+      .left(Box::new(style.clone().child(Repeat::child('|'))) as Box<dyn Widget>)
+      .right(Box::new(style.clone().child(Repeat::child('|'))) as Box<dyn Widget>)
+      .bottom(Box::new(style.clone().child(Repeat::child('-'))) as Box<dyn Widget>)
+      .top_left(Box::new(style.clone().child(Repeat::child('┌'))) as Box<dyn Widget>)
+      .top_right(Box::new(style.clone().child(Repeat::child('┐'))) as Box<dyn Widget>)
+      .bottom_left(Box::new(style.clone().child(Repeat::child('└'))) as Box<dyn Widget>)
+      .bottom_right(Box::new(style.clone().child(Repeat::child('┘'))) as Box<dyn Widget>);
     this
   }
 }
@@ -166,20 +166,20 @@ where
     layout.min.width += borders_width;
     layout.min.height += borders_height;
 
-    if !frame.contains(layout.min.clone()) {
+    if !parent_size.contains(layout.min.clone()) {
       return Err(LayoutError::InsufficientSpace);
     }
     Ok(layout)
   }
 
   fn render(&self, ctx: &RenderCtx) -> RenderResult {
-    let borders_width = if self.left.is_some() { 1 } else { 0 } + if self.right.is_some() { 1 } else { 0 };
-    let borders_height = if self.top.is_some() { 1 } else { 0 } + if self.bottom.is_some() { 1 } else { 0 };
-
     let frame = ctx.get_frame().clone();
-    if frame.width() < borders_width || frame.height() < borders_height {
-      return Err(RenderError::Layout(LayoutError::InsufficientSpace));
-    }
+    let mut layout = self.layout(&frame.size).map_err(|e| RenderError::Layout(e))?;
+
+    layout.max.width = std::cmp::min(layout.max.width, frame.size.width);
+    layout.max.height = std::cmp::min(layout.max.height, frame.size.height);
+    let frame = Rect::new(frame.origin, layout.max);
+    dbg!(&frame);
 
     let top_offset = if self.top.is_some() { 1 } else { 0 };
     let left_offset = if self.left.is_some() { 1 } else { 0 };
