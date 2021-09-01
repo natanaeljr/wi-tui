@@ -1,5 +1,5 @@
 use crate::render::RenderCtx;
-use crate::widgets::{AnyEvent, LayoutResult, LayoutSize, RenderResult, Widget};
+use crate::widgets::{AnyEvent, EventResult, LayoutResult, LayoutSize, RenderResult, Widget};
 use euclid::default::{Point2D, Rect, SideOffsets2D, Size2D};
 
 pub struct Padding<Child> {
@@ -48,7 +48,7 @@ impl<Child> Widget for Padding<Child>
 where
   Child: Widget,
 {
-  fn event(&mut self, event: &AnyEvent, size: &Size2D<usize>) {
+  fn event(&mut self, event: &AnyEvent, size: &Size2D<usize>) -> EventResult {
     self.child.event(event, size)
   }
 

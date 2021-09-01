@@ -1,28 +1,30 @@
 use crate::render::{RenderCtx, Renderer};
+use crate::util::Scoped;
+use crossterm::style::StyledContent;
 use euclid::default::Size2D;
+use std::cell::{Cell, RefCell};
+use std::error::Error;
+use std::fmt::{Display, Formatter};
 use std::ops::{Deref, DerefMut};
+use std::rc::Rc;
 
-mod align;
-pub mod borderbox;
-mod button;
-mod checkbox;
+pub mod align;
+pub mod bordered;
+pub mod button;
+pub mod checkbox;
 pub mod container;
-mod flex;
-mod label;
-mod line;
-mod padding;
-mod progressbar;
+pub mod flex;
+pub mod label;
+pub mod line;
+pub mod padding;
+pub mod progressbar;
 pub mod repeat;
-mod scrollbar;
+pub mod scrollbar;
 pub mod style;
 pub mod table;
-mod tabs;
-mod textbox;
-mod vertical;
-
-// Built-in Widgets
-pub use button::Button;
-pub use table::Table;
+pub mod tabs;
+pub mod textbox;
+pub mod vertical;
 
 #[derive(Debug)]
 pub enum LayoutError {
@@ -71,37 +73,28 @@ pub struct LayoutSize {
 pub type LayoutResult = Result<LayoutSize, LayoutError>;
 pub type RenderResult = Result<(), RenderError>;
 
+pub enum EventResult {
+  Unhandled,
+  Done,
+  LockMouseClick,
+  PopupMenu { options: Vec<Box<dyn Widget>> },
+}
+
 pub enum AnyEvent {
   Input(crossterm::event::Event),
 }
 
 pub trait Widget {
-  fn event(&mut self, event: &AnyEvent, size: &Size2D<usize>);
+  fn event(&mut self, event: &AnyEvent, size: &Size2D<usize>) -> EventResult;
   fn layout(&self, parent_size: &Size2D<usize>) -> LayoutResult;
   fn render(&self, ctx: &RenderCtx) -> RenderResult;
 }
-
-// Wrapping Widgets
-use crate::util::Scoped;
-pub use align::Align;
-use crossterm::style::StyledContent;
-pub use padding::Padding;
-use std::cell::{Cell, RefCell};
-use std::error::Error;
-use std::fmt::{Display, Formatter};
-use std::rc::Rc;
-
-pub struct Border;
-pub struct Bread;
-
-// Inner Widgets
-pub struct Text;
 
 // TODO: Default impl of Widgets
 // impl Widget for Fn {}
 
 impl Widget for &str {
-  fn event(&mut self, event: &AnyEvent, size: &Size2D<usize>) {
+  fn event(&mut self, event: &AnyEvent, size: &Size2D<usize>) -> EventResult {
     todo!()
   }
 
@@ -133,7 +126,7 @@ impl Widget for &str {
 }
 
 impl Widget for String {
-  fn event(&mut self, event: &AnyEvent, size: &Size2D<usize>) {
+  fn event(&mut self, event: &AnyEvent, size: &Size2D<usize>) -> EventResult {
     todo!()
   }
 
@@ -165,7 +158,7 @@ impl Widget for String {
 }
 
 impl Widget for char {
-  fn event(&mut self, event: &AnyEvent, size: &Size2D<usize>) {
+  fn event(&mut self, event: &AnyEvent, size: &Size2D<usize>) -> EventResult {
     todo!()
   }
 
@@ -189,7 +182,7 @@ impl Widget for char {
 }
 
 impl Widget for u32 {
-  fn event(&mut self, event: &AnyEvent, size: &Size2D<usize>) {
+  fn event(&mut self, event: &AnyEvent, size: &Size2D<usize>) -> EventResult {
     todo!()
   }
 
@@ -223,7 +216,7 @@ impl Widget for u32 {
 }
 
 impl Widget for usize {
-  fn event(&mut self, event: &AnyEvent, size: &Size2D<usize>) {
+  fn event(&mut self, event: &AnyEvent, size: &Size2D<usize>) -> EventResult {
     todo!()
   }
 
@@ -260,11 +253,11 @@ impl<T> Widget for Rc<T>
 where
   T: ?Sized + Widget,
 {
-  fn event(&mut self, event: &AnyEvent, size: &Size2D<usize>) {
+  fn event(&mut self, event: &AnyEvent, size: &Size2D<usize>) -> EventResult {
     if let Some(inner) = Rc::get_mut(self) {
       inner.event(event, size)
     } else {
-      ()
+      EventResult::Unhandled
     }
   }
 
@@ -281,7 +274,7 @@ impl<T> Widget for RefCell<T>
 where
   T: ?Sized + Widget,
 {
-  fn event(&mut self, event: &AnyEvent, size: &Size2D<usize>) {
+  fn event(&mut self, event: &AnyEvent, size: &Size2D<usize>) -> EventResult {
     self.get_mut().event(event, size)
   }
 
@@ -298,7 +291,7 @@ impl<T> Widget for Box<T>
 where
   T: ?Sized + Widget,
 {
-  fn event(&mut self, event: &AnyEvent, size: &Size2D<usize>) {
+  fn event(&mut self, event: &AnyEvent, size: &Size2D<usize>) -> EventResult {
     self.deref_mut().event(event, size)
   }
 
@@ -313,7 +306,9 @@ where
 }
 
 impl Widget for () {
-  fn event(&mut self, event: &AnyEvent, size: &Size2D<usize>) {}
+  fn event(&mut self, event: &AnyEvent, size: &Size2D<usize>) -> EventResult {
+    EventResult::Unhandled
+  }
 
   fn layout(&self, parent_size: &Size2D<usize>) -> LayoutResult {
     Ok(LayoutSize {
@@ -331,7 +326,7 @@ impl<T> Widget for StyledContent<T>
 where
   T: Widget + std::fmt::Display,
 {
-  fn event(&mut self, event: &AnyEvent, size: &Size2D<usize>) {
+  fn event(&mut self, event: &AnyEvent, size: &Size2D<usize>) -> EventResult {
     todo!()
   }
 

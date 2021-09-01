@@ -1,6 +1,6 @@
 use euclid::default::{Rect, Size2D};
 use witui::render::{RenderCtx, Renderer};
-use witui::widgets::{Align, Button, Table, Widget};
+use witui::widgets::Widget;
 use witui::WiTui;
 
 fn main() {

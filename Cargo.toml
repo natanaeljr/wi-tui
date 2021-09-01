@@ -10,15 +10,13 @@ euclid = "0.22.6"
 
 [[example]]
 name = "demo"
-
 [[example]]
 name = "mgmt"
-
 [[example]]
 name = "nmcli"
-
 [[example]]
 name = "spreadsheet"
-
 [[example]]
 name = "flex"
+[[example]]
+name = "container"

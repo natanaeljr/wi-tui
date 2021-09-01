@@ -2,7 +2,7 @@ use euclid::default::Size2D;
 use euclid::SideOffsets2D;
 
 use crate::render::RenderCtx;
-use crate::widgets::{AnyEvent, LayoutResult, RenderError, RenderResult, Widget};
+use crate::widgets::{AnyEvent, EventResult, LayoutResult, RenderError, RenderResult, Widget};
 
 pub struct Repeat<Child> {
   pub child: Child,
@@ -18,7 +18,7 @@ impl<Child> Widget for Repeat<Child>
 where
   Child: Widget,
 {
-  fn event(&mut self, event: &AnyEvent, size: &Size2D<usize>) {
+  fn event(&mut self, event: &AnyEvent, size: &Size2D<usize>) -> EventResult {
     self.child.event(event, size)
   }
 

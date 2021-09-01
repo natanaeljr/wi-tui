@@ -1,6 +1,6 @@
 use crate::render::RenderCtx;
 use crate::util::Scoped;
-use crate::widgets::{AnyEvent, LayoutError, LayoutResult, LayoutSize, RenderError, RenderResult, Widget};
+use crate::widgets::{AnyEvent, EventResult, LayoutError, LayoutResult, LayoutSize, RenderError, RenderResult, Widget};
 use euclid::default::{Point2D, Rect, Size2D};
 use std::ops::Deref;
 
@@ -22,23 +22,40 @@ where
   }
 }
 
-pub struct Container {
-  pub children: Option<Box<dyn Children>>,
+pub struct Container<ChildrenStorage> {
+  pub children: Option<ChildrenStorage>,
 }
 
-impl Container {
+impl<ChildrenStorage> Container<ChildrenStorage>
+where
+  ChildrenStorage: Children,
+{
   pub fn new() -> Self {
     Self { children: None }
   }
 
-  pub fn children<C: Children + 'static>(mut self, children: C) -> Self {
-    self.children = Some(Box::new(children));
+  pub fn children(mut self, children: ChildrenStorage) -> Self {
+    self.children = Some(children);
     self
   }
 }
 
-impl Widget for Container {
-  fn event(&mut self, event: &AnyEvent, size: &Size2D<usize>) {
+impl Container<Vec<Box<dyn Widget>>> {
+  pub fn child<C: Widget + 'static>(mut self, child: C) -> Self {
+    if let Some(children) = &mut self.children {
+      children.push(Box::new(child));
+    } else {
+      self.children = Some(vec![Box::new(child) as Box<dyn Widget>])
+    }
+    self
+  }
+}
+
+impl<ChildrenStorage> Widget for Container<ChildrenStorage>
+where
+  ChildrenStorage: Children,
+{
+  fn event(&mut self, event: &AnyEvent, size: &Size2D<usize>) -> EventResult {
     todo!()
   }
 

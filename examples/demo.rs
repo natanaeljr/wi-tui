@@ -5,8 +5,11 @@ use std::ops::{Deref, DerefMut};
 use euclid::default::{Rect, Size2D};
 
 use witui::render::{RenderCtx, Renderer};
-use witui::widgets::table::{Column, ColumnWidth};
-use witui::widgets::{Align, Button, Padding, Table, Widget};
+use witui::widgets::align::Align;
+use witui::widgets::button::Button;
+use witui::widgets::padding::Padding;
+use witui::widgets::table::{Column, ColumnWidth, Table};
+use witui::widgets::Widget;
 
 fn main() {
   let button = Button::new("Button");

@@ -1,5 +1,5 @@
 use crate::render::{RenderCtx, Renderer};
-use crate::widgets::{AnyEvent, LayoutResult, RenderResult, Widget};
+use crate::widgets::{AnyEvent, EventResult, LayoutResult, RenderResult, Widget};
 use euclid::default::Size2D;
 use std::ops::{Deref, DerefMut};
 
@@ -17,7 +17,7 @@ where
 }
 
 impl Widget for Button<&str> {
-  fn event(&mut self, event: &AnyEvent, size: &Size2D<usize>) {
+  fn event(&mut self, event: &AnyEvent, size: &Size2D<usize>) -> EventResult {
     todo!()
   }
 

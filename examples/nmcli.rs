@@ -1,5 +1,4 @@
-use witui::widgets::table::Column;
-use witui::widgets::Table;
+use witui::widgets::table::{Column, Table};
 use witui::WiTui;
 
 /// Example to demonstrate the simple use of the Table Widget.

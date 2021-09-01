@@ -7,7 +7,7 @@ use euclid::default::{Point2D, Rect, Size2D};
 
 use crate::render::RenderCtx;
 use crate::util::{MinMax, Scoped, ScopedMut};
-use crate::widgets::{AnyEvent, LayoutError, LayoutResult, LayoutSize, RenderError, RenderResult, Widget};
+use crate::widgets::{AnyEvent, EventResult, LayoutError, LayoutResult, LayoutSize, RenderError, RenderResult, Widget};
 use crossterm::event::{Event, MouseButton, MouseEventKind};
 
 #[derive(Clone)]
@@ -147,29 +147,32 @@ impl<Heading> Widget for Column<Heading>
 where
   Heading: Widget,
 {
-  fn event(&mut self, event: &AnyEvent, size: &Size2D<usize>) {
+  fn event(&mut self, event: &AnyEvent, size: &Size2D<usize>) -> EventResult {
     match event {
       AnyEvent::Input(input) => match input {
-        Event::Key(_) => {}
+        Event::Key(_) => EventResult::Unhandled,
         Event::Mouse(mouse) => {
           if mouse.modifiers.is_empty() {
             match mouse.kind {
               MouseEventKind::Down(button) => match button {
-                MouseButton::Left => {}
-                MouseButton::Right => {}
+                MouseButton::Left => EventResult::Unhandled,
+                MouseButton::Right => EventResult::Unhandled,
                 MouseButton::Middle => {
                   self.width.max = match self.width.max {
                     ColumnWidthValue::Fixed(_) => ColumnWidthValue::Auto,
                     ColumnWidthValue::Auto => ColumnWidthValue::Fixed(1),
                     ColumnWidthValue::Heading => ColumnWidthValue::Fixed(1),
                   };
+                  EventResult::Done
                 }
               },
-              _ => {}
+              _ => EventResult::Unhandled,
             }
+          } else {
+            EventResult::Unhandled
           }
         }
-        Event::Resize(_, _) => {}
+        Event::Resize(_, _) => EventResult::Unhandled,
       },
     }
   }
@@ -411,7 +414,7 @@ impl<Heading> Widget for Row<Heading>
 where
   Heading: Widget,
 {
-  fn event(&mut self, event: &AnyEvent, size: &Size2D<usize>) {
+  fn event(&mut self, event: &AnyEvent, size: &Size2D<usize>) -> EventResult {
     todo!()
   }
 
@@ -1011,7 +1014,7 @@ struct ColumnLayoutFlexInput {
 }
 
 impl Widget for Table {
-  fn event(&mut self, event: &AnyEvent, size: &Size2D<usize>) {
+  fn event(&mut self, event: &AnyEvent, size: &Size2D<usize>) -> EventResult {
     // NOTE: pass down to the column, make it possible for the column to spawn a Popup Menu with filled options,
     // as we go back up the hierarchy the Popup can be filled up.
 
@@ -1026,7 +1029,7 @@ impl Widget for Table {
 
     match event {
       AnyEvent::Input(input) => match input {
-        Event::Key(_) => {}
+        Event::Key(_) => EventResult::Unhandled,
         Event::Mouse(mouse) => {
           let mut col = None;
           for idx in 0..column_starts.len() {
@@ -1041,20 +1044,23 @@ impl Widget for Table {
           if mouse.modifiers.is_empty() {
             match mouse.kind {
               MouseEventKind::Down(button) => match button {
-                MouseButton::Left => {}
-                MouseButton::Right => {}
+                MouseButton::Left => EventResult::Unhandled,
+                MouseButton::Right => EventResult::Unhandled,
                 MouseButton::Middle => {
                   if let Some(col) = col {
                     let mut column = self.columns.as_mut().unwrap().column_mut(col).unwrap();
                     column.as_mut_widget().event(event, size);
                   }
+                  EventResult::Done
                 }
               },
-              _ => {}
+              _ => EventResult::Unhandled,
             }
+          } else {
+            EventResult::Unhandled
           }
         }
-        Event::Resize(_, _) => {}
+        Event::Resize(_, _) => EventResult::Unhandled,
       },
     }
   }

@@ -4,10 +4,10 @@ use euclid::SideOffsets2D;
 use crate::render::{RenderCtx, Renderer};
 use crate::widgets::repeat::Repeat;
 use crate::widgets::style::Style;
-use crate::widgets::{AnyEvent, LayoutError, LayoutResult, RenderError, RenderResult, Widget};
+use crate::widgets::{AnyEvent, EventResult, LayoutError, LayoutResult, LayoutSize, RenderError, RenderResult, Widget};
 use crossterm::event::Event;
 
-pub struct BorderBox<Border, Child> {
+pub struct Bordered<Border, Child> {
   // sides
   pub top: Option<Border>,
   pub left: Option<Border>,
@@ -22,8 +22,12 @@ pub struct BorderBox<Border, Child> {
   pub child: Child,
 }
 
-impl<Border, Child> BorderBox<Border, Child> {
-  pub fn new(child: Child) -> Self {
+impl<Border, Child> Bordered<Border, Child>
+where
+  Border: Widget,
+  Child: Widget,
+{
+  pub fn child(child: Child) -> Self {
     Self {
       top: None,
       left: None,
@@ -78,10 +82,12 @@ impl<Border, Child> BorderBox<Border, Child> {
   }
 }
 
-impl<Child> BorderBox<Box<dyn Widget>, Child> {
-  pub fn preset_lined(child: Child, style: Style) -> BorderBox<Box<dyn Widget>, Child> {
-    let mut this = BorderBox::new(child);
-    this
+impl<Child> Bordered<Box<dyn Widget>, Child>
+where
+  Child: Widget,
+{
+  pub fn borders_line(mut self, style: Style) -> Self {
+    let this = self
       .top(Box::new(style.clone().apply(Repeat::new('─'))) as Box<dyn Widget>)
       .left(Box::new(style.clone().apply(Repeat::new('│'))) as Box<dyn Widget>)
       .right(Box::new(style.clone().apply(Repeat::new('│'))) as Box<dyn Widget>)
@@ -89,12 +95,12 @@ impl<Child> BorderBox<Box<dyn Widget>, Child> {
       .top_left(Box::new(style.clone().apply(Repeat::new('┌'))) as Box<dyn Widget>)
       .top_right(Box::new(style.clone().apply(Repeat::new('┐'))) as Box<dyn Widget>)
       .bottom_left(Box::new(style.clone().apply(Repeat::new('└'))) as Box<dyn Widget>)
-      .bottom_right(Box::new(style.clone().apply(Repeat::new('┘'))) as Box<dyn Widget>)
+      .bottom_right(Box::new(style.clone().apply(Repeat::new('┘'))) as Box<dyn Widget>);
+    this
   }
 
-  pub fn preset_double(child: Child, style: Style) -> BorderBox<Box<dyn Widget>, Child> {
-    let mut this = BorderBox::new(child);
-    this
+  pub fn borders_double(mut self, style: Style) -> Self {
+    let this = self
       .top(Box::new(style.clone().apply(Repeat::new('═'))) as Box<dyn Widget>)
       .left(Box::new(style.clone().apply(Repeat::new('║'))) as Box<dyn Widget>)
       .right(Box::new(style.clone().apply(Repeat::new('║'))) as Box<dyn Widget>)
@@ -102,12 +108,12 @@ impl<Child> BorderBox<Box<dyn Widget>, Child> {
       .top_left(Box::new(style.clone().apply(Repeat::new('╔'))) as Box<dyn Widget>)
       .top_right(Box::new(style.clone().apply(Repeat::new('╗'))) as Box<dyn Widget>)
       .bottom_left(Box::new(style.clone().apply(Repeat::new('╚'))) as Box<dyn Widget>)
-      .bottom_right(Box::new(style.clone().apply(Repeat::new('╝'))) as Box<dyn Widget>)
+      .bottom_right(Box::new(style.clone().apply(Repeat::new('╝'))) as Box<dyn Widget>);
+    this
   }
 
-  pub fn preset_dashed(child: Child, style: Style) -> BorderBox<Box<dyn Widget>, Child> {
-    let mut this = BorderBox::new(child);
-    this
+  pub fn borders_cross(mut self, style: Style) -> Self {
+    let this = self
       .top(Box::new(style.clone().apply(Repeat::new('-'))) as Box<dyn Widget>)
       .left(Box::new(style.clone().apply(Repeat::new('|'))) as Box<dyn Widget>)
       .right(Box::new(style.clone().apply(Repeat::new('|'))) as Box<dyn Widget>)
@@ -115,12 +121,12 @@ impl<Child> BorderBox<Box<dyn Widget>, Child> {
       .top_left(Box::new(style.clone().apply(Repeat::new('+'))) as Box<dyn Widget>)
       .top_right(Box::new(style.clone().apply(Repeat::new('+'))) as Box<dyn Widget>)
       .bottom_left(Box::new(style.clone().apply(Repeat::new('+'))) as Box<dyn Widget>)
-      .bottom_right(Box::new(style.clone().apply(Repeat::new('+'))) as Box<dyn Widget>)
+      .bottom_right(Box::new(style.clone().apply(Repeat::new('+'))) as Box<dyn Widget>);
+    this
   }
 
-  pub fn preset_simple_dashed(child: Child, style: Style) -> BorderBox<Box<dyn Widget>, Child> {
-    let mut this = BorderBox::new(child);
-    this
+  pub fn borders_dashes(mut self, style: Style) -> Self {
+    let this = self
       .top(Box::new(style.clone().apply(Repeat::new('-'))) as Box<dyn Widget>)
       .left(Box::new(style.clone().apply(Repeat::new('|'))) as Box<dyn Widget>)
       .right(Box::new(style.clone().apply(Repeat::new('|'))) as Box<dyn Widget>)
@@ -128,16 +134,17 @@ impl<Child> BorderBox<Box<dyn Widget>, Child> {
       .top_left(Box::new(style.clone().apply(Repeat::new('┌'))) as Box<dyn Widget>)
       .top_right(Box::new(style.clone().apply(Repeat::new('┐'))) as Box<dyn Widget>)
       .bottom_left(Box::new(style.clone().apply(Repeat::new('└'))) as Box<dyn Widget>)
-      .bottom_right(Box::new(style.clone().apply(Repeat::new('┘'))) as Box<dyn Widget>)
+      .bottom_right(Box::new(style.clone().apply(Repeat::new('┘'))) as Box<dyn Widget>);
+    this
   }
 }
 
-impl<Border, Child> Widget for BorderBox<Border, Child>
+impl<Border, Child> Widget for Bordered<Border, Child>
 where
   Border: Widget,
   Child: Widget,
 {
-  fn event(&mut self, event: &AnyEvent, size: &Size2D<usize>) {
+  fn event(&mut self, event: &AnyEvent, size: &Size2D<usize>) -> EventResult {
     self.child.event(event, size)
   }
 
