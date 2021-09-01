@@ -39,14 +39,14 @@ fn main() {
                       .child(Bordered::child("!").borders_line(Style::new().dark_cyan()))
                       .child(Bordered::child(".").borders_line(Style::new().dark_green())),
                   ) // Bordered
-                  .borders_dashes(Style::default()),
+                  .borders_dash(Style::default()),
                 ), // Repeat
               ) // Bordered
               .borders_line(Style::new().dark_red()),
             ), // Container
         ), // Expanded
       ) // Bordered
-      .borders_dashes(Style::default()),
+      .borders_dash(Style::default()),
     ); // Style
 
   WiTui::root_widget(root).alternate(true).run_loop().unwrap();

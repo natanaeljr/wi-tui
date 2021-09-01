@@ -125,7 +125,7 @@ where
     this
   }
 
-  pub fn borders_dashes(mut self, style: Style) -> Self {
+  pub fn borders_dash(mut self, style: Style) -> Self {
     let this = self
       .top(Box::new(style.clone().child(Repeat::child('-'))) as Box<dyn Widget>)
       .left(Box::new(style.clone().child(Repeat::child('|'))) as Box<dyn Widget>)
