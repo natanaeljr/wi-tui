@@ -179,7 +179,6 @@ where
     layout.max.width = std::cmp::min(layout.max.width, frame.size.width);
     layout.max.height = std::cmp::min(layout.max.height, frame.size.height);
     let frame = Rect::new(frame.origin, layout.max);
-    dbg!(&frame);
 
     let top_offset = if self.top.is_some() { 1 } else { 0 };
     let left_offset = if self.left.is_some() { 1 } else { 0 };

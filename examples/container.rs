@@ -37,7 +37,8 @@ fn main() {
                     Container::new()
                       .child(Bordered::child("~").borders_line(Style::new().dark_magenta()))
                       .child(Bordered::child("!").borders_line(Style::new().dark_cyan()))
-                      .child(Bordered::child(".").borders_line(Style::new().dark_green())),
+                      .child(Bordered::child(".").borders_line(Style::new().dark_green()))
+                      .must_fit_all_children(true),
                   ) // Bordered
                   .borders_dash(Style::default()),
                 ), // Repeat

@@ -24,6 +24,7 @@ where
 
 pub struct Container<ChildrenStorage> {
   pub children: Option<ChildrenStorage>,
+  pub must_fit_all_children: bool,
 }
 
 impl<ChildrenStorage> Container<ChildrenStorage>
@@ -31,11 +32,19 @@ where
   ChildrenStorage: Children,
 {
   pub fn new() -> Self {
-    Self { children: None }
+    Self {
+      children: None,
+      must_fit_all_children: false,
+    }
   }
 
   pub fn children(mut self, children: ChildrenStorage) -> Self {
     self.children = Some(children);
+    self
+  }
+
+  pub fn must_fit_all_children(mut self, must_fit_all_children: bool) -> Self {
+    self.must_fit_all_children = must_fit_all_children;
     self
   }
 }
@@ -67,7 +76,15 @@ where
 
     for idx in 0..children.len() {
       let child = children.get_child(idx).unwrap();
-      let child_layout = child.layout(&avail_size)?;
+      let child_layout_result = child.layout(&avail_size);
+      if let Err(LayoutError::InsufficientSpace) = child_layout_result {
+        if self.must_fit_all_children {
+          return Err(LayoutError::InsufficientSpace);
+        } else {
+          break;
+        }
+      }
+      let child_layout = child_layout_result.unwrap();
 
       if !avail_size.contains(child_layout.min.clone()) {
         return Err(LayoutError::InsufficientSpace);
@@ -103,7 +120,15 @@ where
     let mut the_x = 0;
     for idx in 0..children.len() {
       let child = children.get_child(idx).unwrap();
-      let child_layout = child.layout(&avail_size).unwrap();
+      let child_layout_result = child.layout(&avail_size);
+      if let Err(LayoutError::InsufficientSpace) = child_layout_result {
+        if self.must_fit_all_children {
+          return Err(RenderError::Layout(LayoutError::InsufficientSpace));
+        } else {
+          break;
+        }
+      }
+      let child_layout = child_layout_result.unwrap();
       avail_size.width -= child_layout.min.width;
       let child_frame = Rect::new(Point2D::new(frame.origin.x + the_x, frame.origin.y), child_layout.max);
       ctx.render_child_widget(child_frame, child.deref())?;
