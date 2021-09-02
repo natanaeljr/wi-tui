@@ -1,10 +1,10 @@
 use witui::widgets::bordered::Bordered;
 use witui::widgets::container::Container;
 use witui::widgets::expanded::Expanded;
+use witui::widgets::leak::Leak;
 use witui::widgets::repeat::Repeat;
 use witui::widgets::style::{Color, Style};
 use witui::WiTui;
-use witui::widgets::leak::Leak;
 
 // ┌---------------------------------------┐
 // |┌┐┌┐┌─────────────────────────────────┐|
@@ -35,15 +35,15 @@ fn main() {
               Bordered::child(
                 Repeat::child(
                   Leak::child(
-                  Bordered::child(
-                    Container::new()
-                      .child(Bordered::child("~").borders_line(Style::new().dark_magenta()))
-                      .child(Bordered::child("!").borders_line(Style::new().dark_cyan()))
-                      .child(Bordered::child(".").borders_line(Style::new().dark_green()))
-                      .must_fit_all_children(true),
-                  ) // Bordered
-                  .borders_dash(Style::default()),
-                  ) // Leak
+                    Bordered::child(
+                      Container::new()
+                        .child(Bordered::child("~").borders_line(Style::new().dark_magenta()))
+                        .child(Bordered::child("!").borders_line(Style::new().dark_cyan()))
+                        .child(Bordered::child(".").borders_line(Style::new().dark_green()))
+                        .must_fit_all_children(true),
+                    ) // Bordered
+                    .borders_dash(Style::default()),
+                  ), // Leak
                 ), // Repeat
               ) // Bordered
               .borders_line(Style::new().dark_red()),
