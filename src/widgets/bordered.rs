@@ -3,10 +3,10 @@ use euclid::default::{Rect, Size2D};
 use euclid::SideOffsets2D;
 
 use crate::render::{RenderCtx, Renderer};
-use crate::widgets::{AnyEvent, EventResult, LayoutError, LayoutResult, LayoutSize, RenderError, RenderResult, Widget};
 use crate::widgets::fillchar::FillChar;
 use crate::widgets::repeat::Repeat;
 use crate::widgets::style::Style;
+use crate::widgets::{AnyEvent, EventResult, LayoutError, LayoutResult, LayoutSize, RenderError, RenderResult, Widget};
 
 pub struct Bordered<Border, Child> {
   // sides
@@ -163,10 +163,10 @@ where
     frame.height -= borders_height;
 
     let mut layout = self.child.layout(&frame)?;
-    layout.max.width += borders_width;
-    layout.max.height += borders_height;
-    layout.min.width += borders_width;
-    layout.min.height += borders_height;
+    layout.max.width = layout.max.width.checked_add(borders_width).unwrap_or(std::usize::MAX);
+    layout.max.height = layout.max.height.checked_add(borders_height).unwrap_or(std::usize::MAX);
+    layout.min.width = layout.min.width.checked_add(borders_width).unwrap_or(std::usize::MAX);
+    layout.min.height = layout.min.height.checked_add(borders_height).unwrap_or(std::usize::MAX);
 
     if !parent_size.contains(layout.min.clone()) {
       return Err(LayoutError::InsufficientSpace);

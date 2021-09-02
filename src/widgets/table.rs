@@ -991,7 +991,9 @@ impl Table {
 
     // Generate final table min/max layout sizes
     let table_height_min = table_headings_height.min + first_row_height.min;
-    let table_height_max = table_headings_height.max + first_row_height.max;
+    let table_height_max = table_headings_height.max
+      + first_row_height.max /*TODO: compute actual rows size */* self.data.as_ref().unwrap().rows_len()
+      + 1;
     let table_layout_size = LayoutSize {
       min: Size2D::new(table_width.min, table_height_min),
       max: Size2D::new(table_width.max, table_height_max),
