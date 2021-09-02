@@ -149,7 +149,7 @@ where
   }
 
   fn layout(&self, parent_size: &Size2D<usize>) -> LayoutResult {
-    eprintln!( "[{}:{}]layout(): parent_size: {:?}", file!(), line!(), parent_size);
+    eprintln!("[{}:{}]layout(): parent_size: {:?}", file!(), line!(), parent_size);
     let borders_width = if self.left.is_some() { 1 } else { 0 } + if self.right.is_some() { 1 } else { 0 };
     let borders_height = if self.top.is_some() { 1 } else { 0 } + if self.bottom.is_some() { 1 } else { 0 };
 
@@ -170,7 +170,7 @@ where
     if !parent_size.contains(layout.min.clone()) {
       return Err(LayoutError::InsufficientSpace);
     }
-    eprintln!( "[{}:{}]layout(): layout: {:?}", file!(), line!(), layout );
+    eprintln!("[{}:{}]layout(): layout: {:?}", file!(), line!(), layout);
     Ok(layout)
   }
 

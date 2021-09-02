@@ -16,6 +16,7 @@ pub mod container;
 pub mod expanded;
 pub mod flex;
 pub mod label;
+pub mod leak;
 pub mod line;
 pub mod padding;
 pub mod progressbar;
@@ -26,7 +27,6 @@ pub mod table;
 pub mod tabs;
 pub mod textbox;
 pub mod vertical;
-pub mod leak;
 
 #[derive(Debug)]
 pub enum LayoutError {
@@ -313,12 +313,12 @@ impl Widget for () {
   }
 
   fn layout(&self, parent_size: &Size2D<usize>) -> LayoutResult {
-    eprintln!( "[{}:{}]layout(): parent_size: {:?}", file!(), line!(), parent_size);
+    eprintln!("[{}:{}]layout(): parent_size: {:?}", file!(), line!(), parent_size);
     let layout = LayoutSize {
       min: Default::default(),
       max: Default::default(),
     };
-    eprintln!( "[{}:{}]layout(): layout: {:?}", file!(), line!(), layout );
+    eprintln!("[{}:{}]layout(): layout: {:?}", file!(), line!(), layout);
     Ok(layout)
   }
 

@@ -23,14 +23,14 @@ where
   }
 
   fn layout(&self, parent_size: &Size2D<usize>) -> LayoutResult {
-    eprintln!( "[{}:{}]layout(): parent_size: {:?}", file!(), line!(), parent_size);
+    eprintln!("[{}:{}]layout(): parent_size: {:?}", file!(), line!(), parent_size);
     let mut layout = self
       .child
       .layout(&Size2D::new(std::usize::MAX / 2, std::usize::MAX / 2))
       .unwrap();
     layout.min.width = std::cmp::min(layout.min.width, 1);
     layout.min.height = std::cmp::min(layout.min.height, 1);
-    eprintln!( "[{}:{}]layout(): layout: {:?}", file!(), line!(), layout );
+    eprintln!("[{}:{}]layout(): layout: {:?}", file!(), line!(), layout);
     Ok(layout)
   }
 

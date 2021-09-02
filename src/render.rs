@@ -231,7 +231,7 @@ impl RenderCtx {
       frame: Default::default(),
       depth: 0,
       // parent: None,
-      actual_frame: Default::default()
+      actual_frame: Default::default(),
     };
     let frame = this.renderer().frame.clone();
     this.frame = frame;
@@ -263,7 +263,7 @@ impl RenderCtx {
       renderer: self.renderer.clone(),
       frame,
       depth: self.depth + 1,
-      actual_frame: Default::default()
+      actual_frame: Default::default(),
     };
     let actual_child_frame = if self.frame.intersects(&child_ctx.frame) {
       self
@@ -273,8 +273,18 @@ impl RenderCtx {
     } else {
       Rect::new(self.frame.origin.clone(), Size2D::zero())
     };
+    if actual_child_frame.is_empty() {
+      return Ok(());
+    }
     child_ctx.actual_frame = actual_child_frame.clone();
-    eprintln!("[{}:{}]render_child_widget(): self.frame: {:?}, input_frame: {:?}, actual_child_frame: {:?}", file!(), line!(), &self.frame, &input_frame, actual_child_frame);
+    eprintln!(
+      "[{}:{}]render_child_widget(): self.frame: {:?}, input_frame: {:?}, actual_child_frame: {:?}",
+      file!(),
+      line!(),
+      &self.frame,
+      &input_frame,
+      actual_child_frame
+    );
     self.renderer().set_frame(actual_child_frame);
     let result = child.render(&child_ctx);
     self.renderer().set_frame(self.frame.clone());
