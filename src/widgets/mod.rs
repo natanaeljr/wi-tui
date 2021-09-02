@@ -27,6 +27,7 @@ pub mod table;
 pub mod tabs;
 pub mod textbox;
 pub mod vertical;
+pub mod fillchar;
 
 #[derive(Debug)]
 pub enum LayoutError {
