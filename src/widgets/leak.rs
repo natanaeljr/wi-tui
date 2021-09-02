@@ -39,7 +39,7 @@ where
     eprintln!("[{}:{}]render(): frame: {:?}, ", file!(), line!(), &frame);
     let mut layout = self
       .child
-      .layout(&Size2D::new(std::usize::MAX / 2, std::usize::MAX / 2))
+      .layout(&Size2D::new(10000, 1000))
       .unwrap();
     layout.min.width = std::cmp::max(layout.min.width, frame.size.width);
     layout.min.height = std::cmp::max(layout.min.height, frame.size.height);

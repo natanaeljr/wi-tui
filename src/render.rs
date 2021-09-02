@@ -77,7 +77,10 @@ impl Renderer {
 
   pub fn write(&mut self, buf: &str) {
     // std::thread::sleep(std::time::Duration::from_millis(500));
-    let space = self.frame.width() - (self.frame_cursor.x - self.frame.origin.x);
+    let space = self.frame.max_x().checked_sub(self.frame_cursor.x).unwrap_or(0);
+    if space == 0 {
+      return;
+    }
     if buf.chars().count() > space {
       let (buf, _) = buf.split_at(space);
       // print!("{}", buf);
@@ -112,24 +115,26 @@ impl Renderer {
   }
 
   pub fn next_line(&mut self) {
-    if self.frame_cursor.y >= self.frame.max_y() {
+    if self.frame_cursor.y >= self.frame.max_y().checked_sub(1).unwrap_or(0) {
       return;
     }
     self.frame_cursor.x = self.frame.min_x();
     self.frame_cursor.y += 1;
     let mut stdout = std::io::stdout();
-    execute!(
-      stdout,
-      cursor::MoveTo(
-        self.frame.min_x() as u16,
-        (self.frame_cursor.y + self.reset_pos.y) as u16
-      ),
-      // cursor::MoveToNextLine(1),
-      // cursor::MoveToColumn(self.frame.min_x() as u16)
-    );
-    if self.reset_pos.y + self.frame_cursor.y >= self.size.height {
-      self.reset_pos.y -= 1;
-      execute!(stdout, crossterm::terminal::ScrollUp(1),);
+    // execute!(
+    //   stdout,
+    //   cursor::MoveTo(
+    //     self.frame.min_x() as u16,
+    //     (self.frame_cursor.y + self.reset_pos.y) as u16
+    //   ),
+    //   // cursor::MoveToNextLine(1),
+    //   // cursor::MoveToColumn(self.frame.min_x() as u16)
+    // );
+    if !self.alternate {
+      if self.reset_pos.y + self.frame_cursor.y >= self.size.height {
+        self.reset_pos.y = self.reset_pos.y.checked_sub(1).unwrap_or(0);
+        execute!(stdout, crossterm::terminal::ScrollUp(1),);
+      }
     }
     if self.frame_cursor.y >= self.nl_counter {
       self.nl_counter += 1;
