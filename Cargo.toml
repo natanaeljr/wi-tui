@@ -20,3 +20,5 @@ name = "spreadsheet"
 name = "flex"
 [[example]]
 name = "container"
+[[example]]
+name = "leak_test"

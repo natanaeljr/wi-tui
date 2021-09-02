@@ -1,8 +1,10 @@
+use std::ops::Deref;
+
+use euclid::default::{Point2D, Rect, Size2D};
+
 use crate::render::RenderCtx;
 use crate::util::Scoped;
 use crate::widgets::{AnyEvent, EventResult, LayoutError, LayoutResult, LayoutSize, RenderError, RenderResult, Widget};
-use euclid::default::{Point2D, Rect, Size2D};
-use std::ops::Deref;
 
 pub trait Children: 'static {
   fn len(&self) -> usize;

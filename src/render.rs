@@ -25,6 +25,7 @@ use crossterm::event;
 pub struct Renderer {
   size: Size2D<usize>,
   reset_pos: Point2D<usize>,
+  base_frame: Rect<usize>,
   frame: Rect<usize>,
   frame_cursor: Point2D<usize>,
   nl_counter: usize,
@@ -50,7 +51,8 @@ impl Renderer {
     let mut this = Self {
       size: Size2D::new(cols as usize, rows as usize),
       reset_pos: Point2D::new(pos_c as usize, pos_r as usize),
-      frame: Default::default(),
+      base_frame: Rect::from_size(Size2D::new(cols as usize, rows as usize)),
+      frame: Rect::from_size(Size2D::new(cols as usize, rows as usize)),
       frame_cursor: Point2D::new(0, 0),
       nl_counter: 0,
       alternate,
@@ -66,6 +68,7 @@ impl Renderer {
     self.size.width = cols;
     self.size.height = rows;
     self.nl_counter = 0;
+    self.base_frame = Rect::from_size(Size2D::new(cols as usize, rows as usize));
     self.set_frame(Rect::from_size(Size2D::new(cols as usize, rows as usize)));
     self.canvas.resize(Size2D::new(cols as usize, rows as usize));
     let mut stdout = std::io::stdout();
@@ -136,6 +139,11 @@ impl Renderer {
   }
 
   fn set_frame(&mut self, frame: Rect<usize>) {
+    let frame = self
+      .base_frame
+      .intersection(&frame)
+      .unwrap_or(Rect::new(self.frame_cursor.clone(), Size2D::zero()));
+
     // let frame = Rect::from_size(
     //   (frame.min_x(), frame.min_y() + self.reset_pos.y),
     //   (frame.width(), frame.height()),
@@ -212,6 +220,7 @@ pub struct RenderCtx {
   renderer: Rc<RefCell<Renderer>>,
   frame: Rect<usize>,
   depth: usize,
+  actual_frame: Rect<usize>,
   // parent: Option<Box<RenderCtx>>,
 }
 
@@ -222,9 +231,11 @@ impl RenderCtx {
       frame: Default::default(),
       depth: 0,
       // parent: None,
+      actual_frame: Default::default()
     };
     let frame = this.renderer().frame.clone();
     this.frame = frame;
+    this.actual_frame = frame;
     this
   }
 
@@ -247,13 +258,25 @@ impl RenderCtx {
   }
 
   pub fn render_child_widget(&self, frame: Rect<usize>, child: &dyn Widget) -> RenderResult {
-    let mut ctx = Self {
+    let input_frame = frame.clone();
+    let mut child_ctx = Self {
       renderer: self.renderer.clone(),
       frame,
       depth: self.depth + 1,
+      actual_frame: Default::default()
     };
-    self.renderer().set_frame(ctx.frame.clone());
-    let result = child.render(&ctx);
+    let actual_child_frame = if self.frame.intersects(&child_ctx.frame) {
+      self
+        .actual_frame
+        .intersection(&child_ctx.frame)
+        .unwrap_or(Rect::new(self.frame.origin.clone(), Size2D::zero()))
+    } else {
+      Rect::new(self.frame.origin.clone(), Size2D::zero())
+    };
+    child_ctx.actual_frame = actual_child_frame.clone();
+    eprintln!("[{}:{}]render_child_widget(): self.frame: {:?}, input_frame: {:?}, actual_child_frame: {:?}", file!(), line!(), &self.frame, &input_frame, actual_child_frame);
+    self.renderer().set_frame(actual_child_frame);
+    let result = child.render(&child_ctx);
     self.renderer().set_frame(self.frame.clone());
     result
   }
@@ -261,6 +284,7 @@ impl RenderCtx {
   pub(crate) fn resize(&mut self, cols: usize, rows: usize) {
     self.renderer.deref().borrow_mut().resize(cols, rows);
     let frame = self.renderer().frame.clone();
+    self.actual_frame = frame.clone();
     self.frame = frame;
   }
 }

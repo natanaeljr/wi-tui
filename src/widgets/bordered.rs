@@ -149,6 +149,7 @@ where
   }
 
   fn layout(&self, parent_size: &Size2D<usize>) -> LayoutResult {
+    eprintln!( "[{}:{}]layout(): parent_size: {:?}", file!(), line!(), parent_size);
     let borders_width = if self.left.is_some() { 1 } else { 0 } + if self.right.is_some() { 1 } else { 0 };
     let borders_height = if self.top.is_some() { 1 } else { 0 } + if self.bottom.is_some() { 1 } else { 0 };
 
@@ -169,11 +170,13 @@ where
     if !parent_size.contains(layout.min.clone()) {
       return Err(LayoutError::InsufficientSpace);
     }
+    eprintln!( "[{}:{}]layout(): layout: {:?}", file!(), line!(), layout );
     Ok(layout)
   }
 
   fn render(&self, ctx: &RenderCtx) -> RenderResult {
     let frame = ctx.get_frame().clone();
+    eprintln!("[{}:{}]render(): frame: {:?}, ", file!(), line!(), &frame);
     let mut layout = self.layout(&frame.size).map_err(|e| RenderError::Layout(e))?;
 
     layout.max.width = std::cmp::min(layout.max.width, frame.size.width);

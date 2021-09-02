@@ -26,6 +26,7 @@ pub mod table;
 pub mod tabs;
 pub mod textbox;
 pub mod vertical;
+pub mod leak;
 
 #[derive(Debug)]
 pub enum LayoutError {
@@ -312,13 +313,17 @@ impl Widget for () {
   }
 
   fn layout(&self, parent_size: &Size2D<usize>) -> LayoutResult {
-    Ok(LayoutSize {
+    eprintln!( "[{}:{}]layout(): parent_size: {:?}", file!(), line!(), parent_size);
+    let layout = LayoutSize {
       min: Default::default(),
       max: Default::default(),
-    })
+    };
+    eprintln!( "[{}:{}]layout(): layout: {:?}", file!(), line!(), layout );
+    Ok(layout)
   }
 
   fn render(&self, ctx: &RenderCtx) -> RenderResult {
+    eprintln!("[{}:{}]render(): frame: {:?}, ", file!(), line!(), &ctx.get_frame());
     Ok(())
   }
 }
