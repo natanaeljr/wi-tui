@@ -1,3 +1,4 @@
+use crate::debug;
 use euclid::default::{Point2D, Rect, Size2D};
 use euclid::SideOffsets2D;
 
@@ -54,6 +55,10 @@ where
     let child_width = layout.max.width.min(frame.size.width);
     let child_height = layout.max.height.min(frame.size.height);
     let child_size = Size2D::new(child_width, child_height);
+
+    if child_size.is_empty() {
+      return Ok(());
+    }
 
     let mut avail_height = frame.size.height;
     'row_loop: while avail_height > 0 {

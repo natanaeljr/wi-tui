@@ -31,7 +31,7 @@ fn main() {
   let root = Frame::child(root).borders_line(Style::new().magenta());
   let root = Padding::child(root).top(1).bottom(1).left(3).right(3);
   let root = Leak::child(root);
-  let root = Minimize::min(Size2D::zero()).child(root);
+  let root = Minimize::zero().child(root);
   let root = Frame::child(root).borders_cross(Style::new().yellow());
   let root = Style::new().child(root);
 

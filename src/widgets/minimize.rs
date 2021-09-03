@@ -8,6 +8,12 @@ pub struct Minimize<Child> {
 }
 
 impl Minimize<()> {
+  pub fn zero() -> Self {
+    Self {
+      min: Size2D::zero(),
+      child: (),
+    }
+  }
   pub fn min(min: Size2D<usize>) -> Self {
     Self { min, child: () }
   }
@@ -34,7 +40,6 @@ where
     let layout_result = self.child.layout(parent_size);
     if let Err(e) = layout_result {
       if let LayoutError::InsufficientSpace = e {
-        let mut layout = self.child.layout(&Size2D::new(1000, 200)).unwrap();
         return Ok(LayoutSize {
           min: self.min.clone(),
           max: self.min.clone(),
