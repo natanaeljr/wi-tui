@@ -8,6 +8,7 @@ use crossterm::style::{Attributes, Color};
 use crossterm::terminal::{Clear, ClearType, DisableLineWrap, EnableLineWrap, ScrollDown, ScrollUp};
 use crossterm::{cursor, execute, terminal};
 use euclid::default::{Box2D, Point2D, Rect, Size2D};
+use log::trace;
 
 use crate::canvas::Canvas;
 use crate::util::{Immut, Immutable};
@@ -282,10 +283,8 @@ impl RenderCtx {
       return Ok(());
     }
     child_ctx.actual_frame = actual_child_frame.clone();
-    eprintln!(
-      "[{}:{}]render_child_widget(): self.frame: {:?}, input_frame: {:?}, actual_child_frame: {:?}",
-      file!(),
-      line!(),
+    trace!(
+      "render_child_widget() : self.frame: {:?}, input_frame: {:?}, actual_child_frame: {:?}",
       &self.frame,
       &input_frame,
       actual_child_frame

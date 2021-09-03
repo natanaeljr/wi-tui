@@ -1,6 +1,7 @@
 use crossterm::event::Event;
 use euclid::default::{Rect, Size2D};
 use euclid::SideOffsets2D;
+use log::debug;
 
 use crate::render::{RenderCtx, Renderer};
 use crate::widgets::fillchar::FillChar;
@@ -150,7 +151,7 @@ where
   }
 
   fn layout(&self, parent_size: &Size2D<usize>) -> LayoutResult {
-    eprintln!("[{}:{}]layout(): parent_size: {:?}", file!(), line!(), parent_size);
+    debug!("layout() : parent_size: {:?}", parent_size);
     let borders_width = if self.left.is_some() { 1 } else { 0 } + if self.right.is_some() { 1 } else { 0 };
     let borders_height = if self.top.is_some() { 1 } else { 0 } + if self.bottom.is_some() { 1 } else { 0 };
 
@@ -171,13 +172,13 @@ where
     if !parent_size.contains(layout.min.clone()) {
       return Err(LayoutError::InsufficientSpace);
     }
-    eprintln!("[{}:{}]layout(): layout: {:?}", file!(), line!(), layout);
+    debug!("layout() : layout: {:?}", layout);
     Ok(layout)
   }
 
   fn render(&self, ctx: &RenderCtx) -> RenderResult {
     let frame = ctx.get_frame().clone();
-    eprintln!("[{}:{}]render(): frame: {:?}, ", file!(), line!(), &frame);
+    debug!("render() : frame: {:?}", &frame);
     let mut layout = self.layout(&frame.size).map_err(|e| RenderError::Layout(e))?;
 
     layout.max.width = std::cmp::min(layout.max.width, frame.size.width);
@@ -195,7 +196,7 @@ where
     }
     if let Some(left) = self.left.as_ref() {
       let border_frame = frame.inner_rect(SideOffsets2D::new(top_offset, frame.width() - 1, bottom_offset, 0));
-      eprintln!("[{}:{}]render(): left frame: {:?}, ", file!(), line!(), &border_frame);
+      debug!("render() : left frame: {:?}", &border_frame);
       ctx.render_child(border_frame, left)?;
     }
     if let Some(right) = self.right.as_ref() {

@@ -2,6 +2,7 @@ use crate::render::{RenderCtx, Renderer};
 use crate::util::Scoped;
 use crossterm::style::StyledContent;
 use euclid::default::Size2D;
+use log::debug;
 use std::cell::{Cell, RefCell};
 use std::error::Error;
 use std::fmt::{Display, Formatter};
@@ -14,6 +15,7 @@ pub mod button;
 pub mod checkbox;
 pub mod container;
 pub mod expanded;
+pub mod fillchar;
 pub mod flex;
 pub mod label;
 pub mod leak;
@@ -27,7 +29,6 @@ pub mod table;
 pub mod tabs;
 pub mod textbox;
 pub mod vertical;
-pub mod fillchar;
 
 #[derive(Debug)]
 pub enum LayoutError {
@@ -314,17 +315,17 @@ impl Widget for () {
   }
 
   fn layout(&self, parent_size: &Size2D<usize>) -> LayoutResult {
-    eprintln!("[{}:{}]layout(): parent_size: {:?}", file!(), line!(), parent_size);
+    debug!("layout() : parent_size: {:?}", parent_size);
     let layout = LayoutSize {
       min: Default::default(),
       max: Default::default(),
     };
-    eprintln!("[{}:{}]layout(): layout: {:?}", file!(), line!(), layout);
+    debug!("layout() : layout: {:?}", layout);
     Ok(layout)
   }
 
   fn render(&self, ctx: &RenderCtx) -> RenderResult {
-    eprintln!("[{}:{}]render(): frame: {:?}, ", file!(), line!(), &ctx.get_frame());
+    debug!("render() : frame: {:?}, ", &ctx.get_frame());
     Ok(())
   }
 }

@@ -6,6 +6,7 @@ use crossterm::style::{
 use crossterm::terminal::ClearType;
 use crossterm::{cursor, execute, queue, terminal};
 use euclid::default::{Point2D, Rect, Size2D};
+use log::{debug, info, trace};
 use std::io::{BufWriter, Stdout, Write};
 use std::iter::{Map, Zip};
 use std::ops::BitOr;
@@ -47,7 +48,7 @@ impl Canvas {
     // self.active_buffer.clear();
     // execute!(std::io::stdout(), terminal::Clear(ClearType::All));
     // ---
-    eprintln!("RESIZE: ({},{})", size.height, size.width);
+    info!("RESIZE: ({},{})", size.height, size.width);
     self.draw_buffer.resize_with(size.height, || {
       let mut cols = Vec::<Cell>::new();
       cols.resize(size.width, Cell::default());
@@ -156,24 +157,24 @@ impl Canvas {
       let mut update_cursor = |stdout: &mut Vec<u8>| {
         if cursor_pos.x != col {
           if cursor_pos.y != row {
-            eprintln!("[{},{}]: MoveTo  ({}, {})", cursor_pos.y, cursor_pos.x, row, col);
+            trace!("[{},{}]: MoveTo  ({}, {})", cursor_pos.y, cursor_pos.x, row, col);
             queue!(stdout, MoveTo(col as u16, row as u16));
           } else
           // if col > cursor_pos.x + 5
           {
             // MoveToColumn begins on 1 for some reason
-            eprintln!("[{},{}]: MoveToColumn  ({}, {})", cursor_pos.y, cursor_pos.x, row, col);
+            trace!("[{},{}]: MoveToColumn  ({}, {})", cursor_pos.y, cursor_pos.x, row, col);
             queue!(stdout, MoveToColumn(col as u16 + 1));
           }
           // else {
           //   let space = "        ";
           //   let diff = col - cursor_pos.x;
-          //   eprintln!("[{},{}]: Print({})", row, col, space.split_at(diff).0);
+          //   trace!("[{},{}]: Print({})", row, col, space.split_at(diff).0);
           //   queue!(stdout, Print(space.split_at(diff).0));
           // }
         } else if cursor_pos.y != row {
           // MoveToRow also begins on 1 for some reason
-          eprintln!("[{},{}]: MoveToRow  ({}, {})", cursor_pos.y, cursor_pos.x, row, col);
+          trace!("[{},{}]: MoveToRow  ({}, {})", cursor_pos.y, cursor_pos.x, row, col);
           queue!(stdout, MoveToRow(row as u16 + 1));
         }
         cursor_pos.x = col;
@@ -187,28 +188,28 @@ impl Canvas {
 
       // modifiers
       if draw_cell.style.attributes != active_cell.style.attributes {
-        eprintln!("[{},{}]: attr_changed", row, col);
+        trace!("[{},{}]: attr_changed", row, col);
         attr_changed = true;
         active_cell.style.attributes = draw_cell.style.attributes.clone();
       }
 
       // background
       if draw_cell.style.background_color != active_cell.style.background_color {
-        eprintln!("[{},{}]: bg_changed", row, col);
+        trace!("[{},{}]: bg_changed", row, col);
         bg_changed = true;
         active_cell.style.background_color = draw_cell.style.background_color.clone();
       }
 
       // foreground
       if draw_cell.style.foreground_color != active_cell.style.foreground_color {
-        eprintln!("[{},{}]: fg_changed", row, col);
+        trace!("[{},{}]: fg_changed", row, col);
         fg_changed = true;
         active_cell.style.foreground_color = draw_cell.style.foreground_color.clone();
       }
 
       // character
       if attr_changed || bg_changed || fg_changed || active_cell.data != draw_cell.data {
-        // eprintln!(
+        // trace!(
         //   "[{},{}]: char: {}       changed: attr {}, bg: {}, fg: {}, diff: {}",
         //   row,
         //   col,
@@ -224,7 +225,7 @@ impl Canvas {
 
       if print_char && draw_cell.style.attributes != attributes {
         update_cursor(&mut stdout);
-        eprintln!("[{},{}]: ATTR", row, col);
+        trace!("[{},{}]: ATTR", row, col);
         if !attributes.is_empty() {
           // attribute reset causes the color to also reset
           bg = Color::Reset;
@@ -237,7 +238,7 @@ impl Canvas {
 
       if print_char && draw_cell.style.background_color.unwrap_or(Color::Reset) != bg {
         update_cursor(&mut stdout);
-        eprintln!("[{},{}]: BG", row, col);
+        trace!("[{},{}]: BG", row, col);
         bg = draw_cell.style.background_color.unwrap_or(Color::Reset);
         queue!(
           stdout,
@@ -247,7 +248,7 @@ impl Canvas {
 
       if print_char && draw_cell.style.foreground_color.unwrap_or(Color::Reset) != fg {
         update_cursor(&mut stdout);
-        eprintln!("[{},{}]: FG", row, col);
+        trace!("[{},{}]: FG", row, col);
         fg = draw_cell.style.foreground_color.unwrap_or(Color::Reset);
         queue!(
           stdout,
@@ -257,7 +258,7 @@ impl Canvas {
 
       if print_char {
         update_cursor(&mut stdout);
-        eprintln!("[{},{}]: char: {}", row, col, draw_cell.data.unwrap_or(' '));
+        trace!("[{},{}]: char: {}", row, col, draw_cell.data.unwrap_or(' '));
         queue!(stdout, Print(draw_cell.data.unwrap_or(' ')));
         cursor_pos.x += 1;
       }
