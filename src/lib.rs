@@ -11,6 +11,10 @@ pub mod render;
 pub mod util;
 pub mod widgets;
 
+pub(crate) mod log;
+#[cfg(feature = "logging")]
+pub use crate::log::enable_pretty_env_logging;
+
 // TODO: Make all Widgets divisible between property and widget so we can have (along with WidgetExt):
 // let widget = "Hello".bordered(Borders::lines());
 

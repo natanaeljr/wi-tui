@@ -6,10 +6,11 @@ use crossterm::style::{
 use crossterm::terminal::ClearType;
 use crossterm::{cursor, execute, queue, terminal};
 use euclid::default::{Point2D, Rect, Size2D};
-use log::{debug, info, trace};
 use std::io::{BufWriter, Stdout, Write};
 use std::iter::{Map, Zip};
 use std::ops::BitOr;
+
+use crate::{info, trace};
 
 #[derive(Debug, Copy, Clone, Default, PartialEq, Eq)]
 pub struct Cell {

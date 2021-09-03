@@ -8,7 +8,7 @@ use crossterm::style::{Attributes, Color};
 use crossterm::terminal::{Clear, ClearType, DisableLineWrap, EnableLineWrap, ScrollDown, ScrollUp};
 use crossterm::{cursor, execute, terminal};
 use euclid::default::{Box2D, Point2D, Rect, Size2D};
-use log::trace;
+use crate::trace;
 
 use crate::canvas::Canvas;
 use crate::util::{Immut, Immutable};

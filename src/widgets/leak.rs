@@ -1,8 +1,8 @@
 use euclid::default::{Rect, Size2D};
-use log::debug;
 
 use crate::render::RenderCtx;
 use crate::widgets::{AnyEvent, EventResult, LayoutResult, RenderResult, Widget};
+use crate::debug;
 
 // TODO: percentage
 pub struct Leak<Child> {

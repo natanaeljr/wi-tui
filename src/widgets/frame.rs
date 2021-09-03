@@ -1,7 +1,6 @@
 use crossterm::event::Event;
 use euclid::default::{Rect, Size2D};
 use euclid::SideOffsets2D;
-use log::debug;
 
 use crate::render::{RenderCtx, Renderer};
 use crate::widgets::fillchar::FillChar;
@@ -9,7 +8,9 @@ use crate::widgets::repeat::Repeat;
 use crate::widgets::style::Style;
 use crate::widgets::{AnyEvent, EventResult, LayoutError, LayoutResult, LayoutSize, RenderError, RenderResult, Widget};
 
-pub struct Bordered<Border, Child> {
+use crate::debug;
+
+pub struct Frame<Border, Child> {
   // sides
   pub top: Option<Border>,
   pub left: Option<Border>,
@@ -24,7 +25,7 @@ pub struct Bordered<Border, Child> {
   pub child: Child,
 }
 
-impl<Border, Child> Bordered<Border, Child>
+impl<Border, Child> Frame<Border, Child>
 where
   Border: Widget,
   Child: Widget,
@@ -84,7 +85,7 @@ where
   }
 }
 
-impl<Child> Bordered<Box<dyn Widget>, Child>
+impl<Child> Frame<Box<dyn Widget>, Child>
 where
   Child: Widget,
 {
@@ -141,7 +142,7 @@ where
   }
 }
 
-impl<Border, Child> Widget for Bordered<Border, Child>
+impl<Border, Child> Widget for Frame<Border, Child>
 where
   Border: Widget,
   Child: Widget,
