@@ -1,3 +1,4 @@
+use crate::debug;
 use crate::render::{RenderCtx, Renderer};
 use crate::util::Scoped;
 use crossterm::style::StyledContent;
@@ -7,19 +8,19 @@ use std::error::Error;
 use std::fmt::{Display, Formatter};
 use std::ops::{Deref, DerefMut};
 use std::rc::Rc;
-use crate::debug;
 
 pub mod align;
-pub mod frame;
 pub mod button;
 pub mod checkbox;
 pub mod container;
 pub mod expand;
 pub mod fillchar;
 pub mod flex;
+pub mod frame;
 pub mod label;
 pub mod leak;
 pub mod line;
+pub mod minimize;
 pub mod padding;
 pub mod progressbar;
 pub mod repeat;

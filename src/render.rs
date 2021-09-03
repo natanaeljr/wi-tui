@@ -4,11 +4,11 @@ use std::io::Write;
 use std::ops::{Deref, DerefMut};
 use std::rc::Rc;
 
+use crate::trace;
 use crossterm::style::{Attributes, Color};
 use crossterm::terminal::{Clear, ClearType, DisableLineWrap, EnableLineWrap, ScrollDown, ScrollUp};
 use crossterm::{cursor, execute, terminal};
 use euclid::default::{Box2D, Point2D, Rect, Size2D};
-use crate::trace;
 
 use crate::canvas::Canvas;
 use crate::util::{Immut, Immutable};
@@ -83,9 +83,9 @@ impl Renderer {
       return;
     }
     if buf.chars().count() > space {
-      let (buf, _) = buf.split_at(space);
+      let buf = buf.chars().take(space).collect::<String>();
       // print!("{}", buf);
-      self.canvas.write(&self.frame_cursor, buf);
+      self.canvas.write(&self.frame_cursor, buf.as_str());
       self.frame_cursor.x += space;
     } else {
       // print!("{}", buf);

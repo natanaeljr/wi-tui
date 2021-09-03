@@ -1,5 +1,5 @@
 use crate::render::RenderCtx;
-use crate::widgets::{AnyEvent, EventResult, LayoutResult, LayoutSize, RenderResult, Widget};
+use crate::widgets::{AnyEvent, EventResult, LayoutError, LayoutResult, LayoutSize, RenderResult, Widget};
 use euclid::default::{Point2D, Rect, SideOffsets2D, Size2D};
 
 pub struct Padding<Child> {
@@ -53,6 +53,12 @@ where
   }
 
   fn layout(&self, parent_size: &Size2D<usize>) -> LayoutResult {
+    if parent_size.width < self.offsets.left + self.offsets.right
+      || parent_size.height < self.offsets.top + self.offsets.bottom
+    {
+      return Err(LayoutError::InsufficientSpace);
+    }
+
     let frame = Rect::from_size(parent_size.clone()).inner_rect(self.offsets.clone());
     let mut layout = self.child.layout(&frame.size)?;
     layout.min.width += self.offsets.left + self.offsets.right;

@@ -1,12 +1,18 @@
 use crossterm::style::Stylize;
-use witui::widgets::frame::Frame;
+use euclid::default::Size2D;
 use witui::widgets::container::Container;
+use witui::widgets::frame::Frame;
+use witui::widgets::leak::Leak;
+use witui::widgets::minimize::Minimize;
 use witui::widgets::padding::Padding;
 use witui::widgets::style::{Color, Style};
 use witui::widgets::Widget;
 use witui::WiTui;
 
 fn main() {
+  #[cfg(feature = "logging")]
+  witui::enable_pretty_env_logging();
+
   let root = Container::new()
     .child(Frame::child(()).borders_line(Style::default().dark_blue()))
     .child(Frame::child(()).borders_line(Style::default().dark_yellow()))
@@ -24,7 +30,9 @@ fn main() {
 
   let root = Frame::child(root).borders_line(Style::new().magenta());
   let root = Padding::child(root).top(1).bottom(1).left(3).right(3);
-  let root = Frame::child(root).borders_cross(Style::new().yellow().slow_blink());
+  let root = Leak::child(root);
+  let root = Minimize::min(Size2D::zero()).child(root);
+  let root = Frame::child(root).borders_cross(Style::new().yellow());
   let root = Style::new().child(root);
 
   WiTui::root_widget(root).alternate(true).run_loop().unwrap();
