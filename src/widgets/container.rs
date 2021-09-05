@@ -87,16 +87,17 @@ where
         }
       }
       let child_layout = child_layout_result.unwrap();
+      let child_size = Size2D::new(
+        std::cmp::min(avail_size.width, child_layout.max.width),
+        std::cmp::min(avail_size.height, child_layout.max.height),
+      );
 
-      if !avail_size.contains(child_layout.min.clone()) {
-        return Err(LayoutError::InsufficientSpace);
-      }
-      avail_size.width -= child_layout.min.width;
+      avail_size.width -= child_size.width;
 
       layout.min.width = layout
         .min
         .width
-        .checked_add(child_layout.min.width)
+        .checked_add(child_size.width)
         .unwrap_or(std::usize::MAX);
       layout.max.width = layout
         .max
@@ -104,7 +105,7 @@ where
         .checked_add(child_layout.max.width)
         .unwrap_or(std::usize::MAX);
 
-      layout.min.height = layout.min.height.max(child_layout.min.height);
+      layout.min.height = layout.min.height.max(child_size.height);
       layout.max.height = layout.max.height.max(child_layout.max.height);
     }
 
@@ -137,8 +138,8 @@ where
       );
       let child_frame = Rect::new(Point2D::new(frame.min_x() + the_x, frame.min_y()), child_size);
       ctx.render_child_dyn_widget(child_frame, child.deref())?;
-      avail_size.width -= child_layout.min.width;
-      the_x += child_layout.max.width;
+      avail_size.width -= child_size.width;
+      the_x += child_size.width;
     }
 
     Ok(())

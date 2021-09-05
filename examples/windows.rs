@@ -13,24 +13,22 @@ use witui::WiTui;
 
 fn main() {
   let root = Borders::child(Expand::child(()))
-    .borders_rounded(Style::default().green())
+    .borders_rounded(Style::default().dark_green())
     .top(Box::new(
       Stack::new()
-        .child(Style::default().green().child(FillChar::new('─')))
+        .child(Style::default().dark_green().child(FillChar::new('─')))
         .child(
           Container::new().child(
             Expand::child(
-              Padding::child(
+              Padding::default().left(1).right(1).child(
                 Align::top_left(
                   Container::new()
-                    .child('┤'.green())
+                    .child('┤'.dark_green().dim())
                     .child("Title".white().bold().underlined())
-                    .child('├'.green())
+                    .child('├'.dark_green().dim())
                     .must_fit_all_children(true),
                 ), // Align
-              ) // Padding
-              .left(1)
-              .right(1),
+              ), // Padding
             ), // Expand
           ), // Container
         ), // Stack

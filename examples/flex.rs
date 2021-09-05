@@ -20,16 +20,14 @@ fn main() {
     .child(Borders::child("World".white()).borders_line(Style::default().red()))
     .child(Borders::child("Ready to rock?".white().dim()).borders_line(Style::default().dark_grey()))
     .child(
-      Padding::child(
+      Padding::default().top(3).left(16).child(
         Borders::child("This is one true Text-based UI lib".blue().on_dark_grey())
           .borders_double(Style::new().blue().on_dark_grey()),
-      )
-      .left(16)
-      .top(3),
+      ),
     );
 
   let root = Borders::child(root).borders_line(Style::new().magenta());
-  let root = Padding::child(root).top(1).bottom(1).left(3).right(3);
+  let root = Padding::default().top(1).bottom(1).left(3).right(3).child(root);
   let root = Leak::child(root);
   let root = Minimize::zero().child(root);
   let root = Borders::child(root).borders_cross(Style::new().yellow());

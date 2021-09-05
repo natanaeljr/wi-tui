@@ -4,26 +4,36 @@ use euclid::default::{Point2D, Rect, SideOffsets2D, Size2D};
 
 // TODO: offsets of (min + max + flex)
 pub struct Padding<Child> {
-  pub child: Child,
   pub offsets: SideOffsets2D<usize>,
+  pub child: Child,
 }
 
-impl<Child> Padding<Child> {
-  pub fn child(child: Child) -> Self {
+impl Default for Padding<()> {
+  fn default() -> Self {
     Self {
-      child,
       offsets: SideOffsets2D::zero(),
+      child: (),
+    }
+  }
+}
+
+impl Padding<()> {
+  pub fn all(all: usize) -> Self {
+    Self {
+      offsets: SideOffsets2D::new_all_same(all),
+      child: (),
     }
   }
 
-  pub fn all(mut self, all: usize) -> Self {
-    self.offsets.top = all;
-    self.offsets.left = all;
-    self.offsets.right = all;
-    self.offsets.bottom = all;
-    self
+  pub fn child<Child: Widget>(mut self, child: Child) -> Padding<Child> {
+    Padding {
+      child,
+      offsets: self.offsets,
+    }
   }
+}
 
+impl<Child> Padding<Child> {
   pub fn top(mut self, top: usize) -> Self {
     self.offsets.top = top;
     self
