@@ -94,6 +94,7 @@ impl WiTui {
           // eprintln!("Resize from: {:?}, to: {:?}", original_size, new_size);
           if self.alternate {
             self.render_ctx.resize(cols as usize, rows as usize);
+            self.render_ctx.renderer().force_render_once(); // TEMPORARY: just for resize (URXVT BUG)
             break; // TODO: uncomment
           }
         }

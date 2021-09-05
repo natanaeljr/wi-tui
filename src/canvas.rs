@@ -22,6 +22,7 @@ pub struct Canvas {
   frame: Rect<usize>,
   draw_buffer: Vec<Vec<Cell>>,   // Rows<Cols<Cells>>
   active_buffer: Vec<Vec<Cell>>, // Rows<Cols<Cells>>
+  pub force_render_once: bool,   // TODO: Temporary, just for prove of concept!
 }
 
 impl Canvas {
@@ -38,6 +39,7 @@ impl Canvas {
       frame,
       draw_buffer: rows.clone(),
       active_buffer: rows,
+      force_render_once: false,
     }
   }
 
@@ -209,7 +211,7 @@ impl Canvas {
       }
 
       // character
-      if attr_changed || bg_changed || fg_changed || active_cell.data != draw_cell.data {
+      if attr_changed || bg_changed || fg_changed || active_cell.data != draw_cell.data || self.force_render_once {
         // trace!(
         //   "[{},{}]: char: {}       changed: attr {}, bg: {}, fg: {}, diff: {}",
         //   row,
@@ -283,5 +285,8 @@ impl Canvas {
     // stdout.flush();
     std::io::stdout().write_all(stdout.as_slice());
     std::io::stdout().flush();
+
+    // TODO: Temporary:
+    self.force_render_once = false;
   }
 }

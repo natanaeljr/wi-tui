@@ -76,6 +76,10 @@ impl Renderer {
     // execute!(stdout, terminal::Clear(ClearType::All));
   }
 
+  pub(crate) fn force_render_once(&mut self) {
+    self.canvas.force_render_once = true;
+  }
+
   pub fn write(&mut self, buf: &str) {
     // std::thread::sleep(std::time::Duration::from_millis(500));
     let space = self.frame.max_x().checked_sub(self.frame_cursor.x).unwrap_or(0);
