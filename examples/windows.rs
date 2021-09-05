@@ -4,10 +4,12 @@ use witui::widgets::borders::Borders;
 use witui::widgets::container::Container;
 use witui::widgets::expand::Expand;
 use witui::widgets::fillchar::FillChar;
+use witui::widgets::hook::Hook;
+use witui::widgets::leak::Leak;
 use witui::widgets::minimize::Minimize;
 use witui::widgets::padding::Padding;
 use witui::widgets::stack::Stack;
-use witui::widgets::style::Style;
+use witui::widgets::style::{Color, Style};
 use witui::widgets::Widget;
 use witui::WiTui;
 
@@ -18,23 +20,43 @@ fn main() {
       Stack::new()
         .child(Style::default().dark_green().child(FillChar::new('─')))
         .child(
-          Container::new().child(
-            Expand::child(
-              Padding::default().left(1).right(1).child(
+          Container::new()
+            .child(
+              // Expand::child(
+              Padding::default().left(1).child(
                 Align::top_left(
                   Container::new()
-                    .child('┤'.dark_green().dim())
+                    .child('┤'.dark_green())
                     .child("Title".white().bold().underlined())
-                    .child('├'.dark_green().dim())
+                    .child('├'.dark_green())
                     .must_fit_all_children(true),
                 ), // Align
               ), // Padding
-            ), // Expand
-          ), // Container
-        ), // Stack
+                 // ), // Expand
+            ) // Container
+            .child(
+              Expand::child(
+                Padding::default().right(1).child(
+                  Align::top_right(
+                    Container::new()
+                      .child('┤'.dark_green())
+                      .child("Header".white().bold().underlined())
+                      .child('├'.dark_green())
+                      .must_fit_all_children(true),
+                  ), // Align
+                ), // Padding
+              ), // Expand
+            ) // Container
+            .must_fit_all_children(true),
+        ) // Stack
+        .must_fit_all_children(false),
     ) as Box<dyn Widget>);
 
   let root = Minimize::zero().child(root);
+  let root = Style::new()
+    .bg(Color::Rgb { r: 20, g: 20, b: 20 })
+    .fg(Color::White)
+    .child(root);
 
   WiTui::root_widget(root).alternate(true).run_loop().unwrap();
 }

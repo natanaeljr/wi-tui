@@ -1,6 +1,6 @@
 use crate::render::RenderCtx;
 use crate::util::Scoped;
-use crate::widgets::{AnyEvent, EventResult, LayoutResult, LayoutSize, RenderError, RenderResult, Widget};
+use crate::widgets::{AnyEvent, EventResult, LayoutError, LayoutResult, LayoutSize, RenderError, RenderResult, Widget};
 use euclid::default::Size2D;
 use std::cmp::max;
 use std::ops::Deref;
@@ -22,6 +22,11 @@ where
     self.get(index).and_then(|c| Some(Scoped::Ref(c as &dyn Widget)))
   }
 }
+
+// BUG: bg, fg and attrs, are leaking from one child to the next
+//  e.g.: child 1 renders text with fg(green) and attr(bold)
+//        child 2 renders simple text and ends up inheriting the fg and attr from child 1 settings
+//  need to solve with some sort of push/pop of contexts.
 
 pub struct Stack<ChildrenStorage> {
   pub children: Option<ChildrenStorage>,
@@ -74,7 +79,15 @@ where
     let mut layout = LayoutSize::default();
     for idx in 0..children.len() {
       let child = children.get_child(idx).unwrap();
-      let child_layout = child.layout(&avail_size)?;
+      let child_layout_result = child.layout(&avail_size);
+      if let Err(LayoutError::InsufficientSpace) = child_layout_result {
+        if self.must_fit_all_children {
+          return Err(LayoutError::InsufficientSpace);
+        } else {
+          break;
+        }
+      }
+      let child_layout = child_layout_result.unwrap();
       layout.min.height = max(layout.min.height, child_layout.min.height);
       layout.min.width = max(layout.min.width, child_layout.min.width);
       layout.max.height = max(layout.max.height, child_layout.max.height);
@@ -89,7 +102,14 @@ where
     let children = self.children.as_ref().unwrap();
     for idx in 0..children.len() {
       let child = children.get_child(idx).unwrap();
-      ctx.render_child_dyn_widget(frame.clone(), child.deref())?;
+      let result = ctx.render_child_dyn_widget(frame.clone(), child.deref());
+      if let Err(RenderError::Layout(LayoutError::InsufficientSpace)) = result {
+        if self.must_fit_all_children {
+          return Err(RenderError::Layout(LayoutError::InsufficientSpace));
+        } else {
+          break;
+        }
+      }
     }
     Ok(())
   }
