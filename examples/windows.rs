@@ -13,6 +13,14 @@ use witui::widgets::style::{Color, Style};
 use witui::widgets::Widget;
 use witui::WiTui;
 
+// ╭─┤Title├┤Bar├────────┤ _   x ├─╮
+// │                               │
+// │                               │
+// │                               │
+// │                               │
+// │                               │
+// ╰───────────────────────────────╯
+
 fn main() {
   let root = Borders::child(Expand::child(()))
     .borders_rounded(Style::default().dark_green())
@@ -27,7 +35,7 @@ fn main() {
                   Align::top_left(
                     Container::new()
                       .child('┤'.dark_green())
-                      .child("Title".white().bold().underlined().dim())
+                      .child("Title".dark_green().bold().reverse())
                       .child('├'.dark_green())
                       .must_fit_all_children(true),
                   ), // Align
@@ -37,7 +45,7 @@ fn main() {
                 Align::top_left(
                   Container::new()
                     .child('┤'.dark_green())
-                    .child("Bread".white().bold().underlined().dim())
+                    .child("Bar".white().bold().underlined().dim())
                     .child('├'.dark_green())
                     .must_fit_all_children(true),
                 ), // Align
@@ -48,7 +56,13 @@ fn main() {
                     Align::top_right(
                       Container::new()
                         .child('┤'.dark_green())
-                        .child("Header".white().bold().underlined().dim())
+                        .child(
+                          Container::new()
+                            .child(Minimize::zero().child(Style::new().white().dim().reverse().bold().child(" _ ")))
+                            .child(' ')
+                            .child(Style::new().white().bg(Color::AnsiValue(88)).bold().child(" x "))
+                            .must_fit_all_children(false),
+                        )
                         .child('├'.dark_green())
                         .must_fit_all_children(true),
                     ), // Align
