@@ -191,6 +191,6 @@ where
     }
 
     let child_frame = ctx.get_frame().inner_rect(offsets);
-    ctx.render_child(child_frame, &self.child)
+    ctx.render_child_widget(child_frame, &self.child)
   }
 }

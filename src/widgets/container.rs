@@ -136,7 +136,7 @@ where
         std::cmp::min(avail_size.height, child_layout.max.height),
       );
       let child_frame = Rect::new(Point2D::new(frame.min_x() + the_x, frame.min_y()), child_size);
-      ctx.render_child_widget(child_frame, child.deref())?;
+      ctx.render_child_dyn_widget(child_frame, child.deref())?;
       avail_size.width -= child_layout.min.width;
       the_x += child_layout.max.width;
     }

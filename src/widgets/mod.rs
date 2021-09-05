@@ -25,6 +25,7 @@ pub mod padding;
 pub mod progressbar;
 pub mod repeat;
 pub mod scrollbar;
+pub mod stack;
 pub mod style;
 pub mod table;
 pub mod tabs;
@@ -105,7 +106,7 @@ impl Widget for &str {
 
   fn layout(&self, parent_size: &Size2D<usize>) -> LayoutResult {
     let min = Size2D::new(1, 1);
-    let mut max = Size2D::new(self.len(), 1);
+    let mut max = Size2D::new(self.chars().count(), 1);
     // clamp max size to parent size
     // max.width = std::cmp::min(max.width, parent_size.width);
     // max.height = std::cmp::min(max.height, parent_size.height);
@@ -118,10 +119,10 @@ impl Widget for &str {
   }
 
   fn render(&self, ctx: &RenderCtx) -> RenderResult {
-    let parent_size = ctx.get_frame().size.clone();
-    if parent_size.width < self.len() {
-      let buf = self.split_at(parent_size.width.checked_sub(1).unwrap_or(0)).0;
-      ctx.renderer().write(buf);
+    let frame = ctx.get_frame().size.clone();
+    if frame.width < self.chars().count() {
+      let buf = self.chars().take(frame.width).collect::<String>();
+      ctx.renderer().write(buf.as_str());
       ctx.renderer().write("…");
     } else {
       ctx.renderer().write(self);
@@ -137,7 +138,7 @@ impl Widget for String {
 
   fn layout(&self, parent_size: &Size2D<usize>) -> LayoutResult {
     let min = Size2D::new(1, 1);
-    let mut max = Size2D::new(self.len(), 1);
+    let mut max = Size2D::new(self.chars().count(), 1);
     // clamp max size to parent size
     // max.width = std::cmp::min(max.width, parent_size.width);
     // max.height = std::cmp::min(max.height, parent_size.height);
@@ -150,10 +151,10 @@ impl Widget for String {
   }
 
   fn render(&self, ctx: &RenderCtx) -> RenderResult {
-    let parent_size = ctx.get_frame().size.clone();
-    if parent_size.width < self.len() {
-      let buf = self.split_at(parent_size.width.checked_sub(1).unwrap_or(0)).0;
-      ctx.renderer().write(buf);
+    let frame = ctx.get_frame().size.clone();
+    if frame.width < self.chars().count() {
+      let buf = self.chars().take(frame.width).collect::<String>();
+      ctx.renderer().write(buf.as_str());
       ctx.renderer().write("…");
     } else {
       ctx.renderer().write(self);

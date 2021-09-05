@@ -206,51 +206,51 @@ where
 
     if let Some(top) = self.top.as_ref() {
       let border_frame = frame.inner_rect(SideOffsets2D::new(0, right_offset, frame.height() - 1, left_offset));
-      ctx.render_child(border_frame, top)?;
+      ctx.render_child_widget(border_frame, top)?;
     }
     if let Some(left) = self.left.as_ref() {
       let border_frame = frame.inner_rect(SideOffsets2D::new(top_offset, frame.width() - 1, bottom_offset, 0));
       debug!("render() : left frame: {:?}", &border_frame);
-      ctx.render_child(border_frame, left)?;
+      ctx.render_child_widget(border_frame, left)?;
     }
     if let Some(right) = self.right.as_ref() {
       let border_frame = frame.inner_rect(SideOffsets2D::new(top_offset, 0, bottom_offset, frame.width() - 1));
-      ctx.render_child(border_frame, right)?;
+      ctx.render_child_widget(border_frame, right)?;
     }
     if let Some(bottom) = self.bottom.as_ref() {
       let border_frame = frame.inner_rect(SideOffsets2D::new(frame.height() - 1, right_offset, 0, left_offset));
-      ctx.render_child(border_frame, bottom)?;
+      ctx.render_child_widget(border_frame, bottom)?;
     }
 
     if self.top.is_some() && self.left.is_some() {
       if let Some(top_left) = self.top_left.as_ref() {
         let border_frame = frame.inner_rect(SideOffsets2D::new(0, frame.width() - 1, frame.height() - 1, 0));
-        ctx.render_child(border_frame, top_left)?;
+        ctx.render_child_widget(border_frame, top_left)?;
       }
     }
 
     if self.top.is_some() && self.right.is_some() {
       if let Some(top_right) = self.top_right.as_ref() {
         let border_frame = frame.inner_rect(SideOffsets2D::new(0, 0, frame.height() - 1, frame.width() - 1));
-        ctx.render_child(border_frame, top_right)?;
+        ctx.render_child_widget(border_frame, top_right)?;
       }
     }
 
     if self.bottom.is_some() && self.left.is_some() {
       if let Some(bottom_left) = self.bottom_left.as_ref() {
         let border_frame = frame.inner_rect(SideOffsets2D::new(frame.height() - 1, frame.width() - 1, 0, 0));
-        ctx.render_child(border_frame, bottom_left)?;
+        ctx.render_child_widget(border_frame, bottom_left)?;
       }
     }
 
     if self.bottom.is_some() && self.right.is_some() {
       if let Some(bottom_right) = self.bottom_right.as_ref() {
         let border_frame = frame.inner_rect(SideOffsets2D::new(frame.height() - 1, 0, 0, frame.width() - 1));
-        ctx.render_child(border_frame, bottom_right)?;
+        ctx.render_child_widget(border_frame, bottom_right)?;
       }
     }
 
     let child_frame = frame.inner_rect(SideOffsets2D::new(top_offset, right_offset, bottom_offset, left_offset));
-    ctx.render_child(child_frame, &self.child)
+    ctx.render_child_widget(child_frame, &self.child)
   }
 }

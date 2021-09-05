@@ -80,7 +80,7 @@ where
         let x = frame.max_x() - avail_width;
         let y = frame.max_y() - avail_height;
         let child_frame = Rect::new(Point2D::new(x, y), size.clone());
-        ctx.render_child(child_frame, &self.child)?;
+        ctx.render_child_widget(child_frame, &self.child)?;
         avail_width = avail_width.checked_sub(size.width).unwrap_or(0);
       }
       avail_height = avail_height.checked_sub(size.height).unwrap_or(0);

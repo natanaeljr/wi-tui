@@ -2,6 +2,7 @@ use crate::render::RenderCtx;
 use crate::widgets::{AnyEvent, EventResult, LayoutError, LayoutResult, LayoutSize, RenderResult, Widget};
 use euclid::default::{Point2D, Rect, SideOffsets2D, Size2D};
 
+// TODO: offsets of (min + max + flex)
 pub struct Padding<Child> {
   pub child: Child,
   pub offsets: SideOffsets2D<usize>,
@@ -70,6 +71,6 @@ where
 
   fn render(&self, ctx: &RenderCtx) -> RenderResult {
     let child_frame = ctx.get_frame().inner_rect(self.offsets.clone());
-    ctx.render_child(child_frame, &self.child)
+    ctx.render_child_widget(child_frame, &self.child)
   }
 }

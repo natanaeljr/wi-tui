@@ -1093,7 +1093,7 @@ impl Widget for Table {
             Point2D::new(ctx.get_frame().min_x() + the_x, ctx.get_frame().min_y()),
             Size2D::new(1, 1 /* TODO: height */),
           );
-          ctx.render_child(child_frame, &self.layout.column_separator);
+          ctx.render_child_widget(child_frame, &self.layout.column_separator);
           1
         } else {
           0
@@ -1105,7 +1105,7 @@ impl Widget for Table {
           Size2D::new(flexed_widths[col], 1 /* TODO: height */),
         );
         // ctx.renderer().set_background(&Color::Black);
-        ctx.render_child_widget(child_frame, column.as_widget());
+        ctx.render_child_dyn_widget(child_frame, column.as_widget());
         the_x += flexed_widths[col];
       }
     }
@@ -1129,7 +1129,7 @@ impl Widget for Table {
             ),
             Size2D::new(flexed_widths[col], 1 /* TODO: height */),
           );
-          ctx.render_child(child_frame, &self.layout.column_separator);
+          ctx.render_child_widget(child_frame, &self.layout.column_separator);
           1
         } else {
           0
@@ -1143,7 +1143,7 @@ impl Widget for Table {
             ),
             Size2D::new(flexed_widths[col], 1 /* TODO: height */),
           );
-          ctx.render_child_widget(child_frame, cell.deref());
+          ctx.render_child_dyn_widget(child_frame, cell.deref());
         }
         the_x += flexed_widths[col];
         // ctx.renderer.move_to_column_relative((the_x + 1) as u16);

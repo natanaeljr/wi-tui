@@ -71,12 +71,12 @@ where
         let mut layout = self.child.layout(&Size2D::new(1000, 200)).unwrap();
         layout.min.width = std::cmp::max(layout.min.width, frame.size.width);
         layout.min.height = std::cmp::max(layout.min.height, frame.size.height);
-        ctx.render_child(Rect::new(frame.origin.clone(), layout.min.clone()), &self.child)?;
+        ctx.render_child_widget(Rect::new(frame.origin.clone(), layout.min.clone()), &self.child)?;
       } else {
         return Err(RenderError::Layout(e));
       }
     } else {
-      ctx.render_child(frame.clone(), &self.child)?;
+      ctx.render_child_widget(frame.clone(), &self.child)?;
     }
 
     Ok(())

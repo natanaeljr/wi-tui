@@ -259,11 +259,11 @@ impl RenderCtx {
   }
 
   #[inline]
-  pub fn render_child<W: Widget>(&self, frame: Rect<usize>, child: &W) -> RenderResult {
-    self.render_child_widget(frame, child as &dyn Widget)
+  pub fn render_child_widget<W: Widget>(&self, frame: Rect<usize>, child: &W) -> RenderResult {
+    self.render_child_dyn_widget(frame, child as &dyn Widget)
   }
 
-  pub fn render_child_widget(&self, frame: Rect<usize>, child: &dyn Widget) -> RenderResult {
+  pub fn render_child_dyn_widget(&self, frame: Rect<usize>, child: &dyn Widget) -> RenderResult {
     let input_frame = frame.clone();
     let mut child_ctx = Self {
       renderer: self.renderer.clone(),
