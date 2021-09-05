@@ -20,7 +20,7 @@ pub mod flex;
 pub mod label;
 pub mod leak;
 pub mod line;
-pub mod minimize;
+pub mod min;
 pub mod padding;
 pub mod progressbar;
 pub mod repeat;

@@ -3,7 +3,7 @@ use witui::widgets::borders::Borders;
 use witui::widgets::container::Container;
 use witui::widgets::expand::Expand;
 use witui::widgets::leak::Leak;
-use witui::widgets::minimize::Minimize;
+use witui::widgets::min::Min;
 use witui::widgets::repeat::Repeat;
 use witui::widgets::style::{Color, Style};
 use witui::WiTui;
@@ -39,7 +39,7 @@ fn main() {
             .child(
               Borders::child(
                 Repeat::child(
-                  Minimize::zero().child(
+                  Min::zero().child(
                     Leak::child(
                       Borders::child(
                         Container::new()

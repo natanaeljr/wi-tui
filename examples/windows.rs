@@ -6,7 +6,7 @@ use witui::widgets::expand::Expand;
 use witui::widgets::fillchar::FillChar;
 use witui::widgets::hook::Hook;
 use witui::widgets::leak::Leak;
-use witui::widgets::minimize::Minimize;
+use witui::widgets::min::Min;
 use witui::widgets::padding::Padding;
 use witui::widgets::stack::Stack;
 use witui::widgets::style::{Color, Style};
@@ -25,7 +25,7 @@ fn main() {
   let root = Borders::child(Expand::child(()))
     .borders_rounded(Style::default().dark_green())
     .top(Box::new(
-      Minimize::zero().child(
+      Min::zero().child(
         Stack::new()
           .child(Style::default().dark_green().child(FillChar::new('─')))
           .child(
@@ -58,7 +58,7 @@ fn main() {
                         .child('┤'.dark_green())
                         .child(
                           Container::new()
-                            .child(Minimize::zero().child(Style::new().white().dim().reverse().bold().child(" _ ")))
+                            .child(Min::zero().child(Style::new().white().dim().reverse().bold().child(" _ ")))
                             .child(' ')
                             .child(Style::new().white().bg(Color::AnsiValue(88)).bold().child(" x "))
                             .must_fit_all_children(false),
@@ -74,7 +74,7 @@ fn main() {
       ), // Minimize
     ) as Box<dyn Widget>);
 
-  let root = Minimize::zero().child(root);
+  let root = Min::zero().child(root);
   let root = Style::new()
     .bg(Color::Rgb { r: 20, g: 20, b: 20 })
     .fg(Color::White)

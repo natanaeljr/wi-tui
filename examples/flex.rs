@@ -3,7 +3,7 @@ use euclid::default::Size2D;
 use witui::widgets::borders::Borders;
 use witui::widgets::container::Container;
 use witui::widgets::leak::Leak;
-use witui::widgets::minimize::Minimize;
+use witui::widgets::min::Min;
 use witui::widgets::padding::Padding;
 use witui::widgets::style::{Color, Style};
 use witui::widgets::Widget;
@@ -29,7 +29,7 @@ fn main() {
   let root = Borders::child(root).borders_line(Style::new().magenta());
   let root = Padding::default().top(1).bottom(1).left(3).right(3).child(root);
   let root = Leak::child(root);
-  let root = Minimize::zero().child(root);
+  let root = Min::zero().child(root);
   let root = Borders::child(root).borders_cross(Style::new().yellow());
   let root = Style::new().child(root);
 

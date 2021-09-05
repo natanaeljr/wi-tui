@@ -2,12 +2,19 @@ use crate::render::RenderCtx;
 use crate::widgets::{AnyEvent, EventResult, LayoutError, LayoutResult, LayoutSize, RenderError, RenderResult, Widget};
 use euclid::default::{Rect, Size2D};
 
-pub struct Minimize<Child> {
+// TODO: Minimize should actually be a widget that forces the Render to the min layout
+// like the property of FlexFit::tight.
+// A new widget should be created for this current Minimize behaviour. (MinMax()?)
+// TODO: wait, maybe we should do a Shrink instead? (opposite of Expand?)
+
+// TODO: turn this Min into MinMax (or Sized) with Option<> for each
+
+pub struct Min<Child> {
   min: Size2D<usize>,
   child: Child,
 }
 
-impl Minimize<()> {
+impl Min<()> {
   pub fn zero() -> Self {
     Self {
       min: Size2D::zero(),
@@ -19,13 +26,13 @@ impl Minimize<()> {
   }
 }
 
-impl<Child> Minimize<Child> {
-  pub fn child<C: Widget>(self, child: C) -> Minimize<C> {
-    Minimize { min: self.min, child }
+impl<Child> Min<Child> {
+  pub fn child<C: Widget>(self, child: C) -> Min<C> {
+    Min { min: self.min, child }
   }
 }
 
-impl<Child> Widget for Minimize<Child>
+impl<Child> Widget for Min<Child>
 where
   Child: Widget,
 {
