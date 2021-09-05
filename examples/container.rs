@@ -1,7 +1,7 @@
 use euclid::default::Size2D;
+use witui::widgets::borders::Borders;
 use witui::widgets::container::Container;
 use witui::widgets::expand::Expanded;
-use witui::widgets::frame::Frame;
 use witui::widgets::leak::Leak;
 use witui::widgets::minimize::Minimize;
 use witui::widgets::repeat::Repeat;
@@ -31,32 +31,32 @@ fn main() {
     .bg(Color::Rgb { r: 20, g: 20, b: 20 })
     .fg(Color::White)
     .child(
-      Frame::child(
+      Borders::child(
         Expanded::child(
           Container::new()
-            .child(Frame::child(()).borders_line(Style::new().dark_blue()))
-            .child(Frame::child(()).borders_line(Style::new().dark_yellow()))
+            .child(Borders::child(()).borders_line(Style::new().dark_blue()))
+            .child(Borders::child(()).borders_line(Style::new().dark_yellow()))
             .child(
-              Frame::child(
+              Borders::child(
                 Repeat::child(
                   Minimize::zero().child(
                     Leak::child(
-                      Frame::child(
+                      Borders::child(
                         Container::new()
-                          .child(Frame::child("~").borders_line(Style::new().dark_magenta()))
-                          .child(Frame::child("!").borders_line(Style::new().dark_cyan()))
-                          .child(Frame::child(".").borders_line(Style::new().dark_green()))
+                          .child(Borders::child("~").borders_line(Style::new().dark_magenta()))
+                          .child(Borders::child("!").borders_line(Style::new().dark_cyan()))
+                          .child(Borders::child(".").borders_line(Style::new().dark_green()))
                           .must_fit_all_children(true),
-                      ) // Frame
+                      ) // Borders
                       .borders_dash(Style::default()),
                     ), // Leak
                   ), // Minimize
                 ), // Repeat
-              ) // Frame
+              ) // Borders
               .borders_line(Style::new().dark_red()),
             ), // Container
         ), // Expanded
-      ) // Frame
+      ) // Borders
       .borders_line(Style::default()),
     ); // Style
 

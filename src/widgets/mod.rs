@@ -10,13 +10,13 @@ use std::ops::{Deref, DerefMut};
 use std::rc::Rc;
 
 pub mod align;
+pub mod borders;
 pub mod button;
 pub mod checkbox;
 pub mod container;
 pub mod expand;
 pub mod fillchar;
 pub mod flex;
-pub mod frame;
 pub mod label;
 pub mod leak;
 pub mod line;

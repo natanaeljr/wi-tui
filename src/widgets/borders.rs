@@ -10,7 +10,7 @@ use crate::widgets::{AnyEvent, EventResult, LayoutError, LayoutResult, LayoutSiz
 
 use crate::debug;
 
-pub struct Frame<Border, Child> {
+pub struct Borders<Border, Child> {
   // sides
   pub top: Option<Border>,
   pub left: Option<Border>,
@@ -25,7 +25,7 @@ pub struct Frame<Border, Child> {
   pub child: Child,
 }
 
-impl<Border, Child> Frame<Border, Child>
+impl<Border, Child> Borders<Border, Child>
 where
   Border: Widget,
   Child: Widget,
@@ -85,7 +85,7 @@ where
   }
 }
 
-impl<Child> Frame<Box<dyn Widget>, Child>
+impl<Child> Borders<Box<dyn Widget>, Child>
 where
   Child: Widget,
 {
@@ -142,7 +142,7 @@ where
   }
 }
 
-impl<Border, Child> Widget for Frame<Border, Child>
+impl<Border, Child> Widget for Borders<Border, Child>
 where
   Border: Widget,
   Child: Widget,
