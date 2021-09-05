@@ -17,39 +17,47 @@ fn main() {
   let root = Borders::child(Expand::child(()))
     .borders_rounded(Style::default().dark_green())
     .top(Box::new(
-      Stack::new()
-        .child(Style::default().dark_green().child(FillChar::new('─')))
-        .child(
-          Container::new()
-            .child(
-              // Expand::child(
-              Padding::default().left(1).child(
-                Align::top_left(
-                  Container::new()
-                    .child('┤'.dark_green())
-                    .child("Title".white().bold().underlined())
-                    .child('├'.dark_green())
-                    .must_fit_all_children(true),
-                ), // Align
-              ), // Padding
-                 // ), // Expand
-            ) // Container
-            .child(
-              Expand::child(
-                Padding::default().right(1).child(
-                  Align::top_right(
+      Minimize::zero().child(
+        Stack::new()
+          .child(Style::default().dark_green().child(FillChar::new('─')))
+          .child(
+            Container::new()
+              .child(
+                Padding::default().left(1).child(
+                  Align::top_left(
                     Container::new()
                       .child('┤'.dark_green())
-                      .child("Header".white().bold().underlined())
+                      .child("Title".white().bold().underlined().dim())
                       .child('├'.dark_green())
                       .must_fit_all_children(true),
                   ), // Align
                 ), // Padding
-              ), // Expand
-            ) // Container
-            .must_fit_all_children(true),
-        ) // Stack
-        .must_fit_all_children(false),
+              ) // Container
+              .child(
+                Align::top_left(
+                  Container::new()
+                    .child('┤'.dark_green())
+                    .child("Bread".white().bold().underlined().dim())
+                    .child('├'.dark_green())
+                    .must_fit_all_children(true),
+                ), // Align
+              ) // Container
+              .child(
+                Expand::child(
+                  Padding::default().right(1).child(
+                    Align::top_right(
+                      Container::new()
+                        .child('┤'.dark_green())
+                        .child("Header".white().bold().underlined().dim())
+                        .child('├'.dark_green())
+                        .must_fit_all_children(true),
+                    ), // Align
+                  ), // Padding
+                ), // Expand
+              ) // Container
+              .must_fit_all_children(false),
+          ), // Stack
+      ), // Minimize
     ) as Box<dyn Widget>);
 
   let root = Minimize::zero().child(root);

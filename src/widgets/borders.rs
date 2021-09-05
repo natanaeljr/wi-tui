@@ -169,15 +169,37 @@ where
     let borders_width = if self.left.is_some() { 1 } else { 0 } + if self.right.is_some() { 1 } else { 0 };
     let borders_height = if self.top.is_some() { 1 } else { 0 } + if self.bottom.is_some() { 1 } else { 0 };
 
-    let mut frame = parent_size.clone();
-    if frame.width < borders_width || frame.height < borders_height {
+    let mut size = parent_size.clone();
+    if size.width < borders_width || size.height < borders_height {
       return Err(LayoutError::InsufficientSpace);
     }
+    let frame = Rect::from_size(size.clone());
 
-    frame.width -= borders_width;
-    frame.height -= borders_height;
+    let top_offset = if self.top.is_some() { 1 } else { 0 };
+    let left_offset = if self.left.is_some() { 1 } else { 0 };
+    let right_offset = if self.right.is_some() { 1 } else { 0 };
+    let bottom_offset = if self.bottom.is_some() { 1 } else { 0 };
 
-    let mut layout = self.child.layout(&frame)?;
+    if let Some(top) = self.top.as_ref() {
+      let border_frame = frame.inner_rect(SideOffsets2D::new(0, right_offset, frame.height() - 1, left_offset));
+      top.layout(&border_frame.size)?;
+    }
+    if let Some(left) = self.left.as_ref() {
+      let border_frame = frame.inner_rect(SideOffsets2D::new(top_offset, frame.width() - 1, bottom_offset, 0));
+      left.layout(&border_frame.size)?;
+    }
+    if let Some(right) = self.right.as_ref() {
+      let border_frame = frame.inner_rect(SideOffsets2D::new(top_offset, 0, bottom_offset, frame.width() - 1));
+      right.layout(&border_frame.size)?;
+    }
+    if let Some(bottom) = self.bottom.as_ref() {
+      let border_frame = frame.inner_rect(SideOffsets2D::new(frame.height() - 1, right_offset, 0, left_offset));
+      bottom.layout(&border_frame.size)?;
+    }
+
+    size.width -= borders_width;
+    size.height -= borders_height;
+    let mut layout = self.child.layout(&size)?;
     layout.max.width = layout.max.width.checked_add(borders_width).unwrap_or(std::usize::MAX);
     layout.max.height = layout.max.height.checked_add(borders_height).unwrap_or(std::usize::MAX);
     layout.min.width = layout.min.width.checked_add(borders_width).unwrap_or(std::usize::MAX);
@@ -210,7 +232,6 @@ where
     }
     if let Some(left) = self.left.as_ref() {
       let border_frame = frame.inner_rect(SideOffsets2D::new(top_offset, frame.width() - 1, bottom_offset, 0));
-      debug!("render() : left frame: {:?}", &border_frame);
       ctx.render_child_widget(border_frame, left)?;
     }
     if let Some(right) = self.right.as_ref() {
