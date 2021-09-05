@@ -1,6 +1,6 @@
 use witui::widgets::borders::Borders;
 use witui::widgets::container::Container;
-use witui::widgets::expand::Expanded;
+use witui::widgets::expand::Expand;
 use witui::widgets::leak::Leak;
 use witui::widgets::minimize::Minimize;
 use witui::widgets::repeat::Repeat;

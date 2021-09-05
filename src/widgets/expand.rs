@@ -2,17 +2,17 @@ use crate::render::RenderCtx;
 use crate::widgets::{AnyEvent, EventResult, LayoutResult, LayoutSize, RenderResult, Widget};
 use euclid::default::Size2D;
 
-pub struct Expanded<Child> {
+pub struct Expand<Child> {
   child: Child,
 }
 
-impl<Child> Expanded<Child> {
+impl<Child> Expand<Child> {
   pub fn child(child: Child) -> Self {
     Self { child }
   }
 }
 
-impl<Child> Widget for Expanded<Child>
+impl<Child> Widget for Expand<Child>
 where
   Child: Widget,
 {

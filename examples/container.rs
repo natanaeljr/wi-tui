@@ -1,7 +1,7 @@
 use euclid::default::Size2D;
 use witui::widgets::borders::Borders;
 use witui::widgets::container::Container;
-use witui::widgets::expand::Expanded;
+use witui::widgets::expand::Expand;
 use witui::widgets::leak::Leak;
 use witui::widgets::minimize::Minimize;
 use witui::widgets::repeat::Repeat;
@@ -32,7 +32,7 @@ fn main() {
     .fg(Color::White)
     .child(
       Borders::child(
-        Expanded::child(
+        Expand::child(
           Container::new()
             .child(Borders::child(()).borders_line(Style::new().dark_blue()))
             .child(Borders::child(()).borders_line(Style::new().dark_yellow()))
