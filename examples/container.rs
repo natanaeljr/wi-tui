@@ -57,7 +57,7 @@ fn main() {
             ), // Container
         ), // Expanded
       ) // Borders
-      .borders_line(Style::default()),
+      .borders_rounded(Style::default()),
     ); // Style
 
   WiTui::root_widget(root).alternate(true).run_loop().unwrap();

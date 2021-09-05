@@ -140,6 +140,19 @@ where
       .bottom_right(Box::new(style.clone().child(FillChar::new('┘'))) as Box<dyn Widget>);
     this
   }
+
+  pub fn borders_rounded(mut self, style: Style) -> Self {
+    let this = self
+      .top(Box::new(style.clone().child(FillChar::new('─'))) as Box<dyn Widget>)
+      .left(Box::new(style.clone().child(FillChar::new('│'))) as Box<dyn Widget>)
+      .right(Box::new(style.clone().child(FillChar::new('│'))) as Box<dyn Widget>)
+      .bottom(Box::new(style.clone().child(FillChar::new('─'))) as Box<dyn Widget>)
+      .top_left(Box::new(style.clone().child(FillChar::new('╭'))) as Box<dyn Widget>)
+      .top_right(Box::new(style.clone().child(FillChar::new('╮'))) as Box<dyn Widget>)
+      .bottom_left(Box::new(style.clone().child(FillChar::new('╰'))) as Box<dyn Widget>)
+      .bottom_right(Box::new(style.clone().child(FillChar::new('╯'))) as Box<dyn Widget>);
+    this
+  }
 }
 
 impl<Border, Child> Widget for Borders<Border, Child>
