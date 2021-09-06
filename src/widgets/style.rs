@@ -3,6 +3,7 @@ use crate::widgets::{AnyEvent, EventResult, LayoutResult, RenderResult, Widget};
 use euclid::default::Size2D;
 use std::ops::{BitOr, Deref, DerefMut};
 
+use crate::widgets::flexible::FlexFit;
 pub use crossterm::style::Attribute;
 pub use crossterm::style::Attributes;
 pub use crossterm::style::Color;
@@ -123,5 +124,9 @@ where
       ctx.renderer().set_foreground(fg);
     }
     self.child.render(ctx)
+  }
+
+  fn flex(&self) -> (usize, FlexFit) {
+    self.child.flex()
   }
 }

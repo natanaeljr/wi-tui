@@ -2,6 +2,7 @@ use euclid::default::{Rect, Size2D};
 
 use crate::debug;
 use crate::render::RenderCtx;
+use crate::widgets::flexible::FlexFit;
 use crate::widgets::{AnyEvent, EventResult, LayoutResult, RenderResult, Widget};
 
 // TODO: LeakHorizontal
@@ -43,5 +44,9 @@ where
     layout.min.height = std::cmp::max(layout.min.height, frame.size.height);
     ctx.render_child_widget(Rect::new(frame.origin.clone(), layout.min.clone()), &self.child)?;
     Ok(())
+  }
+
+  fn flex(&self) -> (usize, FlexFit) {
+    self.child.flex()
   }
 }

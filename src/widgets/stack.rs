@@ -1,5 +1,6 @@
 use crate::render::RenderCtx;
 use crate::util::Scoped;
+use crate::widgets::flexible::FlexFit;
 use crate::widgets::{AnyEvent, EventResult, LayoutError, LayoutResult, LayoutSize, RenderError, RenderResult, Widget};
 use euclid::default::Size2D;
 use std::cmp::max;
@@ -112,5 +113,9 @@ where
       }
     }
     Ok(())
+  }
+
+  fn flex(&self) -> (usize, FlexFit) {
+    (1, FlexFit::Tight)
   }
 }

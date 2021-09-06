@@ -1,5 +1,6 @@
 use crate::render::RenderCtx;
-use crate::widgets::{AnyEvent, EventResult, LayoutError, LayoutResult, LayoutSize, RenderResult, Widget};
+use crate::widgets::flexible::FlexFit;
+use crate::widgets::{AnyEvent, EventResult, LayoutError, LayoutResult, LayoutSize, RenderError, RenderResult, Widget};
 use euclid::default::{Point2D, Rect, SideOffsets2D, Size2D};
 
 // TODO: offsets of (min + max + flex)
@@ -80,7 +81,17 @@ where
   }
 
   fn render(&self, ctx: &RenderCtx) -> RenderResult {
+    let frame = ctx.get_frame();
+    if frame.width() < (self.offsets.left + self.offsets.right)
+      || frame.height() < (self.offsets.top + self.offsets.bottom)
+    {
+      return Err(RenderError::Layout(LayoutError::InsufficientSpace));
+    }
     let child_frame = ctx.get_frame().inner_rect(self.offsets.clone());
     ctx.render_child_widget(child_frame, &self.child)
+  }
+
+  fn flex(&self) -> (usize, FlexFit) {
+    self.child.flex()
   }
 }

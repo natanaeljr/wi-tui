@@ -1,4 +1,5 @@
 use crate::render::RenderCtx;
+use crate::widgets::flexible::FlexFit;
 use crate::widgets::{AnyEvent, EventResult, LayoutResult, LayoutSize, RenderResult, Widget};
 use euclid::default::Size2D;
 
@@ -30,5 +31,9 @@ where
 
   fn render(&self, ctx: &RenderCtx) -> RenderResult {
     self.child.render(ctx)
+  }
+
+  fn flex(&self) -> (usize, FlexFit) {
+    (self.child.flex().0, FlexFit::Loose)
   }
 }

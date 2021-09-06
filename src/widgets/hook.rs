@@ -1,4 +1,5 @@
 use crate::render::RenderCtx;
+use crate::widgets::flexible::FlexFit;
 use crate::widgets::{AnyEvent, EventResult, LayoutResult, RenderResult, Widget};
 use euclid::default::Size2D;
 use std::ops::{Deref, DerefMut};
@@ -59,5 +60,10 @@ impl<Child> Widget for Hook<Child> {
 
   fn render(&self, ctx: &RenderCtx) -> RenderResult {
     self.on_render.deref()(&self.child, ctx)
+  }
+
+  fn flex(&self) -> (usize, FlexFit) {
+    // TODO: callback
+    (1, FlexFit::Tight)
   }
 }

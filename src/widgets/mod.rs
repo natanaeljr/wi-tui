@@ -1,6 +1,7 @@
 use crate::debug;
 use crate::render::{RenderCtx, Renderer};
 use crate::util::Scoped;
+use crate::widgets::flexible::FlexFit;
 use crossterm::style::StyledContent;
 use euclid::default::Size2D;
 use std::cell::{Cell, RefCell};
@@ -17,7 +18,9 @@ pub mod container;
 pub mod expand;
 pub mod fillchar;
 pub mod flex;
+pub mod flexible;
 pub mod hook;
+pub mod input;
 pub mod leak;
 pub mod min;
 pub mod padding;
@@ -28,8 +31,6 @@ pub mod stack;
 pub mod style;
 pub mod table;
 pub mod tabs;
-pub mod input;
-pub mod flexible;
 
 #[derive(Debug)]
 pub enum LayoutError {
@@ -93,9 +94,7 @@ pub trait Widget {
   fn event(&mut self, event: &AnyEvent, size: &Size2D<usize>) -> EventResult;
   fn layout(&self, avail_size: &Size2D<usize>) -> LayoutResult;
   fn render(&self, ctx: &RenderCtx) -> RenderResult;
-  fn flex(&self) -> usize {
-    1
-  }
+  fn flex(&self) -> (usize, FlexFit);
 }
 
 // TODO: Default impl of Widgets
@@ -131,6 +130,10 @@ impl Widget for &str {
     }
     Ok(())
   }
+
+  fn flex(&self) -> (usize, FlexFit) {
+    (1, FlexFit::Tight)
+  }
 }
 
 impl Widget for String {
@@ -163,6 +166,10 @@ impl Widget for String {
     }
     Ok(())
   }
+
+  fn flex(&self) -> (usize, FlexFit) {
+    (1, FlexFit::Tight)
+  }
 }
 
 impl Widget for char {
@@ -186,6 +193,10 @@ impl Widget for char {
   fn render(&self, ctx: &RenderCtx) -> RenderResult {
     ctx.renderer().write(self.to_string().as_str());
     Ok(())
+  }
+
+  fn flex(&self) -> (usize, FlexFit) {
+    (0, FlexFit::Tight)
   }
 }
 
@@ -221,6 +232,10 @@ impl Widget for u32 {
     }
     Ok(())
   }
+
+  fn flex(&self) -> (usize, FlexFit) {
+    (1, FlexFit::Tight)
+  }
 }
 
 impl Widget for usize {
@@ -255,6 +270,10 @@ impl Widget for usize {
     }
     Ok(())
   }
+
+  fn flex(&self) -> (usize, FlexFit) {
+    (1, FlexFit::Tight)
+  }
 }
 
 impl<T> Widget for Rc<T>
@@ -276,6 +295,10 @@ where
   fn render(&self, ctx: &RenderCtx) -> RenderResult {
     self.deref().render(ctx)
   }
+
+  fn flex(&self) -> (usize, FlexFit) {
+    self.deref().flex()
+  }
 }
 
 impl<T> Widget for RefCell<T>
@@ -292,6 +315,10 @@ where
 
   fn render(&self, ctx: &RenderCtx) -> RenderResult {
     self.deref().render(ctx)
+  }
+
+  fn flex(&self) -> (usize, FlexFit) {
+    self.deref().flex()
   }
 }
 
@@ -310,6 +337,10 @@ where
   fn render(&self, ctx: &RenderCtx) -> RenderResult {
     self.deref().render(ctx);
     Ok(())
+  }
+
+  fn flex(&self) -> (usize, FlexFit) {
+    self.deref().flex()
   }
 }
 
@@ -332,30 +363,8 @@ impl Widget for () {
     debug!("render() : frame: {:?}, ", &ctx.get_frame());
     Ok(())
   }
-}
 
-impl<T> Widget for StyledContent<T>
-where
-  T: Widget + std::fmt::Display,
-{
-  fn event(&mut self, event: &AnyEvent, size: &Size2D<usize>) -> EventResult {
-    todo!()
-  }
-
-  fn layout(&self, avail_size: &Size2D<usize>) -> LayoutResult {
-    self.content().layout(avail_size)
-  }
-
-  fn render(&self, ctx: &RenderCtx) -> RenderResult {
-    if let Some(bg) = self.style().background_color.as_ref() {
-      ctx.renderer().set_background(bg);
-    }
-    if let Some(fg) = self.style().foreground_color.as_ref() {
-      ctx.renderer().set_foreground(fg);
-    }
-    if !self.style().attributes.is_empty() {
-      ctx.renderer().add_attributes(self.style().attributes);
-    }
-    self.content().render(ctx)
+  fn flex(&self) -> (usize, FlexFit) {
+    (1, FlexFit::Tight)
   }
 }

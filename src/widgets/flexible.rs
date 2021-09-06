@@ -1,25 +1,42 @@
 use crate::render::RenderCtx;
-use crate::widgets::{AnyEvent, EventResult, LayoutResult, RenderResult, Widget};
+use crate::widgets::{AnyEvent, EventResult, LayoutResult, RenderError, RenderResult, Widget};
 use euclid::default::Size2D;
+
+#[derive(Debug, Clone, Ord, PartialOrd, Eq, PartialEq)]
+pub enum FlexFit {
+  Tight,
+  Loose,
+}
 
 pub struct Flexible<Child> {
   pub flex: usize,
+  pub fit: FlexFit,
   pub child: Child,
 }
 
 impl Flexible<()> {
-  pub fn flex(flex: usize) -> Self {
-    Self { flex, child: () }
+  pub fn tight(flex: usize) -> Self {
+    Self {
+      flex,
+      fit: FlexFit::Tight,
+      child: (),
+    }
+  }
+
+  pub fn loose(flex: usize) -> Self {
+    Self {
+      flex,
+      fit: FlexFit::Loose,
+      child: (),
+    }
   }
 
   pub fn child<Child2: Widget>(mut self, child: Child2) -> Flexible<Child2> {
-    Flexible { flex: self.flex, child }
-  }
-}
-
-impl<Child> Flexible<Child> {
-  pub fn new(flex: usize, child: Child) -> Self {
-    Self { flex, child }
+    Flexible {
+      flex: self.flex,
+      fit: self.fit,
+      child,
+    }
   }
 }
 
@@ -39,7 +56,7 @@ where
     ctx.render_child_widget(ctx.get_frame().clone(), &self.child)
   }
 
-  fn flex(&self) -> usize {
-    self.flex
+  fn flex(&self) -> (usize, FlexFit) {
+    (self.flex, self.fit.clone())
   }
 }

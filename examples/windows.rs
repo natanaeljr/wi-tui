@@ -1,9 +1,11 @@
 use crossterm::style::Stylize;
+use euclid::size2;
 use witui::widgets::align::{Align, HorizontalAlignment, HorizontalSide, VerticalAlignment, VerticalSide};
 use witui::widgets::borders::Borders;
 use witui::widgets::container::Container;
 use witui::widgets::expand::Expand;
 use witui::widgets::fillchar::FillChar;
+use witui::widgets::flexible::Flexible;
 use witui::widgets::hook::Hook;
 use witui::widgets::leak::Leak;
 use witui::widgets::min::Min;
@@ -33,28 +35,28 @@ fn main() {
             Padding::default().left(1).right(1).child(
               Container::new()
                 .child(
-                  Align::top_left(
+                  Flexible::tight(6).child(
                     Container::new()
-                      .child('┤'.dark_green())
-                      .child("Title".dark_green().bold().reverse())
-                      .child('├'.dark_green())
+                      .child(Style::new().dark_green().child('┤'))
+                      .child(Style::new().dark_green().bold().reverse().child("Title"))
+                      .child(Style::new().dark_green().child('├'))
                       .must_fit_all_children(true),
-                  ), // Align
+                  ), // Flexible
                 ) // Container
                 .child(
-                  Align::top_left(
+                  Flexible::tight(1).child(
                     Container::new()
-                      .child('┤'.dark_green())
-                      .child("Bar".white().bold().underlined().dim())
-                      .child('├'.dark_green())
+                      .child(Style::new().dark_green().child('┤'))
+                      .child(Style::new().white().bold().underlined().dim().child("Bar"))
+                      .child(Style::new().dark_green().child('├'))
                       .must_fit_all_children(true),
-                  ), // Align
+                  ), // Flexible
                 ) // Container
                 .child(
-                  Expand::child(
+                  Flexible::loose(2).child(
                     Align::top_right(
                       Container::new()
-                        .child('┤'.dark_green())
+                        .child(Style::new().dark_green().child('┤'))
                         .child(
                           Container::new()
                             .child(Min::zero().child(Style::new().white().dim().reverse().bold().child("_")))
@@ -62,14 +64,14 @@ fn main() {
                             .child(Style::new().white().bg(Color::AnsiValue(88)).bold().child("x"))
                             .must_fit_all_children(false),
                         )
-                        .child('├'.dark_green())
+                        .child(Style::new().dark_green().child('├'))
                         .must_fit_all_children(true),
                     ), // Align
-                  ), // Expand
-                ) // Container
-                .must_fit_all_children(false),
+                  ), // Flexible
+                ), // Container
             ), // Padding
-          ), // Stack
+          ) // Stack
+          .must_fit_all_children(false),
       ), // Minimize
     ) as Box<dyn Widget>);
 

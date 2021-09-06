@@ -1,6 +1,7 @@
 use euclid::default::Size2D;
 
 use crate::render::RenderCtx;
+use crate::widgets::flexible::FlexFit;
 use crate::widgets::{AnyEvent, EventResult, LayoutResult, LayoutSize, RenderResult, Widget};
 
 pub struct FillChar {
@@ -34,5 +35,9 @@ impl Widget for FillChar {
     }
     ctx.renderer().write(str.as_str());
     Ok(())
+  }
+
+  fn flex(&self) -> (usize, FlexFit) {
+    (1, FlexFit::Tight)
   }
 }

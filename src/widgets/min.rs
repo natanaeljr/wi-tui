@@ -1,4 +1,5 @@
 use crate::render::RenderCtx;
+use crate::widgets::flexible::FlexFit;
 use crate::widgets::{AnyEvent, EventResult, LayoutError, LayoutResult, LayoutSize, RenderError, RenderResult, Widget};
 use euclid::default::{Rect, Size2D};
 
@@ -75,10 +76,10 @@ where
     if let Err(e) = layout_result {
       if let LayoutError::InsufficientSpace = e {
         // Just like Leak::render
-        let mut layout = self.child.layout(&Size2D::new(1000, 200)).unwrap();
-        layout.min.width = std::cmp::max(layout.min.width, frame.size.width);
-        layout.min.height = std::cmp::max(layout.min.height, frame.size.height);
-        ctx.render_child_widget(Rect::new(frame.origin.clone(), layout.min.clone()), &self.child)?;
+        // let mut layout = self.child.layout(&Size2D::new(1000, 200)).unwrap();
+        // layout.min.width = std::cmp::max(layout.min.width, frame.size.width);
+        // layout.min.height = std::cmp::max(layout.min.height, frame.size.height);
+        // ctx.render_child_widget(Rect::new(frame.origin.clone(), layout.min.clone()), &self.child)?;
       } else {
         return Err(RenderError::Layout(e));
       }
@@ -87,5 +88,9 @@ where
     }
 
     Ok(())
+  }
+
+  fn flex(&self) -> (usize, FlexFit) {
+    self.child.flex()
   }
 }

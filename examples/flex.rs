@@ -16,13 +16,20 @@ fn main() {
   let root = Container::new()
     .child(Borders::child(()).borders_line(Style::default().dark_blue()))
     .child(Borders::child(()).borders_line(Style::default().dark_yellow()))
-    .child(Borders::child("Hello".white()).borders_line(Style::default().green()))
-    .child(Borders::child("World".white()).borders_line(Style::default().red()))
-    .child(Borders::child("Ready to rock?".white().dim()).borders_line(Style::default().dark_grey()))
+    .child(Borders::child(Style::new().white().child("Hello")).borders_line(Style::default().green()))
+    .child(Borders::child(Style::new().white().child("World")).borders_line(Style::default().red()))
+    .child(
+      Borders::child(Style::new().white().dim().child("Ready to rock?")).borders_line(Style::default().dark_grey()),
+    )
     .child(
       Padding::default().top(3).left(16).child(
-        Borders::child("This is one true Text-based UI lib".blue().on_dark_grey())
-          .borders_double(Style::new().blue().on_dark_grey()),
+        Borders::child(
+          Style::new()
+            .blue()
+            .on_dark_grey()
+            .child("This is one true Text-based UI lib"),
+        )
+        .borders_double(Style::new().blue().on_dark_grey()),
       ),
     );
 

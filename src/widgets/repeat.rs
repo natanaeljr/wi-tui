@@ -3,6 +3,7 @@ use euclid::default::{Point2D, Rect, Size2D};
 use euclid::SideOffsets2D;
 
 use crate::render::RenderCtx;
+use crate::widgets::flexible::FlexFit;
 use crate::widgets::{AnyEvent, EventResult, LayoutError, LayoutResult, RenderError, RenderResult, Widget};
 
 // TODO: only vertical
@@ -87,5 +88,9 @@ where
     }
 
     Ok(())
+  }
+
+  fn flex(&self) -> (usize, FlexFit) {
+    self.child.flex()
   }
 }
