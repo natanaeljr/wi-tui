@@ -29,9 +29,9 @@ fn main() {
         Stack::new()
           .child(Style::default().dark_green().child(FillChar::new('─')))
           .child(
-            Container::new()
-              .child(
-                Padding::default().left(1).child(
+            Padding::default().left(1).right(1).child(
+              Container::new()
+                .child(
                   Align::top_left(
                     Container::new()
                       .child('┤'.dark_green())
@@ -39,20 +39,18 @@ fn main() {
                       .child('├'.dark_green())
                       .must_fit_all_children(true),
                   ), // Align
-                ), // Padding
-              ) // Container
-              .child(
-                Align::top_left(
-                  Container::new()
-                    .child('┤'.dark_green())
-                    .child("Bar".white().bold().underlined().dim())
-                    .child('├'.dark_green())
-                    .must_fit_all_children(true),
-                ), // Align
-              ) // Container
-              .child(
-                Expand::child(
-                  Padding::default().right(1).child(
+                ) // Container
+                .child(
+                  Align::top_left(
+                    Container::new()
+                      .child('┤'.dark_green())
+                      .child("Bar".white().bold().underlined().dim())
+                      .child('├'.dark_green())
+                      .must_fit_all_children(true),
+                  ), // Align
+                ) // Container
+                .child(
+                  Expand::child(
                     Align::top_right(
                       Container::new()
                         .child('┤'.dark_green())
@@ -66,10 +64,10 @@ fn main() {
                         .child('├'.dark_green())
                         .must_fit_all_children(true),
                     ), // Align
-                  ), // Padding
-                ), // Expand
-              ) // Container
-              .must_fit_all_children(false),
+                  ), // Expand
+                ) // Container
+                .must_fit_all_children(false),
+            ), // Padding
           ), // Stack
       ), // Minimize
     ) as Box<dyn Widget>);

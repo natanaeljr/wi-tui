@@ -89,8 +89,8 @@ impl WiTui {
           }
         }
         Event::Resize(cols, rows) => {
-          let (original_size, new_size) = flush_resize_events(Event::Resize(cols, rows));
-          let (cols, rows) = new_size;
+          // let (original_size, new_size) = flush_resize_events(Event::Resize(cols, rows));
+          // let (cols, rows) = new_size;
           // eprintln!("Resize from: {:?}, to: {:?}", original_size, new_size);
           if self.alternate {
             self.render_ctx.resize(cols as usize, rows as usize);
