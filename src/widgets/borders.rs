@@ -164,12 +164,12 @@ where
     self.child.event(event, size)
   }
 
-  fn layout(&self, parent_size: &Size2D<usize>) -> LayoutResult {
-    debug!("layout() : parent_size: {:?}", parent_size);
+  fn layout(&self, avail_size: &Size2D<usize>) -> LayoutResult {
+    debug!("layout() : avail_size: {:?}", avail_size);
     let borders_width = if self.left.is_some() { 1 } else { 0 } + if self.right.is_some() { 1 } else { 0 };
     let borders_height = if self.top.is_some() { 1 } else { 0 } + if self.bottom.is_some() { 1 } else { 0 };
 
-    let mut size = parent_size.clone();
+    let mut size = avail_size.clone();
     if size.width < borders_width || size.height < borders_height {
       return Err(LayoutError::InsufficientSpace);
     }
@@ -205,7 +205,7 @@ where
     layout.min.width = layout.min.width.checked_add(borders_width).unwrap_or(std::usize::MAX);
     layout.min.height = layout.min.height.checked_add(borders_height).unwrap_or(std::usize::MAX);
 
-    if !parent_size.contains(layout.min.clone()) {
+    if !avail_size.contains(layout.min.clone()) {
       return Err(LayoutError::InsufficientSpace);
     }
     debug!("layout() : layout: {:?}", layout);

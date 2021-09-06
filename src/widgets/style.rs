@@ -108,8 +108,8 @@ where
     self.child.event(event, size)
   }
 
-  fn layout(&self, parent_size: &Size2D<usize>) -> LayoutResult {
-    self.child.layout(parent_size)
+  fn layout(&self, avail_size: &Size2D<usize>) -> LayoutResult {
+    self.child.layout(avail_size)
   }
 
   fn render(&self, ctx: &RenderCtx) -> RenderResult {

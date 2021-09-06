@@ -18,10 +18,10 @@ impl Widget for FillChar {
     todo!()
   }
 
-  fn layout(&self, parent_size: &Size2D<usize>) -> LayoutResult {
+  fn layout(&self, avail_size: &Size2D<usize>) -> LayoutResult {
     Ok(LayoutSize {
-      min: parent_size.clone(),
-      max: parent_size.clone(),
+      min: avail_size.clone(),
+      max: avail_size.clone(),
     })
   }
 

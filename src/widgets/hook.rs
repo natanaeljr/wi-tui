@@ -53,8 +53,8 @@ impl<Child> Widget for Hook<Child> {
     self.on_event.deref_mut()(&mut self.child, event, size)
   }
 
-  fn layout(&self, parent_size: &Size2D<usize>) -> LayoutResult {
-    self.on_layout.deref()(&self.child, parent_size)
+  fn layout(&self, avail_size: &Size2D<usize>) -> LayoutResult {
+    self.on_layout.deref()(&self.child, avail_size)
   }
 
   fn render(&self, ctx: &RenderCtx) -> RenderResult {

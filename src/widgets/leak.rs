@@ -26,8 +26,8 @@ where
     todo!()
   }
 
-  fn layout(&self, parent_size: &Size2D<usize>) -> LayoutResult {
-    debug!("layout() : parent_size: {:?}", parent_size);
+  fn layout(&self, avail_size: &Size2D<usize>) -> LayoutResult {
+    debug!("layout() : avail_size: {:?}", avail_size);
     let mut layout = self.child.layout(&Size2D::new(1000, 200)).unwrap();
     layout.min.width = std::cmp::min(layout.min.width, 1);
     layout.min.height = std::cmp::min(layout.min.height, 1);

@@ -40,11 +40,11 @@ where
     todo!()
   }
 
-  fn layout(&self, parent_size: &Size2D<usize>) -> LayoutResult {
-    if !parent_size.contains(self.min.clone()) {
+  fn layout(&self, avail_size: &Size2D<usize>) -> LayoutResult {
+    if !avail_size.contains(self.min.clone()) {
       return Err(LayoutError::InsufficientSpace);
     }
-    let layout_result = self.child.layout(parent_size);
+    let layout_result = self.child.layout(avail_size);
     if let Err(e) = layout_result {
       if let LayoutError::InsufficientSpace = e {
         return Ok(LayoutSize {

@@ -70,11 +70,11 @@ where
     todo!()
   }
 
-  fn layout(&self, parent_size: &Size2D<usize>) -> LayoutResult {
+  fn layout(&self, avail_size: &Size2D<usize>) -> LayoutResult {
     let children = self.children.as_ref().unwrap();
 
     let mut layout = LayoutSize::default();
-    let mut avail_size = parent_size.clone();
+    let mut avail_size = avail_size.clone();
 
     for idx in 0..children.len() {
       let child = children.get_child(idx).unwrap();

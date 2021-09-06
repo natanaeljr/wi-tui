@@ -26,10 +26,10 @@ where
     self.child.event(event, size)
   }
 
-  fn layout(&self, parent_size: &Size2D<usize>) -> LayoutResult {
-    let mut layout = self.child.layout(parent_size)?;
-    layout.max.width = layout.max.width.max(parent_size.width);
-    layout.max.height = layout.max.height.max(parent_size.height);
+  fn layout(&self, avail_size: &Size2D<usize>) -> LayoutResult {
+    let mut layout = self.child.layout(avail_size)?;
+    layout.max.width = layout.max.width.max(avail_size.width);
+    layout.max.height = layout.max.height.max(avail_size.height);
     Ok(layout)
   }
 

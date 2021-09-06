@@ -20,11 +20,11 @@ where
     self.child.event(event, size)
   }
 
-  fn layout(&self, parent_size: &Size2D<usize>) -> LayoutResult {
-    let layout = self.child.layout(parent_size)?;
+  fn layout(&self, avail_size: &Size2D<usize>) -> LayoutResult {
+    let layout = self.child.layout(avail_size)?;
     Ok(LayoutSize {
       min: layout.min,
-      max: parent_size.clone(),
+      max: avail_size.clone(),
     })
   }
 

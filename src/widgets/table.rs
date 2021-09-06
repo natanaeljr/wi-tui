@@ -177,8 +177,8 @@ where
     }
   }
 
-  fn layout(&self, parent_size: &Size2D<usize>) -> LayoutResult {
-    self.heading.layout(parent_size)
+  fn layout(&self, avail_size: &Size2D<usize>) -> LayoutResult {
+    self.heading.layout(avail_size)
   }
 
   fn render(&self, ctx: &RenderCtx) -> RenderResult {
@@ -418,8 +418,8 @@ where
     todo!()
   }
 
-  fn layout(&self, parent_size: &Size2D<usize>) -> LayoutResult {
-    self.heading.layout(parent_size)
+  fn layout(&self, avail_size: &Size2D<usize>) -> LayoutResult {
+    self.heading.layout(avail_size)
   }
 
   fn render(&self, ctx: &RenderCtx) -> RenderResult {
@@ -820,7 +820,7 @@ impl Table {
     }
   }
 
-  fn layout_table(&self, parent_size: &Size2D<usize>) -> Result<(LayoutSize, Vec<ColumnLayoutFlexInput>), LayoutError> {
+  fn layout_table(&self, avail_size: &Size2D<usize>) -> Result<(LayoutSize, Vec<ColumnLayoutFlexInput>), LayoutError> {
     // Initial validation checks
     if self.columns.is_none() {
       return Ok((
@@ -837,7 +837,7 @@ impl Table {
     // self fields shorthand
     let columns = self.columns_ref().unwrap();
     // local helpers
-    let mut avail_table_size = parent_size.clone();
+    let mut avail_table_size = avail_size.clone();
     let mut table_width = MinMax::<usize>::default();
     let mut table_headings_height = MinMax::<usize>::default();
 
@@ -953,7 +953,7 @@ impl Table {
       MinMax::default() // zero
     };
     // So let's compute the first row min/max height or leave a hard space of at least 1 unit.
-    let avail_data_height = parent_size.height - table_headings_height.min;
+    let avail_data_height = avail_size.height - table_headings_height.min;
     let mut first_row_height = MinMax::new(1, 1);
 
     // Compute the min/max height for the first row only
@@ -1000,7 +1000,7 @@ impl Table {
     };
 
     // Finally check if we still have space for the final table size and return result
-    if parent_size.contains(table_layout_size.min) {
+    if avail_size.contains(table_layout_size.min) {
       Ok((table_layout_size, column_layouts_flex_input))
     } else {
       Err(LayoutError::InsufficientSpace)
@@ -1067,8 +1067,8 @@ impl Widget for Table {
     }
   }
 
-  fn layout(&self, parent_size: &Size2D<usize>) -> LayoutResult {
-    self.layout_table(parent_size).map(|ok| ok.0)
+  fn layout(&self, avail_size: &Size2D<usize>) -> LayoutResult {
+    self.layout_table(avail_size).map(|ok| ok.0)
   }
 
   fn render(&self, ctx: &RenderCtx) -> RenderResult {
