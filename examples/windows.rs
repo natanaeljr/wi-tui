@@ -13,13 +13,14 @@ use witui::widgets::style::{Color, Style};
 use witui::widgets::Widget;
 use witui::WiTui;
 
-// ╭─┤Title├┤Bar├────────┤ _   x ├─╮
-// │                               │
-// │                               │
-// │                               │
-// │                               │
-// │                               │
-// ╰───────────────────────────────╯
+// ╭─┤Title├┤Bar├───────────┤_ x├─╮
+// │                              │
+// │                              │
+// │                              │
+// │                              │
+// │                              │
+// │                              │
+// ╰──────────────────────────────╯
 
 fn main() {
   let root = Borders::child(Expand::child(()))
