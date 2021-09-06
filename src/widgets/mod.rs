@@ -95,6 +95,9 @@ pub trait Widget {
   fn event(&mut self, event: &AnyEvent, size: &Size2D<usize>) -> EventResult;
   fn layout(&self, avail_size: &Size2D<usize>) -> LayoutResult;
   fn render(&self, ctx: &RenderCtx) -> RenderResult;
+  fn flex(&self) -> usize {
+    1
+  }
 }
 
 // TODO: Default impl of Widgets

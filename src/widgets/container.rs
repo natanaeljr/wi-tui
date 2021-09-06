@@ -24,6 +24,9 @@ where
   }
 }
 
+// TODO: Horizontal/Vertical
+// TODO: Flex calculation
+
 pub struct Container<ChildrenStorage> {
   pub children: Option<ChildrenStorage>,
   pub must_fit_all_children: bool,
