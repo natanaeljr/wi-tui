@@ -51,6 +51,8 @@ impl WiTui {
 
   pub fn quit(mut self) {}
 
+  // TODO: Compute FPS, ms/frame
+  //  Provide API with rendering info, for displaying in a widget
   pub fn run_loop(&mut self) -> RenderResult {
     loop {
       self.print();
