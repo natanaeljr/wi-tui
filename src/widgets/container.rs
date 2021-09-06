@@ -26,6 +26,7 @@ where
 
 // TODO: Horizontal/Vertical
 // TODO: Flex calculation
+// TODO: Must fit N children
 
 pub struct Container<ChildrenStorage> {
   pub children: Option<ChildrenStorage>,

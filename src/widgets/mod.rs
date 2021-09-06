@@ -18,9 +18,7 @@ pub mod expand;
 pub mod fillchar;
 pub mod flex;
 pub mod hook;
-pub mod label;
 pub mod leak;
-pub mod line;
 pub mod min;
 pub mod padding;
 pub mod progressbar;
@@ -30,8 +28,7 @@ pub mod stack;
 pub mod style;
 pub mod table;
 pub mod tabs;
-pub mod textbox;
-pub mod vertical;
+pub mod input;
 
 #[derive(Debug)]
 pub enum LayoutError {

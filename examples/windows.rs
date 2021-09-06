@@ -58,9 +58,9 @@ fn main() {
                         .child('┤'.dark_green())
                         .child(
                           Container::new()
-                            .child(Min::zero().child(Style::new().white().dim().reverse().bold().child(" _ ")))
+                            .child(Min::zero().child(Style::new().white().dim().reverse().bold().child("_")))
                             .child(' ')
-                            .child(Style::new().white().bg(Color::AnsiValue(88)).bold().child(" x "))
+                            .child(Style::new().white().bg(Color::AnsiValue(88)).bold().child("x"))
                             .must_fit_all_children(false),
                         )
                         .child('├'.dark_green())
