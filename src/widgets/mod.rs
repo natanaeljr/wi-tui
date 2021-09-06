@@ -29,6 +29,7 @@ pub mod style;
 pub mod table;
 pub mod tabs;
 pub mod input;
+pub mod flexible;
 
 #[derive(Debug)]
 pub enum LayoutError {
