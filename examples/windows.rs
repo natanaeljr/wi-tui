@@ -35,25 +35,31 @@ fn main() {
             Padding::default().left(1).right(1).child(
               Container::new()
                 .child(
-                  Flexible::tight(6).child(
+                  Flexible::loose(10).child(
                     Container::new()
                       .child(Style::new().dark_green().child('┤'))
-                      .child(Style::new().dark_green().bold().reverse().child("Title"))
+                      .child(
+                        Style::new()
+                          .dark_green()
+                          .bold()
+                          .reverse()
+                          .child(Flexible::loose(1).child("Title")),
+                      )
                       .child(Style::new().dark_green().child('├'))
                       .must_fit_all_children(true),
                   ), // Flexible
                 ) // Container
                 .child(
-                  Flexible::tight(1).child(
+                  Expand::child(
                     Container::new()
                       .child(Style::new().dark_green().child('┤'))
                       .child(Style::new().white().bold().underlined().dim().child("Bar"))
                       .child(Style::new().dark_green().child('├'))
                       .must_fit_all_children(true),
-                  ), // Flexible
+                  ), //Expand
                 ) // Container
                 .child(
-                  Flexible::loose(2).child(
+                  Flexible::loose(10).child(
                     Align::top_right(
                       Container::new()
                         .child(Style::new().dark_green().child('┤'))

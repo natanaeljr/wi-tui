@@ -116,7 +116,7 @@ impl Default for LayoutSize {
       min: Default::default(),
       max: Default::default(),
       flex: 0,
-      fit: FlexFit::Tight,
+      fit: FlexFit::Loose,
     }
   }
 }
@@ -171,8 +171,12 @@ impl Widget for &str {
 
   fn render(&self, ctx: &RenderCtx) -> RenderResult {
     let frame = ctx.get_frame().size.clone();
+    eprintln!("frame.width: {}, len: {}", &frame.width, self.chars().count());
     if frame.width < self.chars().count() {
-      let buf = self.chars().take(frame.width).collect::<String>();
+      let buf = self
+        .chars()
+        .take(frame.width.checked_sub(1).unwrap_or(0))
+        .collect::<String>();
       ctx.renderer().write(buf.as_str());
       ctx.renderer().write("…");
     } else {
@@ -208,7 +212,10 @@ impl Widget for String {
   fn render(&self, ctx: &RenderCtx) -> RenderResult {
     let frame = ctx.get_frame().size.clone();
     if frame.width < self.chars().count() {
-      let buf = self.chars().take(frame.width).collect::<String>();
+      let buf = self
+        .chars()
+        .take(frame.width.checked_sub(1).unwrap_or(0))
+        .collect::<String>();
       ctx.renderer().write(buf.as_str());
       ctx.renderer().write("…");
     } else {

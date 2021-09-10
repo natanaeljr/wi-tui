@@ -175,9 +175,10 @@ fn compute_flex_layout(avail_size: usize, input_layout: &Vec<MinMaxFlex>) -> Res
   let mut fixed_sum = 0;
   let mut flex_sum = 0;
   for (col, layout) in input_layout.iter().enumerate() {
-    fixed_sum += layout.min;
+    let fixed = if layout.flex == 0 { layout.max } else { layout.min };
+    fixed_sum += fixed;
     flex_sum += layout.flex;
-    final_values.push(layout.min);
+    final_values.push(fixed);
   }
 
   if avail_size < fixed_sum {
@@ -193,7 +194,7 @@ fn compute_flex_layout(avail_size: usize, input_layout: &Vec<MinMaxFlex>) -> Res
   for (idx, layout) in input_layout
     .iter()
     .enumerate()
-    .filter(|(idx, layout)| layout.fit == FlexFit::Tight)
+    .filter(|(idx, layout)| layout.fit == FlexFit::Loose)
   {
     // compute actual flex constrained to min/max
     let flex_space = (flex_unit * layout.flex as f32).round() as usize;
@@ -215,7 +216,7 @@ fn compute_flex_layout(avail_size: usize, input_layout: &Vec<MinMaxFlex>) -> Res
   for (idx, layout) in input_layout
     .iter()
     .enumerate()
-    .filter(|(idx, layout)| layout.fit == FlexFit::Loose)
+    .filter(|(idx, layout)| layout.fit == FlexFit::Tight)
   {
     info!("LOOSE");
     // compute actual flex constrained to min/max

@@ -11,21 +11,11 @@ fn main() {
   witui::enable_pretty_env_logging();
 
   let root = Container::new()
-    .child(
-      Style::new()
-        .on_dark_grey()
-        .child(Flexible::loose(1).child(Min::zero().child("HELLO"))),
-    )
-    .child(
-      Style::new()
-        .on_dark_green()
-        .child(Expand::child(Min::zero().child("World"))),
-    )
-    .child(
-      Style::new()
-        .on_dark_blue()
-        .child(Flexible::tight(50).child(Min::zero().child("Welcome"))),
-    );
+    .child(Flexible::loose(0).child(Style::new().on_dark_grey().child("HELLO")))
+    .child(Expand::child(
+      Min::zero().child(Style::new().on_dark_green().child("World")),
+    ))
+    .child(Flexible::loose(10).child(Min::zero().child(Style::new().on_dark_blue().child("Welcome"))));
 
   WiTui::root_widget(root).alternate(true).run_loop().unwrap();
 }
