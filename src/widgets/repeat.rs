@@ -89,8 +89,4 @@ where
 
     Ok(())
   }
-
-  fn flex(&self) -> (usize, FlexFit) {
-    self.child.flex()
-  }
 }

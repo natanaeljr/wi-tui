@@ -48,10 +48,7 @@ where
     let layout_result = self.child.layout(avail_size);
     if let Err(e) = layout_result {
       if let LayoutError::InsufficientSpace = e {
-        return Ok(LayoutSize {
-          min: self.min.clone(),
-          max: self.min.clone(),
-        });
+        return Ok(LayoutSize::min_max(self.min.clone(), self.min.clone()));
       }
       return Err(e);
     }
@@ -88,9 +85,5 @@ where
     }
 
     Ok(())
-  }
-
-  fn flex(&self) -> (usize, FlexFit) {
-    self.child.flex()
   }
 }

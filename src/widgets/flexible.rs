@@ -49,14 +49,10 @@ where
   }
 
   fn layout(&self, avail_size: &Size2D<usize>) -> LayoutResult {
-    self.child.layout(avail_size)
+    Ok(self.child.layout(avail_size)?.flex(self.flex).fit(self.fit.clone()))
   }
 
   fn render(&self, ctx: &RenderCtx) -> RenderResult {
     ctx.render_child_widget(ctx.get_frame().clone(), &self.child)
-  }
-
-  fn flex(&self) -> (usize, FlexFit) {
-    (self.flex, self.fit.clone())
   }
 }

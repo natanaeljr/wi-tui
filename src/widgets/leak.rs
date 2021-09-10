@@ -45,8 +45,4 @@ where
     ctx.render_child_widget(Rect::new(frame.origin.clone(), layout.min.clone()), &self.child)?;
     Ok(())
   }
-
-  fn flex(&self) -> (usize, FlexFit) {
-    self.child.flex()
-  }
 }

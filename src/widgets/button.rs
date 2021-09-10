@@ -30,8 +30,4 @@ impl Widget for Button<&str> {
     ctx.renderer().write(&self.child);
     Ok(())
   }
-
-  fn flex(&self) -> (usize, FlexFit) {
-    (1, FlexFit::Tight)
-  }
 }

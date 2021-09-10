@@ -125,8 +125,4 @@ where
     }
     self.child.render(ctx)
   }
-
-  fn flex(&self) -> (usize, FlexFit) {
-    self.child.flex()
-  }
 }

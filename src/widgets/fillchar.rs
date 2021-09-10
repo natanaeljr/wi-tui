@@ -20,10 +20,7 @@ impl Widget for FillChar {
   }
 
   fn layout(&self, avail_size: &Size2D<usize>) -> LayoutResult {
-    Ok(LayoutSize {
-      min: avail_size.clone(),
-      max: avail_size.clone(),
-    })
+    Ok(LayoutSize::min_max(avail_size.clone(), avail_size.clone()))
   }
 
   fn render(&self, ctx: &RenderCtx) -> RenderResult {
@@ -35,9 +32,5 @@ impl Widget for FillChar {
     }
     ctx.renderer().write(str.as_str());
     Ok(())
-  }
-
-  fn flex(&self) -> (usize, FlexFit) {
-    (1, FlexFit::Tight)
   }
 }

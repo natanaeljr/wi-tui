@@ -88,16 +88,15 @@ where
       layout.min.height = layout.min.height.max(child_layout.min.height);
       layout.max.height = layout.max.height.max(child_layout.max.height);
       // Push layout for later flex computation
-      let child_flex = child.flex();
       flex_input_layouts.push(MinMaxFlex {
         min: child_layout.min.width,
         max: child_layout.max.width,
-        flex: child_flex.0,
-        fit: child_flex.1
+        flex: child_layout.flex,
+        fit: child_layout.fit.clone(),
       });
     }
 
-    Ok((layout, flex_input_layouts))
+    Ok((layout.flex(1), flex_input_layouts))
   }
 }
 
@@ -131,9 +130,5 @@ where
     }
 
     Ok(())
-  }
-
-  fn flex(&self) -> (usize, FlexFit) {
-    (1, FlexFit::Tight)
   }
 }

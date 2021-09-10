@@ -90,8 +90,4 @@ where
     let child_frame = ctx.get_frame().inner_rect(self.offsets.clone());
     ctx.render_child_widget(child_frame, &self.child)
   }
-
-  fn flex(&self) -> (usize, FlexFit) {
-    self.child.flex()
-  }
 }

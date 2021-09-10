@@ -61,9 +61,4 @@ impl<Child> Widget for Hook<Child> {
   fn render(&self, ctx: &RenderCtx) -> RenderResult {
     self.on_render.deref()(&self.child, ctx)
   }
-
-  fn flex(&self) -> (usize, FlexFit) {
-    // TODO: callback
-    (1, FlexFit::Tight)
-  }
 }

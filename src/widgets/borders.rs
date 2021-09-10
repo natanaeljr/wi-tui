@@ -275,8 +275,4 @@ where
     let child_frame = frame.inner_rect(SideOffsets2D::new(top_offset, right_offset, bottom_offset, left_offset));
     ctx.render_child_widget(child_frame, &self.child)
   }
-
-  fn flex(&self) -> (usize, FlexFit) {
-    self.child.flex()
-  }
 }

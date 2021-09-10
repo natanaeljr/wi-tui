@@ -190,10 +190,6 @@ where
     //   .set_attributes(Attributes::default() | Attribute::Reverse);
     self.heading.render(ctx)
   }
-
-  fn flex(&self) -> (usize, FlexFit) {
-    (self.width.flex, FlexFit::Tight)
-  }
 }
 
 pub trait TableColumn: Widget {
@@ -429,10 +425,6 @@ where
 
   fn render(&self, ctx: &RenderCtx) -> RenderResult {
     self.heading.render(ctx)
-  }
-
-  fn flex(&self) -> (usize, FlexFit) {
-    (self.height.flex, FlexFit::Tight)
   }
 }
 
@@ -832,13 +824,7 @@ impl Table {
   fn layout_table(&self, avail_size: &Size2D<usize>) -> Result<(LayoutSize, Vec<ColumnLayoutFlexInput>), LayoutError> {
     // Initial validation checks
     if self.columns.is_none() {
-      return Ok((
-        LayoutSize {
-          min: Size2D::zero(),
-          max: Size2D::zero(),
-        },
-        vec![],
-      ));
+      return Ok((LayoutSize::min_max(Size2D::zero(), Size2D::zero()), vec![]));
     }
 
     // output container for flex
@@ -1003,10 +989,10 @@ impl Table {
     let table_height_max = table_headings_height.max
       + first_row_height.max /*TODO: compute actual rows size */* self.data.as_ref().unwrap().rows_len()
       + 1;
-    let table_layout_size = LayoutSize {
-      min: Size2D::new(table_width.min, table_height_min),
-      max: Size2D::new(table_width.max, table_height_max),
-    };
+    let table_layout_size = LayoutSize::min_max(
+      Size2D::new(table_width.min, table_height_min),
+      Size2D::new(table_width.max, table_height_max),
+    );
 
     // Finally check if we still have space for the final table size and return result
     if avail_size.contains(table_layout_size.min) {
@@ -1161,9 +1147,5 @@ impl Widget for Table {
     }
 
     Ok(())
-  }
-
-  fn flex(&self) -> (usize, FlexFit) {
-    (1, FlexFit::Tight)
   }
 }

@@ -114,8 +114,4 @@ where
     }
     Ok(())
   }
-
-  fn flex(&self) -> (usize, FlexFit) {
-    (1, FlexFit::Tight)
-  }
 }

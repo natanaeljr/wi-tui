@@ -23,17 +23,10 @@ where
 
   fn layout(&self, avail_size: &Size2D<usize>) -> LayoutResult {
     let layout = self.child.layout(avail_size)?;
-    Ok(LayoutSize {
-      min: layout.min,
-      max: avail_size.clone(),
-    })
+    Ok(layout.max(avail_size.clone()).flex(1).fit(FlexFit::Loose))
   }
 
   fn render(&self, ctx: &RenderCtx) -> RenderResult {
     self.child.render(ctx)
-  }
-
-  fn flex(&self) -> (usize, FlexFit) {
-    (self.child.flex().0, FlexFit::Loose)
   }
 }

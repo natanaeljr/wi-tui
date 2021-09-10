@@ -70,10 +70,54 @@ impl Display for RenderError {
 
 impl Error for RenderError {}
 
-#[derive(Debug, Default)]
+#[derive(Debug)]
 pub struct LayoutSize {
-  min: Size2D<usize>,
-  max: Size2D<usize>,
+  pub min: Size2D<usize>,
+  pub max: Size2D<usize>,
+  pub flex: usize,
+  pub fit: FlexFit,
+}
+
+impl LayoutSize {
+  pub fn min_max(min: Size2D<usize>, max: Size2D<usize>) -> Self {
+    Self {
+      min,
+      max,
+      flex: 0,
+      fit: FlexFit::Tight,
+    }
+  }
+
+  pub fn min(mut self, min: Size2D<usize>) -> Self {
+    self.min = min;
+    self
+  }
+
+  pub fn max(mut self, max: Size2D<usize>) -> Self {
+    self.max = max;
+    self
+  }
+
+  pub fn flex(mut self, flex: usize) -> Self {
+    self.flex = flex;
+    self
+  }
+
+  pub fn fit(mut self, fit: FlexFit) -> Self {
+    self.fit = fit;
+    self
+  }
+}
+
+impl Default for LayoutSize {
+  fn default() -> Self {
+    Self {
+      min: Default::default(),
+      max: Default::default(),
+      flex: 0,
+      fit: FlexFit::Tight,
+    }
+  }
 }
 
 pub type LayoutResult = Result<LayoutSize, LayoutError>;
@@ -94,7 +138,6 @@ pub trait Widget {
   fn event(&mut self, event: &AnyEvent, size: &Size2D<usize>) -> EventResult;
   fn layout(&self, avail_size: &Size2D<usize>) -> LayoutResult;
   fn render(&self, ctx: &RenderCtx) -> RenderResult;
-  fn flex(&self) -> (usize, FlexFit);
 }
 
 // TODO: Default impl of Widgets
@@ -113,7 +156,7 @@ impl Widget for &str {
     // max.height = std::cmp::min(max.height, avail_size.height);
     // check for minimum space in parent size
     if avail_size.contains(min.clone()) {
-      Ok(LayoutSize { min, max })
+      Ok(LayoutSize::min_max(min, max))
     } else {
       Err(LayoutError::InsufficientSpace)
     }
@@ -129,10 +172,6 @@ impl Widget for &str {
       ctx.renderer().write(self);
     }
     Ok(())
-  }
-
-  fn flex(&self) -> (usize, FlexFit) {
-    (1, FlexFit::Tight)
   }
 }
 
@@ -149,7 +188,7 @@ impl Widget for String {
     // max.height = std::cmp::min(max.height, avail_size.height);
     // check for minimum space in parent size
     if avail_size.contains(min.clone()) {
-      Ok(LayoutSize { min, max })
+      Ok(LayoutSize::min_max(min, max))
     } else {
       Err(LayoutError::InsufficientSpace)
     }
@@ -166,10 +205,6 @@ impl Widget for String {
     }
     Ok(())
   }
-
-  fn flex(&self) -> (usize, FlexFit) {
-    (1, FlexFit::Tight)
-  }
 }
 
 impl Widget for char {
@@ -181,10 +216,7 @@ impl Widget for char {
     let size = Size2D::new(1, 1);
     // check for minimum space in parent size
     if avail_size.contains(size.clone()) {
-      Ok(LayoutSize {
-        min: size.clone(),
-        max: size,
-      })
+      Ok(LayoutSize::min_max(size.clone(), size))
     } else {
       Err(LayoutError::InsufficientSpace)
     }
@@ -193,10 +225,6 @@ impl Widget for char {
   fn render(&self, ctx: &RenderCtx) -> RenderResult {
     ctx.renderer().write(self.to_string().as_str());
     Ok(())
-  }
-
-  fn flex(&self) -> (usize, FlexFit) {
-    (0, FlexFit::Tight)
   }
 }
 
@@ -214,7 +242,7 @@ impl Widget for u32 {
     max.height = std::cmp::min(max.height, avail_size.height);
     // check for minimum space in parent size
     if avail_size.contains(min.clone()) {
-      Ok(LayoutSize { min, max })
+      Ok(LayoutSize::min_max(min, max))
     } else {
       Err(LayoutError::InsufficientSpace)
     }
@@ -231,10 +259,6 @@ impl Widget for u32 {
       ctx.renderer().write(val.as_str());
     }
     Ok(())
-  }
-
-  fn flex(&self) -> (usize, FlexFit) {
-    (1, FlexFit::Tight)
   }
 }
 
@@ -252,7 +276,7 @@ impl Widget for usize {
     max.height = std::cmp::min(max.height, avail_size.height);
     // check for minimum space in parent size
     if avail_size.contains(min.clone()) {
-      Ok(LayoutSize { min, max })
+      Ok(LayoutSize::min_max(min, max))
     } else {
       Err(LayoutError::InsufficientSpace)
     }
@@ -269,10 +293,6 @@ impl Widget for usize {
       ctx.renderer().write(val.as_str());
     }
     Ok(())
-  }
-
-  fn flex(&self) -> (usize, FlexFit) {
-    (1, FlexFit::Tight)
   }
 }
 
@@ -295,10 +315,6 @@ where
   fn render(&self, ctx: &RenderCtx) -> RenderResult {
     self.deref().render(ctx)
   }
-
-  fn flex(&self) -> (usize, FlexFit) {
-    self.deref().flex()
-  }
 }
 
 impl<T> Widget for RefCell<T>
@@ -315,10 +331,6 @@ where
 
   fn render(&self, ctx: &RenderCtx) -> RenderResult {
     self.deref().render(ctx)
-  }
-
-  fn flex(&self) -> (usize, FlexFit) {
-    self.deref().flex()
   }
 }
 
@@ -338,10 +350,6 @@ where
     self.deref().render(ctx);
     Ok(())
   }
-
-  fn flex(&self) -> (usize, FlexFit) {
-    self.deref().flex()
-  }
 }
 
 impl Widget for () {
@@ -351,10 +359,7 @@ impl Widget for () {
 
   fn layout(&self, avail_size: &Size2D<usize>) -> LayoutResult {
     debug!("layout() : avail_size: {:?}", avail_size);
-    let layout = LayoutSize {
-      min: Default::default(),
-      max: Default::default(),
-    };
+    let layout = LayoutSize::min_max(Default::default(), Default::default());
     debug!("layout() : layout: {:?}", layout);
     Ok(layout)
   }
@@ -362,9 +367,5 @@ impl Widget for () {
   fn render(&self, ctx: &RenderCtx) -> RenderResult {
     debug!("render() : frame: {:?}, ", &ctx.get_frame());
     Ok(())
-  }
-
-  fn flex(&self) -> (usize, FlexFit) {
-    (1, FlexFit::Tight)
   }
 }
