@@ -8,7 +8,9 @@ use euclid::default::{Point2D, Rect, Size2D};
 use crate::render::RenderCtx;
 use crate::util::{MinMax, Scoped, ScopedMut};
 use crate::widgets::flexible::FlexFit;
-use crate::widgets::{AnyEvent, EventResult, LayoutError, LayoutResult, LayoutSize, RenderError, RenderResult, Widget};
+use crate::widgets::{
+  AnyEvent, Capability, EventResult, LayoutError, LayoutResult, LayoutSize, RenderError, RenderResult, Widget,
+};
 use crossterm::event::{Event, MouseButton, MouseEventKind};
 
 #[derive(Clone)]
@@ -189,6 +191,10 @@ where
     //   .renderer()
     //   .set_attributes(Attributes::default() | Attribute::Reverse);
     self.heading.render(ctx)
+  }
+
+  fn has_capability(&self, capability: &Capability) -> bool {
+    self.heading.has_capability(capability)
   }
 }
 
@@ -425,6 +431,10 @@ where
 
   fn render(&self, ctx: &RenderCtx) -> RenderResult {
     self.heading.render(ctx)
+  }
+
+  fn has_capability(&self, capability: &Capability) -> bool {
+    self.heading.has_capability(capability)
   }
 }
 
@@ -1147,5 +1157,9 @@ impl Widget for Table {
     }
 
     Ok(())
+  }
+
+  fn has_capability(&self, capability: &Capability) -> bool {
+    todo!()
   }
 }

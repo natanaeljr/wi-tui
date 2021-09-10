@@ -1,6 +1,6 @@
 use crate::render::RenderCtx;
 use crate::widgets::flexible::FlexFit;
-use crate::widgets::{AnyEvent, EventResult, LayoutResult, LayoutSize, RenderResult, Widget};
+use crate::widgets::{AnyEvent, Capability, EventResult, LayoutResult, LayoutSize, RenderResult, Widget};
 use euclid::default::Size2D;
 
 pub struct Expand<Child> {
@@ -28,5 +28,9 @@ where
 
   fn render(&self, ctx: &RenderCtx) -> RenderResult {
     self.child.render(ctx)
+  }
+
+  fn has_capability(&self, capability: &Capability) -> bool {
+    self.child.has_capability(capability)
   }
 }

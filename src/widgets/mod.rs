@@ -4,6 +4,7 @@ use crate::util::Scoped;
 use crate::widgets::flexible::FlexFit;
 use crossterm::style::StyledContent;
 use euclid::default::Size2D;
+use std::borrow::Cow;
 use std::cell::{Cell, RefCell};
 use std::error::Error;
 use std::fmt::{Display, Formatter};
@@ -134,10 +135,16 @@ pub enum AnyEvent {
   Input(crossterm::event::Event),
 }
 
+pub enum Capability {
+  Selectable,
+  Custom(String),
+}
+
 pub trait Widget {
   fn event(&mut self, event: &AnyEvent, size: &Size2D<usize>) -> EventResult;
   fn layout(&self, avail_size: &Size2D<usize>) -> LayoutResult;
   fn render(&self, ctx: &RenderCtx) -> RenderResult;
+  fn has_capability(&self, capability: &Capability) -> bool;
 }
 
 // TODO: Default impl of Widgets
@@ -173,6 +180,10 @@ impl Widget for &str {
     }
     Ok(())
   }
+
+  fn has_capability(&self, capability: &Capability) -> bool {
+    false
+  }
 }
 
 impl Widget for String {
@@ -205,6 +216,10 @@ impl Widget for String {
     }
     Ok(())
   }
+
+  fn has_capability(&self, capability: &Capability) -> bool {
+    false
+  }
 }
 
 impl Widget for char {
@@ -225,6 +240,10 @@ impl Widget for char {
   fn render(&self, ctx: &RenderCtx) -> RenderResult {
     ctx.renderer().write(self.to_string().as_str());
     Ok(())
+  }
+
+  fn has_capability(&self, capability: &Capability) -> bool {
+    false
   }
 }
 
@@ -260,6 +279,10 @@ impl Widget for u32 {
     }
     Ok(())
   }
+
+  fn has_capability(&self, capability: &Capability) -> bool {
+    false
+  }
 }
 
 impl Widget for usize {
@@ -294,6 +317,10 @@ impl Widget for usize {
     }
     Ok(())
   }
+
+  fn has_capability(&self, capability: &Capability) -> bool {
+    false
+  }
 }
 
 impl<T> Widget for Rc<T>
@@ -315,6 +342,10 @@ where
   fn render(&self, ctx: &RenderCtx) -> RenderResult {
     self.deref().render(ctx)
   }
+
+  fn has_capability(&self, capability: &Capability) -> bool {
+    self.deref().has_capability(capability)
+  }
 }
 
 impl<T> Widget for RefCell<T>
@@ -331,6 +362,10 @@ where
 
   fn render(&self, ctx: &RenderCtx) -> RenderResult {
     self.deref().render(ctx)
+  }
+
+  fn has_capability(&self, capability: &Capability) -> bool {
+    self.deref().has_capability(capability)
   }
 }
 
@@ -350,6 +385,10 @@ where
     self.deref().render(ctx);
     Ok(())
   }
+
+  fn has_capability(&self, capability: &Capability) -> bool {
+    self.deref().has_capability(capability)
+  }
 }
 
 impl Widget for () {
@@ -367,5 +406,9 @@ impl Widget for () {
   fn render(&self, ctx: &RenderCtx) -> RenderResult {
     debug!("render() : frame: {:?}, ", &ctx.get_frame());
     Ok(())
+  }
+
+  fn has_capability(&self, capability: &Capability) -> bool {
+    false
   }
 }

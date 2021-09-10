@@ -1,6 +1,8 @@
 use crate::render::RenderCtx;
 use crate::widgets::flexible::FlexFit;
-use crate::widgets::{AnyEvent, EventResult, LayoutError, LayoutResult, LayoutSize, RenderError, RenderResult, Widget};
+use crate::widgets::{
+  AnyEvent, Capability, EventResult, LayoutError, LayoutResult, LayoutSize, RenderError, RenderResult, Widget,
+};
 use euclid::default::{Point2D, Rect, SideOffsets2D, Size2D};
 
 // TODO: offsets of (min + max + flex)
@@ -89,5 +91,9 @@ where
     }
     let child_frame = ctx.get_frame().inner_rect(self.offsets.clone());
     ctx.render_child_widget(child_frame, &self.child)
+  }
+
+  fn has_capability(&self, capability: &Capability) -> bool {
+    self.child.has_capability(capability)
   }
 }

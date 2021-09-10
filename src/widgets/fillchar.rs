@@ -2,7 +2,7 @@ use euclid::default::Size2D;
 
 use crate::render::RenderCtx;
 use crate::widgets::flexible::FlexFit;
-use crate::widgets::{AnyEvent, EventResult, LayoutResult, LayoutSize, RenderResult, Widget};
+use crate::widgets::{AnyEvent, Capability, EventResult, LayoutResult, LayoutSize, RenderResult, Widget};
 
 pub struct FillChar {
   char: char,
@@ -32,5 +32,9 @@ impl Widget for FillChar {
     }
     ctx.renderer().write(str.as_str());
     Ok(())
+  }
+
+  fn has_capability(&self, capability: &Capability) -> bool {
+    todo!()
   }
 }

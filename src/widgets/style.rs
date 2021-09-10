@@ -1,5 +1,5 @@
 use crate::render::RenderCtx;
-use crate::widgets::{AnyEvent, EventResult, LayoutResult, RenderResult, Widget};
+use crate::widgets::{AnyEvent, Capability, EventResult, LayoutResult, RenderResult, Widget};
 use euclid::default::Size2D;
 use std::ops::{BitOr, Deref, DerefMut};
 
@@ -124,5 +124,9 @@ where
       ctx.renderer().set_foreground(fg);
     }
     self.child.render(ctx)
+  }
+
+  fn has_capability(&self, capability: &Capability) -> bool {
+    self.child.has_capability(capability)
   }
 }

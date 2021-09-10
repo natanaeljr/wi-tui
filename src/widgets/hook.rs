@@ -1,6 +1,6 @@
 use crate::render::RenderCtx;
 use crate::widgets::flexible::FlexFit;
-use crate::widgets::{AnyEvent, EventResult, LayoutResult, RenderResult, Widget};
+use crate::widgets::{AnyEvent, Capability, EventResult, LayoutResult, RenderResult, Widget};
 use euclid::default::Size2D;
 use std::ops::{Deref, DerefMut};
 
@@ -8,6 +8,7 @@ pub struct Hook<Child> {
   on_event: Box<dyn FnMut(/*child:*/ &mut Child, /*event:*/ &AnyEvent, /*size:*/ &Size2D<usize>) -> EventResult>,
   on_layout: Box<dyn Fn(/*child:*/ &Child, /*avail_size:*/ &Size2D<usize>) -> LayoutResult>,
   on_render: Box<dyn Fn(/*child:*/ &Child, /*ctx:*/ &RenderCtx) -> RenderResult>,
+  on_has_capability: Box<dyn Fn(/*child:*/ &Child, /*capability:*/ &Capability) -> bool>,
   child: Child,
 }
 
@@ -20,6 +21,7 @@ where
       on_event: Box::new(|child, event, size| child.event(event, size)),
       on_layout: Box::new(|child, avail_size| child.layout(avail_size)),
       on_render: Box::new(|child, render_ctx| render_ctx.render_child_widget(render_ctx.get_frame().clone(), child)),
+      on_has_capability: Box::new(|child, capability| child.has_capability(capability)),
       child,
     }
   }
@@ -47,6 +49,14 @@ where
     self.on_render = Box::new(func);
     self
   }
+
+  pub fn on_has_capability<F>(mut self, func: F) -> Self
+  where
+    F: 'static + Fn(/*child:*/ &Child, /*capability:*/ &Capability) -> bool,
+  {
+    self.on_has_capability = Box::new(func);
+    self
+  }
 }
 
 impl<Child> Widget for Hook<Child> {
@@ -60,5 +70,9 @@ impl<Child> Widget for Hook<Child> {
 
   fn render(&self, ctx: &RenderCtx) -> RenderResult {
     self.on_render.deref()(&self.child, ctx)
+  }
+
+  fn has_capability(&self, capability: &Capability) -> bool {
+    self.on_has_capability.deref()(&self.child, capability)
   }
 }

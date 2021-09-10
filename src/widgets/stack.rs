@@ -1,7 +1,9 @@
 use crate::render::RenderCtx;
 use crate::util::Scoped;
 use crate::widgets::flexible::FlexFit;
-use crate::widgets::{AnyEvent, EventResult, LayoutError, LayoutResult, LayoutSize, RenderError, RenderResult, Widget};
+use crate::widgets::{
+  AnyEvent, Capability, EventResult, LayoutError, LayoutResult, LayoutSize, RenderError, RenderResult, Widget,
+};
 use euclid::default::Size2D;
 use std::cmp::max;
 use std::ops::Deref;
@@ -113,5 +115,9 @@ where
       }
     }
     Ok(())
+  }
+
+  fn has_capability(&self, capability: &Capability) -> bool {
+    todo!()
   }
 }

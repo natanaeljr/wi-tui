@@ -8,7 +8,9 @@ use crate::render::RenderCtx;
 use crate::util::Scoped;
 use crate::widgets::flexible::FlexFit;
 use crate::widgets::stack::Children;
-use crate::widgets::{AnyEvent, EventResult, LayoutError, LayoutResult, LayoutSize, RenderError, RenderResult, Widget};
+use crate::widgets::{
+  AnyEvent, Capability, EventResult, LayoutError, LayoutResult, LayoutSize, RenderError, RenderResult, Widget,
+};
 use crate::{compute_flex_layout, ChildrenStorage, MinMaxFlex};
 use crossterm::style::ContentStyle;
 use std::cmp::{max, min};
@@ -130,5 +132,9 @@ where
     }
 
     Ok(())
+  }
+
+  fn has_capability(&self, capability: &Capability) -> bool {
+    todo!()
   }
 }

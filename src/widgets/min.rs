@@ -1,6 +1,8 @@
 use crate::render::RenderCtx;
 use crate::widgets::flexible::FlexFit;
-use crate::widgets::{AnyEvent, EventResult, LayoutError, LayoutResult, LayoutSize, RenderError, RenderResult, Widget};
+use crate::widgets::{
+  AnyEvent, Capability, EventResult, LayoutError, LayoutResult, LayoutSize, RenderError, RenderResult, Widget,
+};
 use euclid::default::{Rect, Size2D};
 
 // TODO: Minimize should actually be a widget that forces the Render to the min layout
@@ -85,5 +87,9 @@ where
     }
 
     Ok(())
+  }
+
+  fn has_capability(&self, capability: &Capability) -> bool {
+    self.child.has_capability(capability)
   }
 }

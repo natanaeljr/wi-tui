@@ -1,6 +1,6 @@
 use crate::render::{RenderCtx, Renderer};
 use crate::widgets::flexible::FlexFit;
-use crate::widgets::{AnyEvent, EventResult, LayoutResult, RenderResult, Widget};
+use crate::widgets::{AnyEvent, Capability, EventResult, LayoutResult, RenderResult, Widget};
 use euclid::default::Size2D;
 use std::ops::{Deref, DerefMut};
 
@@ -29,5 +29,9 @@ impl Widget for Button<&str> {
   fn render(&self, ctx: &RenderCtx) -> RenderResult {
     ctx.renderer().write(&self.child);
     Ok(())
+  }
+
+  fn has_capability(&self, capability: &Capability) -> bool {
+    todo!()
   }
 }

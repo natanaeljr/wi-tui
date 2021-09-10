@@ -1,5 +1,5 @@
 use crate::render::RenderCtx;
-use crate::widgets::{AnyEvent, EventResult, LayoutResult, RenderError, RenderResult, Widget};
+use crate::widgets::{AnyEvent, Capability, EventResult, LayoutResult, RenderError, RenderResult, Widget};
 use euclid::default::Size2D;
 
 #[derive(Debug, Clone, Ord, PartialOrd, Eq, PartialEq)]
@@ -54,5 +54,9 @@ where
 
   fn render(&self, ctx: &RenderCtx) -> RenderResult {
     ctx.render_child_widget(ctx.get_frame().clone(), &self.child)
+  }
+
+  fn has_capability(&self, capability: &Capability) -> bool {
+    self.child.has_capability(capability)
   }
 }

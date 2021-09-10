@@ -4,7 +4,7 @@ use euclid::SideOffsets2D;
 
 use crate::render::RenderCtx;
 use crate::widgets::flexible::FlexFit;
-use crate::widgets::{AnyEvent, EventResult, LayoutError, LayoutResult, RenderError, RenderResult, Widget};
+use crate::widgets::{AnyEvent, Capability, EventResult, LayoutError, LayoutResult, RenderError, RenderResult, Widget};
 
 // TODO: only vertical
 // TODO: only horizontal
@@ -88,5 +88,9 @@ where
     }
 
     Ok(())
+  }
+
+  fn has_capability(&self, capability: &Capability) -> bool {
+    self.child.has_capability(capability)
   }
 }

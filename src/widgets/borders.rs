@@ -6,7 +6,9 @@ use crate::render::{RenderCtx, Renderer};
 use crate::widgets::fillchar::FillChar;
 use crate::widgets::repeat::Repeat;
 use crate::widgets::style::Style;
-use crate::widgets::{AnyEvent, EventResult, LayoutError, LayoutResult, LayoutSize, RenderError, RenderResult, Widget};
+use crate::widgets::{
+  AnyEvent, Capability, EventResult, LayoutError, LayoutResult, LayoutSize, RenderError, RenderResult, Widget,
+};
 
 use crate::debug;
 use crate::widgets::flexible::FlexFit;
@@ -274,5 +276,9 @@ where
 
     let child_frame = frame.inner_rect(SideOffsets2D::new(top_offset, right_offset, bottom_offset, left_offset));
     ctx.render_child_widget(child_frame, &self.child)
+  }
+
+  fn has_capability(&self, capability: &Capability) -> bool {
+    self.child.has_capability(capability)
   }
 }
