@@ -32,6 +32,7 @@ pub mod stack;
 pub mod style;
 pub mod table;
 pub mod tabs;
+pub mod text;
 
 #[derive(Debug)]
 pub enum LayoutError {
@@ -171,7 +172,6 @@ impl Widget for &str {
 
   fn render(&self, ctx: &RenderCtx) -> RenderResult {
     let frame = ctx.get_frame().size.clone();
-    eprintln!("frame.width: {}, len: {}", &frame.width, self.chars().count());
     if frame.width < self.chars().count() {
       let buf = self
         .chars()

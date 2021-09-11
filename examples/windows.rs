@@ -44,7 +44,7 @@ fn main() {
                           .bold()
                           .reverse()
                           .child(Flexible::loose(1).child("Title")),
-                      )
+                      ) // Container
                       .child(Style::new().dark_green().child('├'))
                       .must_fit_all_children(true),
                   ), // Flexible
@@ -59,20 +59,18 @@ fn main() {
                   ), //Expand
                 ) // Container
                 .child(
-                  Flexible::loose(10).child(
-                    Align::top_right(
-                      Container::new()
-                        .child(Style::new().dark_green().child('┤'))
-                        .child(
-                          Container::new()
-                            .child(Min::zero().child(Style::new().white().dim().reverse().bold().child("_")))
-                            .child(' ')
-                            .child(Style::new().white().bg(Color::AnsiValue(88)).bold().child("x"))
-                            .must_fit_all_children(false),
-                        )
-                        .child(Style::new().dark_green().child('├'))
-                        .must_fit_all_children(true),
-                    ), // Align
+                  Flexible::loose(5).child(
+                    Container::new()
+                      .child(Style::new().dark_green().child('┤'))
+                      .child(
+                        Container::new()
+                          .child(Min::zero().child(Style::new().white().dim().reverse().bold().child("_")))
+                          .child(' ')
+                          .child(Style::new().white().bg(Color::AnsiValue(88)).bold().child("x"))
+                          .must_fit_all_children(false),
+                      ) // Container
+                      .child(Style::new().dark_green().child('├'))
+                      .must_fit_all_children(true),
                   ), // Flexible
                 ), // Container
             ), // Padding

@@ -190,15 +190,8 @@ impl Renderer {
     Some(())
   }
 
-  pub fn move_to_column_relative(&mut self, x: u16) -> Option<()> {
-    let the_x = self.frame.min_x() as u16 + x;
-    if the_x > self.frame.max_x() as u16 {
-      return None;
-    }
-    self.frame_cursor.x = the_x as usize;
-    let mut stdout = std::io::stdout();
-    // execute!(stdout, cursor::MoveToColumn(the_x));
-    Some(())
+  pub fn move_right(&mut self, x: usize) {
+    self.frame_cursor.x = (self.frame_cursor.x + x).min(self.frame.max_x());
   }
 }
 
