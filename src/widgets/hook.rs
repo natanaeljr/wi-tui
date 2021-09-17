@@ -1,6 +1,6 @@
 use crate::render::RenderCtx;
-use crate::FlexFit;
 use crate::widgets::{AnyEvent, Capability, EventResult, LayoutResult, RenderResult, Widget};
+use crate::FlexFit;
 use euclid::default::Size2D;
 use std::ops::{Deref, DerefMut};
 

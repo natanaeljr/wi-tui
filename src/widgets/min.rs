@@ -1,8 +1,8 @@
 use crate::render::RenderCtx;
-use crate::FlexFit;
 use crate::widgets::{
   AnyEvent, Capability, EventResult, LayoutError, LayoutResult, LayoutSize, RenderError, RenderResult, Widget,
 };
+use crate::FlexFit;
 use euclid::default::{Rect, Size2D};
 
 // TODO: Minimize should actually be a widget that forces the Render to the min layout

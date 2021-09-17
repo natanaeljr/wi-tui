@@ -1,9 +1,9 @@
 use euclid::default::{Rect, Size2D};
 
-use crate::debug;
+use crate::log::debug;
 use crate::render::RenderCtx;
-use crate::FlexFit;
 use crate::widgets::{AnyEvent, Capability, EventResult, LayoutResult, RenderResult, Widget};
+use crate::FlexFit;
 
 // TODO: LeakHorizontal
 // TODO: LeakVertical

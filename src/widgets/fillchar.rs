@@ -1,8 +1,8 @@
 use euclid::default::Size2D;
 
 use crate::render::RenderCtx;
-use crate::FlexFit;
 use crate::widgets::{AnyEvent, Capability, EventResult, LayoutResult, LayoutSize, RenderResult, Widget};
+use crate::FlexFit;
 
 pub struct FillChar {
   char: char,

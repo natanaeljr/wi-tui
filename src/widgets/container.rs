@@ -3,13 +3,13 @@ use std::ops::Deref;
 
 use euclid::default::{Point2D, Rect, Size2D};
 
-use crate::info;
+use crate::log::info;
 use crate::render::RenderCtx;
 use crate::util::Scoped;
-use crate::FlexFit;
 use crate::widgets::{
   AnyEvent, Capability, EventResult, LayoutError, LayoutResult, LayoutSize, RenderError, RenderResult, Widget,
 };
+use crate::FlexFit;
 use crate::{compute_flex_layout, ChildrenStorage, MinMaxFlex};
 use crossterm::style::ContentStyle;
 use std::cmp::{max, min};

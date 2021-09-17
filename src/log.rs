@@ -16,7 +16,6 @@ pub fn enable_pretty_env_logging() {
   logger.init();
 }
 
-#[macro_export]
 macro_rules! error {
   (target: $target:expr, $($arg:tt)+) => {
     #[cfg(feature = "logging")]
@@ -28,8 +27,7 @@ macro_rules! error {
   };
 }
 
-#[macro_export]
-macro_rules! warn {
+macro_rules! warning {
   (target: $target:expr, $($arg:tt)+) => {
     #[cfg(feature = "logging")]
     { ::log::warn!($target, $($arg)+); }
@@ -40,7 +38,6 @@ macro_rules! warn {
   };
 }
 
-#[macro_export]
 macro_rules! info {
   (target: $target:expr, $($arg:tt)+) => {
     #[cfg(feature = "logging")]
@@ -52,7 +49,6 @@ macro_rules! info {
   };
 }
 
-#[macro_export]
 macro_rules! debug {
   (target: $target:expr, $($arg:tt)+) => {
     #[cfg(feature = "logging")]
@@ -64,7 +60,6 @@ macro_rules! debug {
   };
 }
 
-#[macro_export]
 macro_rules! trace {
   (target: $target:expr, $($arg:tt)+) => {
     #[cfg(feature = "logging")]
@@ -75,3 +70,9 @@ macro_rules! trace {
     { ::log::trace!($($arg)+); }
   };
 }
+
+pub(crate) use debug;
+pub(crate) use error;
+pub(crate) use info;
+pub(crate) use trace;
+pub(crate) use warning;

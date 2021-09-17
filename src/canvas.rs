@@ -10,7 +10,7 @@ use std::io::{BufWriter, Stdout, Write};
 use std::iter::{Map, Zip};
 use std::ops::BitOr;
 
-use crate::{info, trace};
+use crate::log::{info, trace};
 
 #[derive(Debug, Copy, Clone, Default, PartialEq, Eq)]
 pub struct Cell {

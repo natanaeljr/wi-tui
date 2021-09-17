@@ -1,8 +1,8 @@
 use euclid::default::Size2D;
 
-use crate::FlexFit;
 use crate::render::RenderCtx;
 use crate::widgets::{AnyEvent, Capability, EventResult, LayoutResult, RenderError, RenderResult, Widget};
+use crate::FlexFit;
 
 pub struct Flexible<Child> {
   pub flex: usize,

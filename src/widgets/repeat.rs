@@ -1,10 +1,10 @@
-use crate::debug;
+use crate::log::debug;
 use euclid::default::{Point2D, Rect, Size2D};
 use euclid::SideOffsets2D;
 
 use crate::render::RenderCtx;
-use crate::FlexFit;
 use crate::widgets::{AnyEvent, Capability, EventResult, LayoutError, LayoutResult, RenderError, RenderResult, Widget};
+use crate::FlexFit;
 
 // TODO: only vertical
 // TODO: only horizontal

@@ -5,14 +5,14 @@ use euclid::SideOffsets2D;
 use crate::render::{RenderCtx, Renderer};
 use crate::widgets::fillchar::FillChar;
 use crate::widgets::repeat::Repeat;
-use crate::Style;
 use crate::widgets::{
   AnyEvent, Capability, EventResult, LayoutError, LayoutResult, LayoutSize, RenderError, RenderResult, Widget,
 };
+use crate::Style;
 
-use crate::debug;
-use crate::FlexFit;
+use crate::log::debug;
 use crate::widgets::stack::Stack;
+use crate::FlexFit;
 
 pub struct Borders<Border, Child> {
   // sides

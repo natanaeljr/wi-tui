@@ -4,7 +4,7 @@ use std::io::Write;
 use std::ops::{Deref, DerefMut};
 use std::rc::Rc;
 
-use crate::trace;
+use crate::log::trace;
 use crossterm::style::{Attributes, Color};
 use crossterm::terminal::{Clear, ClearType, DisableLineWrap, EnableLineWrap, ScrollDown, ScrollUp};
 use crossterm::{cursor, execute, terminal};

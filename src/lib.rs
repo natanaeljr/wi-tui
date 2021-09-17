@@ -13,12 +13,14 @@ use crate::render::RenderCtx;
 use crate::util::{Scoped, ScopedMut};
 use crate::widgets::{AnyEvent, LayoutError, RenderResult, Styled, Widget};
 
+#[macro_use]
+pub(crate) mod log;
+
 pub mod canvas;
 pub mod render;
 pub mod util;
 pub mod widgets;
 
-pub(crate) mod log;
 // TODO: Make all Widgets divisible between property and widget so we can have (along with WidgetExt):
 // let widget = "Hello".bordered(Borders::lines());
 

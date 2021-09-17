@@ -1,6 +1,6 @@
+use witui::widgets::text::{Text, TextAlign};
 use witui::widgets::Borders;
 use witui::Style;
-use witui::widgets::text::{Text, TextAlign};
 use witui::WiTui;
 
 fn main() {
