@@ -6,12 +6,12 @@ use crate::{compute_flex_layout, ChildrenStorage, MinMaxFlex};
 use euclid::default::{Point2D, Rect, Size2D};
 use std::ops::Deref;
 
-pub struct Column<Children> {
+pub struct ColumnView<Children> {
   pub children: Children,
   pub must_fit_all_children: bool,
 }
 
-impl Column<Vec<Box<dyn Widget>>> {
+impl ColumnView<Vec<Box<dyn Widget>>> {
   pub fn new() -> Self {
     Self {
       children: Vec::new(),
@@ -25,12 +25,12 @@ impl Column<Vec<Box<dyn Widget>>> {
   }
 }
 
-impl<Children> Column<Children>
+impl<Children> ColumnView<Children>
 where
   Children: ChildrenStorage,
 {
-  pub fn children<Children2: ChildrenStorage>(mut self, children: Children2) -> Column<Children2> {
-    Column {
+  pub fn children<Children2: ChildrenStorage>(mut self, children: Children2) -> ColumnView<Children2> {
+    ColumnView {
       children,
       must_fit_all_children: self.must_fit_all_children,
     }
@@ -97,7 +97,7 @@ where
   }
 }
 
-impl<Children> Widget for Column<Children>
+impl<Children> Widget for ColumnView<Children>
 where
   Children: ChildrenStorage,
 {

@@ -2,7 +2,7 @@ use crossterm::style::Stylize;
 use euclid::default::Size2D;
 
 use witui::widgets::Borders;
-use witui::widgets::Row;
+use witui::widgets::RowView;
 use witui::widgets::Leak;
 use witui::widgets::Min;
 use witui::widgets::Padding;
@@ -14,7 +14,7 @@ fn main() {
   #[cfg(feature = "logging")]
   witui::enable_pretty_env_logging();
 
-  let root = Row::new()
+  let root = RowView::new()
     .child(Borders::with_child(()).borders_line(Style::default().dark_blue()))
     .child(Borders::with_child(()).borders_line(Style::default().dark_yellow()))
     .child(Borders::with_child(Style::new().white().child("Hello")).borders_line(Style::default().green()))

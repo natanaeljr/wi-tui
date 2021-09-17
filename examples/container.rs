@@ -1,7 +1,7 @@
 use euclid::default::Size2D;
 
 use witui::widgets::Borders;
-use witui::widgets::Row;
+use witui::widgets::RowView;
 use witui::widgets::Expanded;
 use witui::widgets::Leak;
 use witui::widgets::Min;
@@ -33,7 +33,7 @@ fn main() {
     .child(
       Borders::with_child(
         Expanded::child(
-          Row::new()
+          RowView::new()
             .child(Borders::with_child(()).borders_line(Style::new().dark_blue()))
             .child(Borders::with_child(()).borders_line(Style::new().dark_yellow()))
             .child(
@@ -42,7 +42,7 @@ fn main() {
                   Min::zero().child(
                     Leak::child(
                       Borders::with_child(
-                        Row::new()
+                        RowView::new()
                           .child(Borders::with_child("~").borders_line(Style::new().dark_magenta()))
                           .child(Borders::with_child("!").borders_line(Style::new().dark_cyan()))
                           .child(Borders::with_child(".").borders_line(Style::new().dark_green()))

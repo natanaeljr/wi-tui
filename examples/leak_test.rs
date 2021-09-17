@@ -1,5 +1,5 @@
 use witui::widgets::Borders;
-use witui::widgets::Row;
+use witui::widgets::RowView;
 use witui::widgets::Expanded;
 use witui::widgets::Leak;
 use witui::widgets::Min;

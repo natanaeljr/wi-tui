@@ -17,12 +17,12 @@ use std::cmp::{max, min};
 // TODO: Horizontal/Vertical
 // TODO: Must fit N children
 
-pub struct Row<Children> {
+pub struct RowView<Children> {
   pub children: Children,
   pub must_fit_all_children: bool,
 }
 
-impl Row<Vec<Box<dyn Widget>>> {
+impl RowView<Vec<Box<dyn Widget>>> {
   pub fn new() -> Self {
     Self {
       children: Vec::new(),
@@ -36,12 +36,12 @@ impl Row<Vec<Box<dyn Widget>>> {
   }
 }
 
-impl<Children> Row<Children>
+impl<Children> RowView<Children>
 where
   Children: ChildrenStorage,
 {
-  pub fn children<Children2: ChildrenStorage>(mut self, children: Children2) -> Row<Children2> {
-    Row {
+  pub fn children<Children2: ChildrenStorage>(mut self, children: Children2) -> RowView<Children2> {
+    RowView {
       children,
       must_fit_all_children: self.must_fit_all_children,
     }
@@ -108,7 +108,7 @@ where
   }
 }
 
-impl<Children> Widget for Row<Children>
+impl<Children> Widget for RowView<Children>
 where
   Children: ChildrenStorage,
 {
