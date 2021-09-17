@@ -3,17 +3,22 @@ use crate::widgets::{AnyEvent, Capability, EventResult, LayoutResult, LayoutSize
 use crate::FlexFit;
 use euclid::default::Size2D;
 
-pub struct Expand<Child> {
-  child: Child,
+pub struct Expanded<Child> {
+  pub flex: usize,
+  pub child: Child,
 }
 
-impl<Child> Expand<Child> {
+impl<Child> Expanded<Child> {
   pub fn child(child: Child) -> Self {
-    Self { child }
+    Self { flex: 1, child }
+  }
+
+  pub fn flex_child(flex: usize, child: Child) -> Self {
+    Self { flex, child }
   }
 }
 
-impl<Child> Widget for Expand<Child>
+impl<Child> Widget for Expanded<Child>
 where
   Child: Widget,
 {
@@ -23,7 +28,7 @@ where
 
   fn layout(&self, avail_size: &Size2D<usize>) -> LayoutResult {
     let layout = self.child.layout(avail_size)?;
-    Ok(layout.max(avail_size.clone()).flex(1).fit(FlexFit::Tight))
+    Ok(layout.max(avail_size.clone()).flex(self.flex).fit(FlexFit::Tight))
   }
 
   fn render(&self, ctx: &RenderCtx) -> RenderResult {

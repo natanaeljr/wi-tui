@@ -4,7 +4,7 @@ use euclid::size2;
 use witui::widgets::Align;
 use witui::widgets::Borders;
 use witui::widgets::Row;
-use witui::widgets::Expand;
+use witui::widgets::Expanded;
 use witui::widgets::FillChar;
 use witui::widgets::Flexible;
 use witui::widgets::Hook;
@@ -25,7 +25,7 @@ use witui::{Color, HorizontalAlignment, HorizontalSide, Style, VerticalAlignment
 // ╰──────────────────────────────╯
 
 fn main() {
-  let root = Borders::with_child(Expand::child(()))
+  let root = Borders::with_child(Expanded::child(()))
     .borders_rounded(Style::default().dark_green())
     .top(Box::new(
       Min::zero().child(
@@ -50,7 +50,7 @@ fn main() {
                   ), // Flexible
                 ) // Container
                 .child(
-                  Expand::child(
+                  Expanded::child(
                     Row::new()
                       .child(Style::new().dark_green().child('┤'))
                       .child(Style::new().white().bold().underlined().dim().child("Bar"))
