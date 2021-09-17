@@ -1,44 +1,26 @@
 use crate::render::RenderCtx;
 use crate::util::Scoped;
-use crate::widgets::flexible::FlexFit;
 use crate::widgets::{
   AnyEvent, Capability, EventResult, LayoutError, LayoutResult, LayoutSize, RenderError, RenderResult, Widget,
 };
+use crate::{ChildrenStorage, FlexFit};
 use euclid::default::Size2D;
 use std::cmp::max;
 use std::ops::Deref;
-
-pub trait Children: 'static {
-  fn len(&self) -> usize;
-  fn get_child(&self, index: usize) -> Option<Scoped<dyn Widget>>;
-}
-
-impl<W> Children for Vec<W>
-where
-  W: Widget + 'static,
-{
-  fn len(&self) -> usize {
-    self.len()
-  }
-
-  fn get_child(&self, index: usize) -> Option<Scoped<dyn Widget>> {
-    self.get(index).and_then(|c| Some(Scoped::Ref(c as &dyn Widget)))
-  }
-}
 
 // BUG: bg, fg and attrs, are leaking from one child to the next
 //  e.g.: child 1 renders text with fg(green) and attr(bold)
 //        child 2 renders simple text and ends up inheriting the fg and attr from child 1 settings
 //  need to solve with some sort of push/pop of contexts.
 
-pub struct Stack<ChildrenStorage> {
-  pub children: Option<ChildrenStorage>,
+pub struct Stack<Children> {
+  pub children: Option<Children>,
   pub must_fit_all_children: bool,
 }
 
-impl<ChildrenStorage> Stack<ChildrenStorage>
+impl<Children> Stack<Children>
 where
-  ChildrenStorage: Children,
+  Children: ChildrenStorage,
 {
   pub fn new() -> Self {
     Self {
@@ -47,7 +29,7 @@ where
     }
   }
 
-  pub fn children(mut self, children: ChildrenStorage) -> Self {
+  pub fn children(mut self, children: Children) -> Self {
     self.children = Some(children);
     self
   }
@@ -69,9 +51,9 @@ impl Stack<Vec<Box<dyn Widget>>> {
   }
 }
 
-impl<ChildrenStorage> Widget for Stack<ChildrenStorage>
+impl<Children> Widget for Stack<Children>
 where
-  ChildrenStorage: Children,
+  Children: ChildrenStorage,
 {
   fn event(&mut self, event: &AnyEvent, size: &Size2D<usize>) -> EventResult {
     todo!()
@@ -81,7 +63,7 @@ where
     let children = self.children.as_ref().unwrap();
     let mut layout = LayoutSize::default();
     for idx in 0..children.len() {
-      let child = children.get_child(idx).unwrap();
+      let child = children.child(idx).unwrap();
       let child_layout_result = child.layout(&avail_size);
       if let Err(LayoutError::InsufficientSpace) = child_layout_result {
         if self.must_fit_all_children {
@@ -104,7 +86,7 @@ where
     let layout = self.layout(&frame.size).map_err(|e| RenderError::Layout(e))?;
     let children = self.children.as_ref().unwrap();
     for idx in 0..children.len() {
-      let child = children.get_child(idx).unwrap();
+      let child = children.child(idx).unwrap();
       let result = ctx.render_child_dyn_widget(frame.clone(), child.deref());
       if let Err(RenderError::Layout(LayoutError::InsufficientSpace)) = result {
         if self.must_fit_all_children {

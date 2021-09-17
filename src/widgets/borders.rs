@@ -5,13 +5,14 @@ use euclid::SideOffsets2D;
 use crate::render::{RenderCtx, Renderer};
 use crate::widgets::fillchar::FillChar;
 use crate::widgets::repeat::Repeat;
-use crate::widgets::style::Style;
+use crate::Style;
 use crate::widgets::{
   AnyEvent, Capability, EventResult, LayoutError, LayoutResult, LayoutSize, RenderError, RenderResult, Widget,
 };
 
 use crate::debug;
-use crate::widgets::flexible::FlexFit;
+use crate::FlexFit;
+use crate::widgets::stack::Stack;
 
 pub struct Borders<Border, Child> {
   // sides
@@ -28,12 +29,8 @@ pub struct Borders<Border, Child> {
   pub child: Child,
 }
 
-impl<Border, Child> Borders<Border, Child>
-where
-  Border: Widget,
-  Child: Widget,
-{
-  pub fn child(child: Child) -> Self {
+impl Borders<Box<dyn Widget>, ()> {
+  pub fn new() -> Self {
     Self {
       top: None,
       left: None,
@@ -43,6 +40,40 @@ where
       top_right: None,
       bottom_left: None,
       bottom_right: None,
+      child: (),
+    }
+  }
+}
+
+impl<Border, Child> Borders<Border, Child>
+where
+  Border: Widget,
+  Child: Widget,
+{
+  pub fn with_child(child: Child) -> Self {
+    Self {
+      top: None,
+      left: None,
+      right: None,
+      bottom: None,
+      top_left: None,
+      top_right: None,
+      bottom_left: None,
+      bottom_right: None,
+      child,
+    }
+  }
+
+  pub fn child<Child2: Widget>(mut self, child: Child2) -> Borders<Border, Child2> {
+    Borders {
+      top: self.top,
+      left: self.left,
+      right: self.right,
+      bottom: self.bottom,
+      top_left: self.top_left,
+      top_right: self.top_right,
+      bottom_left: self.bottom_left,
+      bottom_right: self.bottom_right,
       child,
     }
   }
@@ -155,6 +186,14 @@ where
       .bottom_left(Box::new(style.clone().child(FillChar::new('╰'))) as Box<dyn Widget>)
       .bottom_right(Box::new(style.clone().child(FillChar::new('╯'))) as Box<dyn Widget>);
     this
+  }
+
+  pub fn top_overlay<B: 'static + Widget>(mut self, border: B) -> Self {
+    self.top = Some(match self.top {
+      None => Box::new(Stack::new().child(border)),
+      Some(prev_top) => Box::new(Stack::new().child(prev_top).child(border)),
+    } as Box<dyn Widget>);
+    self
   }
 }
 

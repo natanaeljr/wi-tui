@@ -1,19 +1,19 @@
 use crossterm::style::Stylize;
 use euclid::size2;
-use witui::widgets::align::{Align, HorizontalAlignment, HorizontalSide, VerticalAlignment, VerticalSide};
-use witui::widgets::borders::Borders;
-use witui::widgets::container::Container;
-use witui::widgets::expand::Expand;
-use witui::widgets::fillchar::FillChar;
-use witui::widgets::flexible::Flexible;
-use witui::widgets::hook::Hook;
-use witui::widgets::leak::Leak;
-use witui::widgets::min::Min;
-use witui::widgets::padding::Padding;
-use witui::widgets::stack::Stack;
-use witui::widgets::style::{Color, Style};
+
+use witui::widgets::Align;
+use witui::widgets::Borders;
+use witui::widgets::Container;
+use witui::widgets::Expand;
+use witui::widgets::FillChar;
+use witui::widgets::Flexible;
+use witui::widgets::Hook;
+use witui::widgets::Leak;
+use witui::widgets::Min;
+use witui::widgets::Padding;
+use witui::widgets::Stack;
 use witui::widgets::Widget;
-use witui::WiTui;
+use witui::{Color, HorizontalAlignment, HorizontalSide, Style, VerticalAlignment, VerticalSide, WiTui};
 
 // ╭─┤Title├┤Bar├───────────┤_ x├─╮
 // │                              │
@@ -25,7 +25,7 @@ use witui::WiTui;
 // ╰──────────────────────────────╯
 
 fn main() {
-  let root = Borders::child(Expand::child(()))
+  let root = Borders::with_child(Expand::child(()))
     .borders_rounded(Style::default().dark_green())
     .top(Box::new(
       Min::zero().child(
@@ -40,9 +40,9 @@ fn main() {
                       .child(Style::new().dark_green().child('┤'))
                       .child(
                         Style::new()
-                          .dark_green()
+                          .white()
+                          .on_dark_green()
                           .bold()
-                          .reverse()
                           .child(Flexible::loose(1).child("Title")),
                       ) // Container
                       .child(Style::new().dark_green().child('├'))

@@ -1,12 +1,8 @@
-use crate::render::RenderCtx;
-use crate::widgets::{AnyEvent, Capability, EventResult, LayoutResult, RenderError, RenderResult, Widget};
 use euclid::default::Size2D;
 
-#[derive(Debug, Clone, Ord, PartialOrd, Eq, PartialEq)]
-pub enum FlexFit {
-  Tight,
-  Loose,
-}
+use crate::FlexFit;
+use crate::render::RenderCtx;
+use crate::widgets::{AnyEvent, Capability, EventResult, LayoutResult, RenderError, RenderResult, Widget};
 
 pub struct Flexible<Child> {
   pub flex: usize,

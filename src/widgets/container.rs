@@ -6,8 +6,7 @@ use euclid::default::{Point2D, Rect, Size2D};
 use crate::info;
 use crate::render::RenderCtx;
 use crate::util::Scoped;
-use crate::widgets::flexible::FlexFit;
-use crate::widgets::stack::Children;
+use crate::FlexFit;
 use crate::widgets::{
   AnyEvent, Capability, EventResult, LayoutError, LayoutResult, LayoutSize, RenderError, RenderResult, Widget,
 };
@@ -73,13 +72,21 @@ where
         }
         Err(e) => return Err(e),
       };
+      let child_fixed_size = if child_layout.flex == 0 { child_layout.max } else { child_layout.min };
+      if !avail_size.contains(child_fixed_size.clone()) {
+        if self.must_fit_all_children {
+          return Err(LayoutError::InsufficientSpace);
+        } else {
+          break; // TODO: Maybe change this to just skip this child?
+        }
+      }
       // Take this child's size from available size for other children
-      avail_size.width -= child_layout.min.width;
+      avail_size.width -= child_fixed_size.width;
       // Add up the widths
       layout.min.width = layout
         .min
         .width
-        .checked_add(child_layout.min.width)
+        .checked_add(child_fixed_size.width)
         .unwrap_or(std::usize::MAX);
       layout.max.width = layout
         .max
@@ -87,7 +94,7 @@ where
         .checked_add(child_layout.max.width)
         .unwrap_or(std::usize::MAX);
       // Find the highest height
-      layout.min.height = layout.min.height.max(child_layout.min.height);
+      layout.min.height = layout.min.height.max(child_fixed_size.height);
       layout.max.height = layout.max.height.max(child_layout.max.height);
       // Push layout for later flex computation
       flex_input_layouts.push(MinMaxFlex {

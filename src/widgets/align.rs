@@ -1,33 +1,14 @@
-use crate::render::RenderCtx;
-use crate::widgets::flexible::FlexFit;
-use crate::widgets::{AnyEvent, Capability, EventResult, LayoutResult, RenderError, RenderResult, Widget};
-use euclid::default::Size2D;
-use euclid::SideOffsets2D;
 use std::cmp::{max, min};
 use std::ops::Sub;
 use std::rc::Rc;
 
-pub enum HorizontalAlignment {
-  Left,
-  Center { round_to: HorizontalSide },
-  Right,
-}
+use euclid::default::Size2D;
+use euclid::SideOffsets2D;
 
-pub enum VerticalAlignment {
-  Top,
-  Middle { round_to: VerticalSide },
-  Bottom,
-}
-
-pub enum HorizontalSide {
-  Left,
-  Right,
-}
-
-pub enum VerticalSide {
-  Top,
-  Bottom,
-}
+use crate::render::RenderCtx;
+use crate::FlexFit;
+use crate::widgets::{AnyEvent, Capability, EventResult, LayoutResult, RenderError, RenderResult, Widget};
+use crate::{HorizontalAlignment, HorizontalSide, VerticalAlignment, VerticalSide};
 
 pub struct Align<Child> {
   pub vertical: VerticalAlignment,

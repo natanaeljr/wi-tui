@@ -1,9 +1,9 @@
 use crossterm::style::Stylize;
-use witui::widgets::container::Container;
-use witui::widgets::expand::Expand;
-use witui::widgets::flexible::Flexible;
-use witui::widgets::min::Min;
-use witui::widgets::style::Style;
+use witui::widgets::Container;
+use witui::widgets::Expand;
+use witui::widgets::Flexible;
+use witui::widgets::Min;
+use witui::Style;
 use witui::WiTui;
 
 fn main() {

@@ -3,7 +3,7 @@ use euclid::default::{Point2D, Rect, Size2D};
 use euclid::SideOffsets2D;
 
 use crate::render::RenderCtx;
-use crate::widgets::flexible::FlexFit;
+use crate::FlexFit;
 use crate::widgets::{AnyEvent, Capability, EventResult, LayoutError, LayoutResult, RenderError, RenderResult, Widget};
 
 // TODO: only vertical

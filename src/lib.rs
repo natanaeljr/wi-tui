@@ -4,14 +4,14 @@ use std::any::Any;
 use std::io::Write;
 use std::time::Duration;
 
-use crossterm::event::{Event, KeyCode, KeyModifiers, MouseEventKind};
+pub use crossterm::event::{Event, KeyCode, KeyModifiers, MouseEventKind};
+pub use crossterm::style::{Attribute, Attributes, Color};
 
 #[cfg(feature = "logging")]
 pub use crate::log::enable_pretty_env_logging;
 use crate::render::RenderCtx;
 use crate::util::{Scoped, ScopedMut};
-use crate::widgets::flexible::FlexFit;
-use crate::widgets::{AnyEvent, LayoutError, RenderResult, Widget};
+use crate::widgets::{AnyEvent, LayoutError, RenderResult, Styled, Widget};
 
 pub mod canvas;
 pub mod render;
@@ -239,5 +239,120 @@ fn compute_flex_layout(avail_size: usize, input_layout: &Vec<MinMaxFlex>) -> Res
     Ok((total_space, final_values))
   } else {
     Err(LayoutError::InsufficientSpace)
+  }
+}
+
+pub enum HorizontalAlignment {
+  Left,
+  Center { round_to: HorizontalSide },
+  Right,
+}
+
+pub enum VerticalAlignment {
+  Top,
+  Middle { round_to: VerticalSide },
+  Bottom,
+}
+
+pub enum HorizontalSide {
+  Left,
+  Right,
+}
+
+pub enum VerticalSide {
+  Top,
+  Bottom,
+}
+
+#[derive(Debug, Clone, Ord, PartialOrd, Eq, PartialEq)]
+pub enum FlexFit {
+  Tight,
+  Loose,
+}
+
+macro_rules! stylize_method {
+  ($attr_method:ident, Attribute::$attribute:ident) => {
+    pub fn $attr_method(mut self) -> Self {
+      self.attr(Attribute::$attribute)
+    }
+  };
+  ($color_method_fg:ident, $color_method_bg:ident, Color::$color:ident) => {
+    pub fn $color_method_fg(mut self) -> Self {
+      self.fg(Color::$color)
+    }
+    pub fn $color_method_bg(mut self) -> Self {
+      self.bg(Color::$color)
+    }
+  };
+}
+
+#[derive(Debug, Clone)]
+pub struct Style {
+  pub fg: Option<Color>,
+  pub bg: Option<Color>,
+  pub attrs: Attributes,
+}
+
+impl Style {
+  pub fn new() -> Self {
+    Self {
+      fg: None,
+      bg: None,
+      attrs: Default::default(),
+    }
+  }
+
+  pub fn fg(mut self, color: Color) -> Self {
+    self.fg = Some(color);
+    self
+  }
+
+  pub fn bg(mut self, color: Color) -> Self {
+    self.bg = Some(color);
+    self
+  }
+
+  pub fn attr(mut self, attr: Attribute) -> Self {
+    self.attrs = self.attrs | attr;
+    self
+  }
+
+  pub fn child<Child: Widget>(self, child: Child) -> Styled<Child> {
+    Styled { style: self, child }
+  }
+
+  stylize_method!(reset, Attribute::Reset);
+  stylize_method!(bold, Attribute::Bold);
+  stylize_method!(underlined, Attribute::Underlined);
+  stylize_method!(reverse, Attribute::Reverse);
+  stylize_method!(dim, Attribute::Dim);
+  stylize_method!(italic, Attribute::Italic);
+  stylize_method!(negative, Attribute::Reverse);
+  stylize_method!(slow_blink, Attribute::SlowBlink);
+  stylize_method!(rapid_blink, Attribute::RapidBlink);
+  stylize_method!(hidden, Attribute::Hidden);
+  stylize_method!(crossed_out, Attribute::CrossedOut);
+
+  stylize_method!(black, on_black, Color::Black);
+  stylize_method!(dark_grey, on_dark_grey, Color::DarkGrey);
+  stylize_method!(red, on_red, Color::Red);
+  stylize_method!(dark_red, on_dark_red, Color::DarkRed);
+  stylize_method!(green, on_green, Color::Green);
+  stylize_method!(dark_green, on_dark_green, Color::DarkGreen);
+  stylize_method!(yellow, on_yellow, Color::Yellow);
+  stylize_method!(dark_yellow, on_dark_yellow, Color::DarkYellow);
+  stylize_method!(blue, on_blue, Color::Blue);
+  stylize_method!(dark_blue, on_dark_blue, Color::DarkBlue);
+  stylize_method!(magenta, on_magenta, Color::Magenta);
+  stylize_method!(dark_magenta, on_dark_magenta, Color::DarkMagenta);
+  stylize_method!(cyan, on_cyan, Color::Cyan);
+  stylize_method!(dark_cyan, on_dark_cyan, Color::DarkCyan);
+  stylize_method!(white, on_white, Color::White);
+  stylize_method!(grey, on_grey, Color::Grey);
+}
+
+impl Default for Style {
+  fn default() -> Self {
+    Self::new()
   }
 }

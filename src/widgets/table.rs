@@ -7,7 +7,7 @@ use euclid::default::{Point2D, Rect, Size2D};
 
 use crate::render::RenderCtx;
 use crate::util::{MinMax, Scoped, ScopedMut};
-use crate::widgets::flexible::FlexFit;
+use crate::FlexFit;
 use crate::widgets::{
   AnyEvent, Capability, EventResult, LayoutError, LayoutResult, LayoutSize, RenderError, RenderResult, Widget,
 };

@@ -2,7 +2,7 @@ use euclid::default::{Rect, Size2D};
 
 use crate::debug;
 use crate::render::RenderCtx;
-use crate::widgets::flexible::FlexFit;
+use crate::FlexFit;
 use crate::widgets::{AnyEvent, Capability, EventResult, LayoutResult, RenderResult, Widget};
 
 // TODO: LeakHorizontal

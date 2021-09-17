@@ -1,5 +1,5 @@
 use crate::render::RenderCtx;
-use crate::widgets::flexible::FlexFit;
+use crate::FlexFit;
 use crate::widgets::{
   AnyEvent, Capability, EventResult, LayoutError, LayoutResult, LayoutSize, RenderError, RenderResult, Widget,
 };

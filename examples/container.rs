@@ -1,12 +1,12 @@
 use euclid::default::Size2D;
-use witui::widgets::borders::Borders;
-use witui::widgets::container::Container;
-use witui::widgets::expand::Expand;
-use witui::widgets::leak::Leak;
-use witui::widgets::min::Min;
-use witui::widgets::repeat::Repeat;
-use witui::widgets::style::{Color, Style};
-use witui::WiTui;
+
+use witui::widgets::Borders;
+use witui::widgets::Container;
+use witui::widgets::Expand;
+use witui::widgets::Leak;
+use witui::widgets::Min;
+use witui::widgets::Repeat;
+use witui::{Color, Style, WiTui};
 
 // ┌---------------------------------------┐
 // |┌┐┌┐┌─────────────────────────────────┐|
@@ -31,21 +31,21 @@ fn main() {
     .bg(Color::Rgb { r: 20, g: 20, b: 20 })
     .fg(Color::White)
     .child(
-      Borders::child(
+      Borders::with_child(
         Expand::child(
           Container::new()
-            .child(Borders::child(()).borders_line(Style::new().dark_blue()))
-            .child(Borders::child(()).borders_line(Style::new().dark_yellow()))
+            .child(Borders::with_child(()).borders_line(Style::new().dark_blue()))
+            .child(Borders::with_child(()).borders_line(Style::new().dark_yellow()))
             .child(
-              Borders::child(
+              Borders::with_child(
                 Repeat::child(
                   Min::zero().child(
                     Leak::child(
-                      Borders::child(
+                      Borders::with_child(
                         Container::new()
-                          .child(Borders::child("~").borders_line(Style::new().dark_magenta()))
-                          .child(Borders::child("!").borders_line(Style::new().dark_cyan()))
-                          .child(Borders::child(".").borders_line(Style::new().dark_green()))
+                          .child(Borders::with_child("~").borders_line(Style::new().dark_magenta()))
+                          .child(Borders::with_child("!").borders_line(Style::new().dark_cyan()))
+                          .child(Borders::with_child(".").borders_line(Style::new().dark_green()))
                           .must_fit_all_children(true),
                       ) // Borders
                       .borders_dash(Style::default()),

@@ -1,7 +1,7 @@
 use crate::debug;
 use crate::render::{RenderCtx, Renderer};
 use crate::util::Scoped;
-use crate::widgets::flexible::FlexFit;
+use crate::FlexFit;
 use crossterm::style::StyledContent;
 use euclid::default::Size2D;
 use std::borrow::Cow;
@@ -11,27 +11,53 @@ use std::fmt::{Display, Formatter};
 use std::ops::{Deref, DerefMut};
 use std::rc::Rc;
 
-pub mod align;
-pub mod borders;
-pub mod button;
-pub mod checkbox;
-pub mod container;
-pub mod expand;
-pub mod fillchar;
-pub mod flex;
-pub mod flexible;
-pub mod hook;
-pub mod input;
-pub mod leak;
-pub mod min;
-pub mod padding;
-pub mod progressbar;
-pub mod repeat;
-pub mod scrollbar;
-pub mod stack;
-pub mod style;
+// Export std Widgets
+pub use align::Align;
+pub use borders::Borders;
+pub use button::Button;
+// pub use checkbox::{};
+pub use container::Container;
+pub use expand::Expand;
+pub use fillchar::FillChar;
+// pub use flex::{};
+pub use flexible::Flexible;
+pub use hook::Hook;
+// pub use input::{};
+pub use leak::Leak;
+pub use min::Min;
+pub use padding::Padding;
+// pub use progressbar::{};
+pub use repeat::Repeat;
+// pub use scrollbar::ScrollBar;
+pub use stack::Stack;
+pub use style::Styled;
+#[doc(inline)]
+pub use table::Table;
+// pub use tabs::Tabs;
+#[doc(inline)]
+pub use text::Text;
+
+mod align;
+mod borders;
+mod button;
+mod checkbox;
+mod container;
+mod expand;
+mod fillchar;
+mod flex;
+mod flexible;
+mod hook;
+mod input;
+mod leak;
+mod min;
+mod padding;
+mod progressbar;
+mod repeat;
+mod scrollbar;
+mod stack;
+mod style;
 pub mod table;
-pub mod tabs;
+mod tabs;
 pub mod text;
 
 #[derive(Debug)]

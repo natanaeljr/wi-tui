@@ -1,5 +1,5 @@
 use crate::render::RenderCtx;
-use crate::widgets::flexible::FlexFit;
+use crate::FlexFit;
 use crate::widgets::{AnyEvent, Capability, EventResult, LayoutResult, LayoutSize, RenderResult, Widget};
 use euclid::default::Size2D;
 
