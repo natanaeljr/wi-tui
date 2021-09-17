@@ -125,6 +125,8 @@ impl ColumnWidth {
   }
 }
 
+// TODO: table without columns (use only data)
+
 pub struct Column<Heading> {
   pub heading: Heading,
   pub width: ColumnWidth,
@@ -134,6 +136,8 @@ impl<Heading> Column<Heading>
 where
   Heading: Widget,
 {
+  // TODO: allow for Column without heading
+
   pub fn new(heading: Heading) -> Self {
     Self {
       heading,
@@ -559,6 +563,7 @@ pub struct TableLayout {
   // TODO: pub row_separator: char,
   /// Rendering must fit all columns or render nothing at all (declare insufficient space)
   pub must_render_fit_all_columns: bool,
+  // TODO: must_render_fit_N_columns
   // TODO: Global header style (Container Widget?) for applying to the entire header box
   // TODO: Headers, Rows and Column (underlay) Container Widgets for default appliance?
 }

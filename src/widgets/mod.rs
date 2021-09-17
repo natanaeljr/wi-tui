@@ -17,6 +17,7 @@ use std::rc::Rc;
 pub use align::Align;
 pub use borders::Borders;
 pub use button::Button;
+pub use checkbox::CheckBox;
 pub use columnview::ColumnView;
 pub use expanded::Expanded;
 pub use fillchar::FillChar;
@@ -163,6 +164,19 @@ pub enum AnyEvent {
 pub enum Capability {
   Selectable,
   Custom(String),
+}
+
+pub trait BoxWidget: Widget + 'static {
+  fn box_widget(self) -> Box<dyn Widget>;
+}
+
+impl<W> BoxWidget for W
+where
+  W: Widget + 'static,
+{
+  fn box_widget(self) -> Box<dyn Widget> {
+    Box::new(self) as Box<dyn Widget>
+  }
 }
 
 pub trait Widget {
