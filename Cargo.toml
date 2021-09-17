@@ -18,20 +18,3 @@ logging = ["log", "pretty_env_logger"]
 [dev-dependencies]
 log = "0.4.14"
 pretty_env_logger = "0.4.0"
-
-[[example]]
-name = "demo"
-[[example]]
-name = "mgmt"
-[[example]]
-name = "nmcli"
-[[example]]
-name = "spreadsheet"
-[[example]]
-name = "flex"
-[[example]]
-name = "container"
-[[example]]
-name = "leak_test"
-[[example]]
-name = "paragraph"

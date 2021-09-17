@@ -1,28 +1,17 @@
-use std::any::Any;
-use std::ops::Deref;
-
-use euclid::default::{Point2D, Rect, Size2D};
-
-use crate::log::info;
 use crate::render::RenderCtx;
-use crate::util::Scoped;
 use crate::widgets::{
   AnyEvent, Capability, EventResult, LayoutError, LayoutResult, LayoutSize, RenderError, RenderResult, Widget,
 };
-use crate::FlexFit;
 use crate::{compute_flex_layout, ChildrenStorage, MinMaxFlex};
-use crossterm::style::ContentStyle;
-use std::cmp::{max, min};
+use euclid::default::{Point2D, Rect, Size2D};
+use std::ops::Deref;
 
-// TODO: Horizontal/Vertical
-// TODO: Must fit N children
-
-pub struct Row<Children> {
+pub struct Column<Children> {
   pub children: Children,
   pub must_fit_all_children: bool,
 }
 
-impl Row<Vec<Box<dyn Widget>>> {
+impl Column<Vec<Box<dyn Widget>>> {
   pub fn new() -> Self {
     Self {
       children: Vec::new(),
@@ -36,12 +25,12 @@ impl Row<Vec<Box<dyn Widget>>> {
   }
 }
 
-impl<Children> Row<Children>
+impl<Children> Column<Children>
 where
   Children: ChildrenStorage,
 {
-  pub fn children<Children2: ChildrenStorage>(mut self, children: Children2) -> Row<Children2> {
-    Row {
+  pub fn children<Children2: ChildrenStorage>(mut self, children: Children2) -> Column<Children2> {
+    Column {
       children,
       must_fit_all_children: self.must_fit_all_children,
     }
@@ -80,25 +69,25 @@ where
         }
       }
       // Take this child's size from available size for other children
-      avail_size.width -= child_fixed_size.width;
-      // Add up the widths
-      layout.min.width = layout
+      avail_size.height -= child_fixed_size.height;
+      // Add up the heights
+      layout.min.height = layout
         .min
-        .width
-        .checked_add(child_fixed_size.width)
+        .height
+        .checked_add(child_fixed_size.height)
         .unwrap_or(std::usize::MAX);
-      layout.max.width = layout
+      layout.max.height = layout
         .max
-        .width
-        .checked_add(child_layout.max.width)
+        .height
+        .checked_add(child_layout.max.height)
         .unwrap_or(std::usize::MAX);
-      // Find the highest height
-      layout.min.height = layout.min.height.max(child_fixed_size.height);
-      layout.max.height = layout.max.height.max(child_layout.max.height);
+      // Find the largest width
+      layout.min.width = layout.min.width.max(child_fixed_size.width);
+      layout.max.width = layout.max.width.max(child_layout.max.width);
       // Push layout for later flex computation
       flex_input_layouts.push(MinMaxFlex {
-        min: child_layout.min.width,
-        max: child_layout.max.width,
+        min: child_layout.min.height,
+        max: child_layout.max.height,
         flex: child_layout.flex,
         fit: child_layout.fit.clone(),
       });
@@ -108,7 +97,7 @@ where
   }
 }
 
-impl<Children> Widget for Row<Children>
+impl<Children> Widget for Column<Children>
 where
   Children: ChildrenStorage,
 {
@@ -123,18 +112,18 @@ where
   fn render(&self, ctx: &RenderCtx) -> RenderResult {
     let frame = ctx.get_frame().clone();
     let (layout, flex_input_layouts) = self.layout_impl(&frame.size).map_err(|e| RenderError::Layout(e))?;
-    let (total_width, flexed_widths) =
-      compute_flex_layout(frame.size.width, &flex_input_layouts).map_err(|e| RenderError::Layout(e))?;
+    let (total_height, flexed_heights) =
+      compute_flex_layout(frame.size.height, &flex_input_layouts).map_err(|e| RenderError::Layout(e))?;
 
-    let mut walked_width = 0;
-    for (idx, child_width) in flexed_widths.iter().enumerate() {
+    let mut walked_height = 0;
+    for (idx, child_height) in flexed_heights.iter().enumerate() {
       let child = self.children.child(idx).unwrap();
       let child_frame = Rect::new(
-        Point2D::new(frame.min_x() + walked_width, frame.min_y()),
-        Size2D::new(*child_width, frame.height()),
+        Point2D::new(frame.min_x(), frame.min_y() + walked_height),
+        Size2D::new(frame.width(), *child_height),
       );
       ctx.render_child_dyn_widget(child_frame, child.deref())?;
-      walked_width += *child_width;
+      walked_height += *child_height;
     }
 
     Ok(())
