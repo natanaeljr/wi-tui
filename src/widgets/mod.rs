@@ -17,7 +17,6 @@ use std::rc::Rc;
 pub use align::Align;
 pub use borders::Borders;
 pub use button::Button;
-pub use container::Container;
 pub use expand::Expand;
 pub use fillchar::FillChar;
 pub use flexible::Flexible;
@@ -26,8 +25,9 @@ pub use leak::Leak;
 pub use min::Min;
 pub use padding::Padding;
 pub use repeat::Repeat;
+pub use row::Row;
 pub use stack::Stack;
-pub use style::Styled;
+pub use styled::Styled;
 #[doc(inline)]
 pub use table::Table;
 #[doc(inline)]
@@ -37,7 +37,6 @@ mod align;
 mod borders;
 mod button;
 mod checkbox;
-mod container;
 mod expand;
 mod fillchar;
 mod flex;
@@ -49,9 +48,10 @@ mod min;
 mod padding;
 mod progressbar;
 mod repeat;
+mod row;
 mod scrollbar;
 mod stack;
-mod style;
+mod styled;
 pub mod table;
 mod tabs;
 pub mod text;
@@ -439,5 +439,35 @@ impl Widget for () {
 
   fn has_capability(&self, capability: &Capability) -> bool {
     false
+  }
+}
+
+impl<D> Widget for StyledContent<D>
+where
+  D: Widget + std::fmt::Display,
+{
+  fn event(&mut self, event: &AnyEvent, size: &Size2D<usize>) -> EventResult {
+    EventResult::Unhandled
+  }
+
+  fn layout(&self, avail_size: &Size2D<usize>) -> LayoutResult {
+    self.content().layout(avail_size)
+  }
+
+  fn render(&self, ctx: &RenderCtx) -> RenderResult {
+    if !self.style().attributes.is_empty() {
+      ctx.renderer().add_attributes(self.style().attributes);
+    }
+    if let Some(bg) = self.style().background_color.as_ref() {
+      ctx.renderer().set_background(bg);
+    }
+    if let Some(fg) = self.style().foreground_color.as_ref() {
+      ctx.renderer().set_foreground(fg);
+    }
+    self.content().render(ctx)
+  }
+
+  fn has_capability(&self, capability: &Capability) -> bool {
+    self.content().has_capability(capability)
   }
 }

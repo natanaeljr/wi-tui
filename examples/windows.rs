@@ -3,7 +3,7 @@ use euclid::size2;
 
 use witui::widgets::Align;
 use witui::widgets::Borders;
-use witui::widgets::Container;
+use witui::widgets::Row;
 use witui::widgets::Expand;
 use witui::widgets::FillChar;
 use witui::widgets::Flexible;
@@ -33,10 +33,10 @@ fn main() {
           .child(Style::default().dark_green().child(FillChar::new('─')))
           .child(
             Padding::default().left(1).right(1).child(
-              Container::new()
+              Row::new()
                 .child(
                   Flexible::loose(10).child(
-                    Container::new()
+                    Row::new()
                       .child(Style::new().dark_green().child('┤'))
                       .child(
                         Style::new()
@@ -51,7 +51,7 @@ fn main() {
                 ) // Container
                 .child(
                   Expand::child(
-                    Container::new()
+                    Row::new()
                       .child(Style::new().dark_green().child('┤'))
                       .child(Style::new().white().bold().underlined().dim().child("Bar"))
                       .child(Style::new().dark_green().child('├'))
@@ -60,10 +60,10 @@ fn main() {
                 ) // Container
                 .child(
                   Flexible::loose(5).child(
-                    Container::new()
+                    Row::new()
                       .child(Style::new().dark_green().child('┤'))
                       .child(
-                        Container::new()
+                        Row::new()
                           .child(Min::zero().child(Style::new().white().dim().reverse().bold().child("_")))
                           .child(' ')
                           .child(Style::new().white().bg(Color::AnsiValue(88)).bold().child("x"))
