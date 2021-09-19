@@ -34,6 +34,7 @@ pub use styled::Styled;
 pub use table::Table;
 #[doc(inline)]
 pub use text::Text;
+pub use textinput::TextInput;
 
 mod align;
 mod borders;
@@ -45,7 +46,6 @@ mod fillchar;
 mod flex;
 mod flexible;
 mod hook;
-mod input;
 mod leak;
 mod min;
 mod padding;
@@ -58,6 +58,7 @@ mod styled;
 pub mod table;
 mod tabs;
 pub mod text;
+mod textinput;
 
 #[derive(Debug)]
 pub enum LayoutError {

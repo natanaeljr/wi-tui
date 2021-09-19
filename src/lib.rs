@@ -77,17 +77,18 @@ impl WiTui {
   fn event_loop(&mut self, quit: &mut bool) {
     loop {
       match crossterm::event::read().unwrap() {
-        Event::Key(key) => {
-          if key.modifiers == KeyModifiers::empty() {
-            match key.code {
-              KeyCode::Char('q') => {
-                *quit = true;
-                break;
-              }
-              _ => {}
-            }
+        Event::Key(key) => match key.code {
+          KeyCode::Char('c') if key.modifiers == KeyModifiers::CONTROL => {
+            *quit = true;
+            break;
           }
-        }
+          _ => {
+            self
+              .root
+              .event(&AnyEvent::Input(Event::Key(key)), &self.render_ctx.get_frame().size);
+            break;
+          }
+        },
         Event::Mouse(mouse) => {
           if let MouseEventKind::Down(_) = mouse.kind {
             self

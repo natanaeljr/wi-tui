@@ -564,6 +564,7 @@ pub struct TableLayout {
   /// Rendering must fit all columns or render nothing at all (declare insufficient space)
   pub must_render_fit_all_columns: bool,
   // TODO: must_render_fit_N_columns
+  // TODO: must_render_fit_N_rows (like the ColumnView Widget)
   // TODO: Global header style (Container Widget?) for applying to the entire header box
   // TODO: Headers, Rows and Column (underlay) Container Widgets for default appliance?
 }
@@ -941,7 +942,7 @@ impl Table {
 
       // 2) Factor the this column height in the min/max table headings height
       table_headings_height.min = std::cmp::max(table_headings_height.min, column_height.min);
-      table_headings_height.max = std::cmp::min(table_headings_height.max, column_height.max);
+      table_headings_height.max = std::cmp::max(table_headings_height.max, column_height.max);
 
       // 3) Add column width to the overall table width values
       avail_table_size.width -= column_width.min;
@@ -1002,8 +1003,8 @@ impl Table {
     // Generate final table min/max layout sizes
     let table_height_min = table_headings_height.min + first_row_height.min;
     let table_height_max = table_headings_height.max
-      + first_row_height.max /*TODO: compute actual rows size */* self.data.as_ref().unwrap().rows_len()
-      + 1;
+      + first_row_height.max /*TODO: compute actual rows size */* self.data.as_ref().unwrap().rows_len();
+      // + 1; // BUG? do not remember
     let table_layout_size = LayoutSize::min_max(
       Size2D::new(table_width.min, table_height_min),
       Size2D::new(table_width.max, table_height_max),
