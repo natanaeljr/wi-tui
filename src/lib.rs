@@ -12,6 +12,8 @@ pub use crate::log::enable_pretty_env_logging;
 use crate::render::RenderCtx;
 use crate::util::{Scoped, ScopedMut};
 use crate::widgets::{AnyEvent, LayoutError, RenderResult, Styled, Widget};
+use std::cmp::{max, min};
+use std::ops::Range;
 
 #[macro_use]
 pub(crate) mod log;
@@ -357,5 +359,60 @@ impl Style {
 impl Default for Style {
   fn default() -> Self {
     Self::new()
+  }
+}
+
+pub struct Constraint {
+  pub min: usize,
+  pub max: usize,
+  pub percent: u8,
+}
+
+impl Default for Constraint {
+  fn default() -> Self {
+    Self {
+      min: 0,
+      max: 0,
+      percent: 0,
+    }
+  }
+}
+
+impl Constraint {
+  pub fn min(mut self, min: usize) -> Self {
+    self.min = min;
+    self
+  }
+
+  pub fn max(mut self, max: usize) -> Self {
+    self.max = max;
+    self
+  }
+
+  pub fn percent(mut self, percent: u8) -> Self {
+    self.percent = percent;
+    self
+  }
+
+  pub fn range(range: Range<usize>) -> Self {
+    Self {
+      min: min(range.start, range.end),
+      max: max(range.start, range.end),
+      percent: 0,
+    }
+  }
+
+  pub fn percentage(percent: u8) -> Self {
+    Self::default().percent(percent)
+  }
+}
+
+impl From<usize> for Constraint {
+  fn from(value: usize) -> Self {
+    Self {
+      min: value,
+      max: value,
+      percent: 0,
+    }
   }
 }

@@ -1,13 +1,13 @@
+use euclid::default::{Point2D, Rect, SideOffsets2D, Size2D};
+
 use crate::render::RenderCtx;
 use crate::widgets::{
   AnyEvent, Capability, EventResult, LayoutError, LayoutResult, LayoutSize, RenderError, RenderResult, Widget,
 };
-use crate::FlexFit;
-use euclid::default::{Point2D, Rect, SideOffsets2D, Size2D};
+use crate::{Constraint, FlexFit};
 
-// TODO: offsets of (min + max + flex)
 pub struct Padding<Child> {
-  pub offsets: SideOffsets2D<usize>,
+  pub offsets: SideOffsets2D<Constraint>,
   pub child: Child,
 }
 
@@ -21,14 +21,15 @@ impl Default for Padding<()> {
 }
 
 impl Padding<()> {
-  pub fn all(all: usize) -> Self {
+  pub fn all<C: Into<Constraint>>(all: C) -> Self {
     Self {
-      offsets: SideOffsets2D::new_all_same(all),
+      offsets: SideOffsets2D::new_all_same(all.into()),
       child: (),
     }
   }
 
   pub fn child<Child: Widget>(mut self, child: Child) -> Padding<Child> {
+    Padding::all(Constraint::percentage(10));
     Padding {
       child,
       offsets: self.offsets,
@@ -37,23 +38,23 @@ impl Padding<()> {
 }
 
 impl<Child> Padding<Child> {
-  pub fn top(mut self, top: usize) -> Self {
-    self.offsets.top = top;
+  pub fn top<C: Into<Constraint>>(mut self, top: C) -> Self {
+    self.offsets.top = top.into();
     self
   }
 
-  pub fn left(mut self, left: usize) -> Self {
-    self.offsets.left = left;
+  pub fn left<C: Into<Constraint>>(mut self, left: C) -> Self {
+    self.offsets.left = left.into();
     self
   }
 
-  pub fn right(mut self, right: usize) -> Self {
-    self.offsets.right = right;
+  pub fn right<C: Into<Constraint>>(mut self, right: C) -> Self {
+    self.offsets.right = right.into();
     self
   }
 
-  pub fn bottom(mut self, bottom: usize) -> Self {
-    self.offsets.bottom = bottom;
+  pub fn bottom<C: Into<Constraint>>(mut self, bottom: C) -> Self {
+    self.offsets.bottom = bottom.into();
     self
   }
 }
