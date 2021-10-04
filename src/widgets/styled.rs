@@ -7,7 +7,7 @@ use crossterm::style::Stylize;
 use euclid::default::Size2D;
 
 use crate::render::RenderCtx;
-use crate::widgets::{AnyEvent, Capability, EventResult, LayoutResult, RenderResult, Widget};
+use crate::widgets::{AnyEvent, Capability, EventResult, LayoutResult, RenderResult, Widget, LayoutSize};
 use crate::{FlexFit, Style};
 
 pub struct Styled<Child> {
@@ -23,7 +23,7 @@ where
     self.child.event(event, size)
   }
 
-  fn layout(&self, avail_size: &Size2D<usize>) -> LayoutResult {
+  fn layout(&self, avail_size: &Size2D<usize>) -> LayoutSize {
     self.child.layout(avail_size)
   }
 

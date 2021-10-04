@@ -43,22 +43,13 @@ where
     todo!()
   }
 
-  fn layout(&self, avail_size: &Size2D<usize>) -> LayoutResult {
-    if !avail_size.contains(self.min.clone()) {
-      return Err(LayoutError::InsufficientSpace);
-    }
+  fn layout(&self, avail_size: &Size2D<usize>) -> LayoutSize {
     let layout_result = self.child.layout(avail_size);
-    if let Err(e) = layout_result {
-      if let LayoutError::InsufficientSpace = e {
-        return Ok(LayoutSize::min_max(self.min.clone(), self.min.clone()));
-      }
-      return Err(e);
-    }
-    let mut layout = layout_result.unwrap();
+    let mut layout = layout_result;
     layout.min = self.min.clone();
     layout.max.width = std::cmp::max(layout.max.width, layout.min.width);
     layout.max.height = std::cmp::max(layout.max.height, layout.min.height);
-    Ok(layout)
+    layout
   }
 
   fn render(&self, ctx: &RenderCtx) -> RenderResult {
@@ -72,19 +63,19 @@ where
     }
 
     let layout_result = self.child.layout(&frame.size);
-    if let Err(e) = layout_result {
-      if let LayoutError::InsufficientSpace = e {
-        // Just like Leak::render
-        // let mut layout = self.child.layout(&Size2D::new(1000, 200)).unwrap();
-        // layout.min.width = std::cmp::max(layout.min.width, frame.size.width);
-        // layout.min.height = std::cmp::max(layout.min.height, frame.size.height);
-        // ctx.render_child_widget(Rect::new(frame.origin.clone(), layout.min.clone()), &self.child)?;
-      } else {
-        return Err(RenderError::Layout(e));
-      }
-    } else {
+    // if let Err(e) = layout_result {
+    //   if let LayoutError::InsufficientSpace = e {
+    //     // Just like Leak::render
+    //     // let mut layout = self.child.layout(&Size2D::new(1000, 200)).unwrap();
+    //     // layout.min.width = std::cmp::max(layout.min.width, frame.size.width);
+    //     // layout.min.height = std::cmp::max(layout.min.height, frame.size.height);
+    //     // ctx.render_child_widget(Rect::new(frame.origin.clone(), layout.min.clone()), &self.child)?;
+    //   } else {
+    //     return Err(RenderError::Layout(e));
+    //   }
+    // } else {
       ctx.render_child_widget(frame.clone(), &self.child)?;
-    }
+    // }
 
     Ok(())
   }

@@ -1,5 +1,5 @@
 use crate::render::{RenderCtx, Renderer};
-use crate::widgets::{AnyEvent, Capability, EventResult, LayoutResult, RenderResult, Widget};
+use crate::widgets::{AnyEvent, Capability, EventResult, LayoutResult, RenderResult, Widget, LayoutSize};
 use crate::FlexFit;
 use euclid::default::Size2D;
 use std::ops::{Deref, DerefMut};
@@ -22,7 +22,7 @@ impl Widget for Button<&str> {
     todo!()
   }
 
-  fn layout(&self, avail_size: &Size2D<usize>) -> LayoutResult {
+  fn layout(&self, avail_size: &Size2D<usize>) -> LayoutSize {
     todo!()
   }
 

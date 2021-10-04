@@ -70,7 +70,7 @@ impl Widget for TextInput {
     }
   }
 
-  fn layout(&self, avail_size: &Size2D<usize>) -> LayoutResult {
+  fn layout(&self, avail_size: &Size2D<usize>) -> LayoutSize {
     self.text.layout(avail_size)
   }
 

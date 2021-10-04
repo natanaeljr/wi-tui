@@ -19,8 +19,8 @@ impl Widget for FillChar {
     todo!()
   }
 
-  fn layout(&self, avail_size: &Size2D<usize>) -> LayoutResult {
-    Ok(LayoutSize::min_max(avail_size.clone(), avail_size.clone()))
+  fn layout(&self, avail_size: &Size2D<usize>) -> LayoutSize {
+    LayoutSize::min_max(avail_size.clone(), avail_size.clone())
   }
 
   fn render(&self, ctx: &RenderCtx) -> RenderResult {

@@ -26,9 +26,13 @@ where
     self.child.event(event, size)
   }
 
-  fn layout(&self, avail_size: &Size2D<usize>) -> LayoutResult {
-    let layout = self.child.layout(avail_size)?;
-    Ok(layout.max(avail_size.clone()).flex(self.flex).fit(FlexFit::Tight))
+  fn layout(&self, avail_size: &Size2D<usize>) -> LayoutSize {
+    self
+      .child
+      .layout(avail_size)
+      .max(avail_size.clone())
+      .flex(self.flex)
+      .fit(FlexFit::Tight)
   }
 
   fn render(&self, ctx: &RenderCtx) -> RenderResult {

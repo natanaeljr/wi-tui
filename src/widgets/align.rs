@@ -6,7 +6,7 @@ use euclid::default::Size2D;
 use euclid::SideOffsets2D;
 
 use crate::render::RenderCtx;
-use crate::widgets::{AnyEvent, Capability, EventResult, LayoutResult, RenderError, RenderResult, Widget};
+use crate::widgets::{AnyEvent, Capability, EventResult, LayoutResult, RenderError, RenderResult, Widget, LayoutSize};
 use crate::FlexFit;
 use crate::{HorizontalAlignment, HorizontalSide, VerticalAlignment, VerticalSide};
 
@@ -115,14 +115,14 @@ where
     todo!()
   }
 
-  fn layout(&self, avail_size: &Size2D<usize>) -> LayoutResult {
+  fn layout(&self, avail_size: &Size2D<usize>) -> LayoutSize {
     self.child.layout(avail_size)
   }
 
   fn render(&self, ctx: &RenderCtx) -> RenderResult {
     let frame = ctx.get_frame().size.clone();
 
-    let layout = self.child.layout(&frame).map_err(|e| RenderError::Layout(e))?;
+    let layout = self.child.layout(&frame);
     let max_size = Size2D::new(min(layout.max.width, frame.width), min(layout.max.height, frame.height));
     let remainder = frame.sub(max_size);
 

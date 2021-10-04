@@ -59,31 +59,24 @@ where
     todo!()
   }
 
-  fn layout(&self, avail_size: &Size2D<usize>) -> LayoutResult {
+  fn layout(&self, avail_size: &Size2D<usize>) -> LayoutSize {
     let children = self.children.as_ref().unwrap();
     let mut layout = LayoutSize::default();
     for idx in 0..children.len() {
       let child = children.child(idx).unwrap();
-      let child_layout_result = child.layout(&avail_size);
-      if let Err(LayoutError::InsufficientSpace) = child_layout_result {
-        if self.must_fit_all_children {
-          return Err(LayoutError::InsufficientSpace);
-        } else {
-          break;
-        }
-      }
-      let child_layout = child_layout_result.unwrap();
+      let child_layout_result = child.layout(avail_size);
+      let child_layout = child_layout_result;
       layout.min.height = max(layout.min.height, child_layout.min.height);
       layout.min.width = max(layout.min.width, child_layout.min.width);
       layout.max.height = max(layout.max.height, child_layout.max.height);
       layout.max.width = max(layout.max.width, child_layout.max.width);
     }
-    Ok(layout)
+    layout
   }
 
   fn render(&self, ctx: &RenderCtx) -> RenderResult {
     let frame = ctx.get_frame().clone();
-    let layout = self.layout(&frame.size).map_err(|e| RenderError::Layout(e))?;
+    let layout = self.layout(&frame.size);
     let children = self.children.as_ref().unwrap();
     for idx in 0..children.len() {
       let child = children.child(idx).unwrap();

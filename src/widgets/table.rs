@@ -184,7 +184,7 @@ where
     }
   }
 
-  fn layout(&self, avail_size: &Size2D<usize>) -> LayoutResult {
+  fn layout(&self, avail_size: &Size2D<usize>) -> LayoutSize {
     self.heading.layout(avail_size)
   }
 
@@ -429,7 +429,7 @@ where
     todo!()
   }
 
-  fn layout(&self, avail_size: &Size2D<usize>) -> LayoutResult {
+  fn layout(&self, avail_size: &Size2D<usize>) -> LayoutSize {
     self.heading.layout(avail_size)
   }
 
@@ -780,24 +780,24 @@ impl Table {
           if let Some(cell) = data.cell(row, col) {
             // Get the underlying cell layout
             let cell_layout_result = cell.layout(&avail_size);
-            if let Err(err) = cell_layout_result {
-              match err {
-                LayoutError::InsufficientSpace => {
-                  if self.layout.must_render_fit_all_columns {
-                    return Err(err);
-                  } else {
-                    // BUG: hardcoded height in 1, because we do not know the final row height
-                    if visible_only {
-                      avail_size.height = avail_size.height.checked_sub(1).unwrap_or(0);
-                    }
-                    // Do not consider Insufficient Space as error, we are just not going to render this cell
-                    continue;
-                  }
-                }
-                _ => return Err(err),
-              }
-            }
-            let cell_layout = cell_layout_result.unwrap();
+            // if let Err(err) = cell_layout_result {
+            //   match err {
+            //     LayoutError::InsufficientSpace => {
+            //       if self.layout.must_render_fit_all_columns {
+            //         return Err(err);
+            //       } else {
+            //         // BUG: hardcoded height in 1, because we do not know the final row height
+            //         if visible_only {
+            //           avail_size.height = avail_size.height.checked_sub(1).unwrap_or(0);
+            //         }
+            //         // Do not consider Insufficient Space as error, we are just not going to render this cell
+            //         continue;
+            //       }
+            //     }
+            //     _ => return Err(err),
+            //   }
+            // }
+            let cell_layout = cell_layout_result;
             if visible_only {
               avail_size.height = avail_size.height.checked_sub(cell_layout.min.height).unwrap_or(0);
             }
@@ -878,20 +878,20 @@ impl Table {
 
       // Get the underlying column layout
       let column_layout_result = column.layout(&avail_table_size);
-      if let Err(err) = column_layout_result {
-        match err {
-          LayoutError::InsufficientSpace => {
-            if self.layout.must_render_fit_all_columns {
-              return Err(err);
-            } else {
-              // Do not consider Insufficient Space as error, we are just not going to render the remaining columns
-              break;
-            }
-          }
-          _ => return Err(err),
-        }
-      }
-      let column_layout = column_layout_result.unwrap();
+      // if let Err(err) = column_layout_result {
+      //   match err {
+      //     LayoutError::InsufficientSpace => {
+      //       if self.layout.must_render_fit_all_columns {
+      //         return Err(err);
+      //       } else {
+      //         // Do not consider Insufficient Space as error, we are just not going to render the remaining columns
+      //         break;
+      //       }
+      //     }
+      //     _ => return Err(err),
+      //   }
+      // }
+      let column_layout = column_layout_result;
 
       // Figure out min/max column height
       let column_height = if self.layout.show_column_headings {
@@ -976,20 +976,20 @@ impl Table {
             // Get the underlying cell layout
             let cell_avail_size = Size2D::new(column_flex.min, avail_data_height);
             let cell_layout_result = cell.layout(&cell_avail_size);
-            if let Err(err) = cell_layout_result {
-              match err {
-                LayoutError::InsufficientSpace => {
-                  if self.layout.must_render_fit_all_columns {
-                    return Err(err);
-                  } else {
-                    // Do not consider Insufficient Space as error, we are just not going to render this cell
-                    continue;
-                  }
-                }
-                _ => return Err(err),
-              }
-            }
-            let cell_layout = cell_layout_result.unwrap();
+            // if let Err(err) = cell_layout_result {
+            //   match err {
+            //     LayoutError::InsufficientSpace => {
+            //       if self.layout.must_render_fit_all_columns {
+            //         return Err(err);
+            //       } else {
+            //         // Do not consider Insufficient Space as error, we are just not going to render this cell
+            //         continue;
+            //       }
+            //     }
+            //     _ => return Err(err),
+            //   }
+            // }
+            let cell_layout = cell_layout_result;
             // Check for the highest/lowest minimum/maximum cell height
             first_row_height.min = std::cmp::max(first_row_height.min, cell_layout.min.height);
             first_row_height.max = std::cmp::min(first_row_height.max, cell_layout.max.height);
@@ -1004,7 +1004,7 @@ impl Table {
     let table_height_min = table_headings_height.min + first_row_height.min;
     let table_height_max = table_headings_height.max
       + first_row_height.max /*TODO: compute actual rows size */* self.data.as_ref().unwrap().rows_len();
-      // + 1; // BUG? do not remember
+    // + 1; // BUG? do not remember
     let table_layout_size = LayoutSize::min_max(
       Size2D::new(table_width.min, table_height_min),
       Size2D::new(table_width.max, table_height_max),
@@ -1078,8 +1078,8 @@ impl Widget for Table {
     }
   }
 
-  fn layout(&self, avail_size: &Size2D<usize>) -> LayoutResult {
-    self.layout_table(avail_size).map(|ok| ok.0)
+  fn layout(&self, avail_size: &Size2D<usize>) -> LayoutSize {
+    self.layout_table(avail_size).map(|ok| ok.0).unwrap()
   }
 
   fn render(&self, ctx: &RenderCtx) -> RenderResult {

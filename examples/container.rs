@@ -1,11 +1,6 @@
 use euclid::default::Size2D;
 
-use witui::widgets::Borders;
-use witui::widgets::RowView;
-use witui::widgets::Expanded;
-use witui::widgets::Leak;
-use witui::widgets::Min;
-use witui::widgets::Repeat;
+use witui::widgets::{Borders, RowView, Expanded, Leak, Min, Repeat, Flexible};
 use witui::{Color, Style, WiTui};
 
 // ┌---------------------------------------┐
@@ -39,6 +34,7 @@ fn main() {
             .child(
               Borders::with_child(
                 Repeat::child(
+                  Flexible::loose(1).child(
                   Min::zero().child(
                     Leak::child(
                       Borders::with_child(
@@ -51,6 +47,7 @@ fn main() {
                       .borders_dash(Style::default()),
                     ), // Leak
                   ), // Minimize
+), // Flexible
                 ), // Repeat
               ) // Borders
               .borders_line(Style::new().dark_red()),

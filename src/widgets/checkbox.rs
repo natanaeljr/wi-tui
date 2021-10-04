@@ -27,14 +27,9 @@ impl Widget for CheckBox {
     todo!()
   }
 
-  fn layout(&self, avail_size: &Size2D<usize>) -> LayoutResult {
+  fn layout(&self, avail_size: &Size2D<usize>) -> LayoutSize {
     let size = Size2D::new(1, 1);
-    // check for minimum space in parent size
-    if avail_size.contains(size.clone()) {
-      Ok(LayoutSize::min_max(size.clone(), size))
-    } else {
-      Err(LayoutError::InsufficientSpace)
-    }
+    LayoutSize::min_max(size.clone(), size)
   }
 
   fn render(&self, ctx: &RenderCtx) -> RenderResult {

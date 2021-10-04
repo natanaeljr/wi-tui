@@ -206,15 +206,12 @@ where
     self.child.event(event, size)
   }
 
-  fn layout(&self, avail_size: &Size2D<usize>) -> LayoutResult {
+  fn layout(&self, avail_size: &Size2D<usize>) -> LayoutSize {
     debug!("layout() : avail_size: {:?}", avail_size);
     let borders_width = if self.left.is_some() { 1 } else { 0 } + if self.right.is_some() { 1 } else { 0 };
     let borders_height = if self.top.is_some() { 1 } else { 0 } + if self.bottom.is_some() { 1 } else { 0 };
 
     let mut size = avail_size.clone();
-    if size.width < borders_width || size.height < borders_height {
-      return Err(LayoutError::InsufficientSpace);
-    }
     let frame = Rect::from_size(size.clone());
 
     let top_offset = if self.top.is_some() { 1 } else { 0 };
@@ -222,42 +219,39 @@ where
     let right_offset = if self.right.is_some() { 1 } else { 0 };
     let bottom_offset = if self.bottom.is_some() { 1 } else { 0 };
 
-    if let Some(top) = self.top.as_ref() {
-      let border_frame = frame.inner_rect(SideOffsets2D::new(0, right_offset, frame.height() - 1, left_offset));
-      top.layout(&border_frame.size)?;
-    }
-    if let Some(left) = self.left.as_ref() {
-      let border_frame = frame.inner_rect(SideOffsets2D::new(top_offset, frame.width() - 1, bottom_offset, 0));
-      left.layout(&border_frame.size)?;
-    }
-    if let Some(right) = self.right.as_ref() {
-      let border_frame = frame.inner_rect(SideOffsets2D::new(top_offset, 0, bottom_offset, frame.width() - 1));
-      right.layout(&border_frame.size)?;
-    }
-    if let Some(bottom) = self.bottom.as_ref() {
-      let border_frame = frame.inner_rect(SideOffsets2D::new(frame.height() - 1, right_offset, 0, left_offset));
-      bottom.layout(&border_frame.size)?;
-    }
+    // if let Some(top) = self.top.as_ref() {
+    //   let border_frame = frame.inner_rect(SideOffsets2D::new(0, right_offset, frame.height() - 1, left_offset));
+    //   top.layout()?;
+    // }
+    // if let Some(left) = self.left.as_ref() {
+    //   let border_frame = frame.inner_rect(SideOffsets2D::new(top_offset, frame.width() - 1, bottom_offset, 0));
+    //   left.layout()?;
+    // }
+    // if let Some(right) = self.right.as_ref() {
+    //   let border_frame = frame.inner_rect(SideOffsets2D::new(top_offset, 0, bottom_offset, frame.width() - 1));
+    //   right.layout()?;
+    // }
+    // if let Some(bottom) = self.bottom.as_ref() {
+    //   let border_frame = frame.inner_rect(SideOffsets2D::new(frame.height() - 1, right_offset, 0, left_offset));
+    //   bottom.layout()?;
+    // }
 
     size.width -= borders_width;
     size.height -= borders_height;
-    let mut layout = self.child.layout(&size)?;
+    let mut layout = self.child.layout(avail_size);
     layout.max.width = layout.max.width.checked_add(borders_width).unwrap_or(std::usize::MAX);
     layout.max.height = layout.max.height.checked_add(borders_height).unwrap_or(std::usize::MAX);
     layout.min.width = layout.min.width.checked_add(borders_width).unwrap_or(std::usize::MAX);
     layout.min.height = layout.min.height.checked_add(borders_height).unwrap_or(std::usize::MAX);
 
-    if !avail_size.contains(layout.min.clone()) {
-      return Err(LayoutError::InsufficientSpace);
-    }
     debug!("layout() : layout: {:?}", layout);
-    Ok(layout)
+    layout
   }
 
   fn render(&self, ctx: &RenderCtx) -> RenderResult {
     let frame = ctx.get_frame().clone();
     debug!("render() : frame: {:?}", &frame);
-    let mut layout = self.layout(&frame.size).map_err(|e| RenderError::Layout(e))?;
+    let mut layout = self.layout(&frame.size);
 
     layout.max.width = std::cmp::min(layout.max.width, frame.size.width);
     layout.max.height = std::cmp::min(layout.max.height, frame.size.height);

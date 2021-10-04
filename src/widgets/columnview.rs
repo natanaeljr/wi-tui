@@ -49,17 +49,18 @@ where
     for idx in 0..self.children.len() {
       let child = self.children.child(idx).unwrap();
       let child_layout_result = child.layout(&avail_size);
-      let child_layout = match child_layout_result {
-        Ok(layout) => layout,
-        Err(LayoutError::InsufficientSpace) => {
-          if self.must_fit_all_children {
-            return Err(LayoutError::InsufficientSpace);
-          } else {
-            break; // TODO: Maybe change this to just skip this child?
-          }
-        }
-        Err(e) => return Err(e),
-      };
+      let child_layout = child_layout_result;
+      // let child_layout = match child_layout_result {
+      //   Ok(layout) => layout,
+      //   Err(LayoutError::InsufficientSpace) => {
+      //     if self.must_fit_all_children {
+      //       return Err(LayoutError::InsufficientSpace);
+      //     } else {
+      //       break; // TODO: Maybe change this to just skip this child?
+      //     }
+      //   }
+      //   Err(e) => return Err(e),
+      // };
       let child_fixed_size = if child_layout.flex == 0 { child_layout.max } else { child_layout.min };
       if !avail_size.contains(child_fixed_size.clone()) {
         if self.must_fit_all_children {
@@ -105,8 +106,8 @@ where
     todo!()
   }
 
-  fn layout(&self, total_avail_size: &Size2D<usize>) -> LayoutResult {
-    Ok(self.layout_impl(total_avail_size)?.0)
+  fn layout(&self, avail_size: &Size2D<usize>) -> LayoutSize {
+    self.layout_impl(&Size2D::new(1000, 200)).unwrap().0
   }
 
   fn render(&self, ctx: &RenderCtx) -> RenderResult {

@@ -2,7 +2,7 @@ use euclid::default::{Rect, Size2D};
 
 use crate::log::debug;
 use crate::render::RenderCtx;
-use crate::widgets::{AnyEvent, Capability, EventResult, LayoutResult, RenderResult, Widget};
+use crate::widgets::{AnyEvent, Capability, EventResult, LayoutResult, LayoutSize, RenderResult, Widget};
 use crate::FlexFit;
 
 // TODO: LeakHorizontal
@@ -27,19 +27,19 @@ where
     todo!()
   }
 
-  fn layout(&self, avail_size: &Size2D<usize>) -> LayoutResult {
+  fn layout(&self, avail_size: &Size2D<usize>) -> LayoutSize {
     debug!("layout() : avail_size: {:?}", avail_size);
-    let mut layout = self.child.layout(&Size2D::new(1000, 200)).unwrap();
+    let mut layout = self.child.layout(avail_size);
     layout.min.width = std::cmp::min(layout.min.width, 1);
     layout.min.height = std::cmp::min(layout.min.height, 1);
     debug!("layout() : layout: {:?}", layout);
-    Ok(layout)
+    layout
   }
 
   fn render(&self, ctx: &RenderCtx) -> RenderResult {
     let frame = ctx.get_frame().clone();
     debug!("render() : frame: {:?}, ", &frame);
-    let mut layout = self.child.layout(&Size2D::new(1000, 200)).unwrap();
+    let mut layout = self.child.layout(&frame.size);
     layout.min.width = std::cmp::max(layout.min.width, frame.size.width);
     layout.min.height = std::cmp::max(layout.min.height, frame.size.height);
     ctx.render_child_widget(Rect::new(frame.origin.clone(), layout.min.clone()), &self.child)?;

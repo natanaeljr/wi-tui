@@ -1,7 +1,7 @@
 use euclid::default::Size2D;
 
 use crate::render::RenderCtx;
-use crate::widgets::{AnyEvent, Capability, EventResult, LayoutResult, RenderError, RenderResult, Widget};
+use crate::widgets::{AnyEvent, Capability, EventResult, LayoutResult, LayoutSize, RenderError, RenderResult, Widget};
 use crate::FlexFit;
 
 pub struct Flexible<Child> {
@@ -44,8 +44,8 @@ where
     self.child.event(event, size)
   }
 
-  fn layout(&self, avail_size: &Size2D<usize>) -> LayoutResult {
-    Ok(self.child.layout(avail_size)?.flex(self.flex).fit(self.fit.clone()))
+  fn layout(&self, avail_size: &Size2D<usize>) -> LayoutSize {
+    self.child.layout(avail_size).flex(self.flex).fit(self.fit.clone())
   }
 
   fn render(&self, ctx: &RenderCtx) -> RenderResult {

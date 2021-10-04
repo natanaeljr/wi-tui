@@ -3,7 +3,9 @@ use euclid::default::{Point2D, Rect, Size2D};
 use euclid::SideOffsets2D;
 
 use crate::render::RenderCtx;
-use crate::widgets::{AnyEvent, Capability, EventResult, LayoutError, LayoutResult, RenderError, RenderResult, Widget};
+use crate::widgets::{
+  AnyEvent, Capability, EventResult, LayoutError, LayoutResult, LayoutSize, RenderError, RenderResult, Widget,
+};
 use crate::FlexFit;
 
 // TODO: only vertical
@@ -27,11 +29,11 @@ where
     self.child.event(event, size)
   }
 
-  fn layout(&self, avail_size: &Size2D<usize>) -> LayoutResult {
-    let mut layout = self.child.layout(avail_size)?;
+  fn layout(&self, avail_size: &Size2D<usize>) -> LayoutSize {
+    let mut layout = self.child.layout(avail_size);
     layout.max.width = layout.max.width.max(avail_size.width);
     layout.max.height = layout.max.height.max(avail_size.height);
-    Ok(layout)
+    layout
   }
 
   fn render(&self, ctx: &RenderCtx) -> RenderResult {
@@ -52,7 +54,7 @@ where
     //   }
     // }
 
-    let layout = self.child.layout(&frame.size).map_err(|e| RenderError::Layout(e))?;
+    let layout = self.child.layout(&frame.size);
     let child_width = layout.max.width.min(frame.size.width);
     let child_height = layout.max.height.min(frame.size.height);
     let child_size = Size2D::new(child_width, child_height);
@@ -68,12 +70,12 @@ where
       'col_loop: while avail_width > 0 {
         if avail_height < child_height || avail_width < child_width {
           let layout_result = self.child.layout(&Size2D::new(avail_width, avail_height));
-          if let Err(e) = layout_result {
-            if let LayoutError::InsufficientSpace = e {
-              break 'col_loop;
-            }
-            return Err(RenderError::Layout(e));
-          }
+          // if let Err(e) = layout_result {
+          //   if let LayoutError::InsufficientSpace = e {
+          //     break 'col_loop;
+          //   }
+          //   return Err(RenderError::Layout(e));
+          // }
           let child_width = layout.max.width.min(frame.size.width);
           let child_height = layout.max.height.min(frame.size.height);
           size = Size2D::new(child_width, child_height);

@@ -49,12 +49,8 @@ impl Widget for Text {
     self.data.event(event, size)
   }
 
-  fn layout(&self, avail_size: &Size2D<usize>) -> LayoutResult {
+  fn layout(&self, avail_size: &Size2D<usize>) -> LayoutSize {
     let min = Size2D::new(1, 1);
-    if !avail_size.contains(min.clone()) {
-      return Err(LayoutError::InsufficientSpace);
-    }
-
     let wrapped_text = textwrap::wrap(self.data.as_str(), textwrap::Options::new(avail_size.width));
     let mut longest = 0;
     for line in wrapped_text.iter() {
@@ -63,10 +59,8 @@ impl Widget for Text {
         longest = count;
       }
     }
-
     let max = Size2D::new(longest, wrapped_text.len());
-
-    Ok(LayoutSize::min_max(min, max))
+    LayoutSize::min_max(min, max)
   }
 
   fn render(&self, ctx: &RenderCtx) -> RenderResult {

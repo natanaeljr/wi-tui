@@ -182,7 +182,7 @@ where
 
 pub trait Widget {
   fn event(&mut self, event: &AnyEvent, size: &Size2D<usize>) -> EventResult;
-  fn layout(&self, avail_size: &Size2D<usize>) -> LayoutResult;
+  fn layout(&self, avail_size: &Size2D<usize>) -> LayoutSize;
   fn render(&self, ctx: &RenderCtx) -> RenderResult;
   fn has_capability(&self, capability: &Capability) -> bool;
 }
@@ -195,18 +195,10 @@ impl Widget for &str {
     todo!()
   }
 
-  fn layout(&self, avail_size: &Size2D<usize>) -> LayoutResult {
+  fn layout(&self, avail_size: &Size2D<usize>) -> LayoutSize {
     let min = Size2D::new(1, 1);
-    let mut max = Size2D::new(self.chars().count(), 1);
-    // clamp max size to parent size
-    // max.width = std::cmp::min(max.width, avail_size.width);
-    // max.height = std::cmp::min(max.height, avail_size.height);
-    // check for minimum space in parent size
-    if avail_size.contains(min.clone()) {
-      Ok(LayoutSize::min_max(min, max))
-    } else {
-      Err(LayoutError::InsufficientSpace)
-    }
+    let max = Size2D::new(self.chars().count(), 1);
+    LayoutSize::min_max(min, max)
   }
 
   fn render(&self, ctx: &RenderCtx) -> RenderResult {
@@ -234,18 +226,10 @@ impl Widget for String {
     todo!()
   }
 
-  fn layout(&self, avail_size: &Size2D<usize>) -> LayoutResult {
+  fn layout(&self, avail_size: &Size2D<usize>) -> LayoutSize {
     let min = Size2D::new(1, 1);
-    let mut max = Size2D::new(self.chars().count(), 1);
-    // clamp max size to parent size
-    // max.width = std::cmp::min(max.width, avail_size.width);
-    // max.height = std::cmp::min(max.height, avail_size.height);
-    // check for minimum space in parent size
-    if avail_size.contains(min.clone()) {
-      Ok(LayoutSize::min_max(min, max))
-    } else {
-      Err(LayoutError::InsufficientSpace)
-    }
+    let max = Size2D::new(self.chars().count(), 1);
+    LayoutSize::min_max(min, max)
   }
 
   fn render(&self, ctx: &RenderCtx) -> RenderResult {
@@ -273,14 +257,9 @@ impl Widget for char {
     todo!()
   }
 
-  fn layout(&self, avail_size: &Size2D<usize>) -> LayoutResult {
+  fn layout(&self, avail_size: &Size2D<usize>) -> LayoutSize {
     let size = Size2D::new(1, 1);
-    // check for minimum space in parent size
-    if avail_size.contains(size.clone()) {
-      Ok(LayoutSize::min_max(size.clone(), size))
-    } else {
-      Err(LayoutError::InsufficientSpace)
-    }
+    LayoutSize::min_max(size.clone(), size)
   }
 
   fn render(&self, ctx: &RenderCtx) -> RenderResult {
@@ -298,19 +277,14 @@ impl Widget for u32 {
     todo!()
   }
 
-  fn layout(&self, avail_size: &Size2D<usize>) -> LayoutResult {
+  fn layout(&self, avail_size: &Size2D<usize>) -> LayoutSize {
     let value = format!("{}", self);
     let min = Size2D::new(1, 1);
     let mut max = Size2D::new(value.len(), 1);
     // clamp max size to parent size
     max.width = std::cmp::min(max.width, avail_size.width);
     max.height = std::cmp::min(max.height, avail_size.height);
-    // check for minimum space in parent size
-    if avail_size.contains(min.clone()) {
-      Ok(LayoutSize::min_max(min, max))
-    } else {
-      Err(LayoutError::InsufficientSpace)
-    }
+    LayoutSize::min_max(min, max)
   }
 
   fn render(&self, ctx: &RenderCtx) -> RenderResult {
@@ -336,19 +310,14 @@ impl Widget for usize {
     todo!()
   }
 
-  fn layout(&self, avail_size: &Size2D<usize>) -> LayoutResult {
+  fn layout(&self, avail_size: &Size2D<usize>) -> LayoutSize {
     let value = format!("{}", self);
     let min = Size2D::new(1, 1);
     let mut max = Size2D::new(value.len(), 1);
     // clamp max size to parent size
     max.width = std::cmp::min(max.width, avail_size.width);
     max.height = std::cmp::min(max.height, avail_size.height);
-    // check for minimum space in parent size
-    if avail_size.contains(min.clone()) {
-      Ok(LayoutSize::min_max(min, max))
-    } else {
-      Err(LayoutError::InsufficientSpace)
-    }
+    LayoutSize::min_max(min, max)
   }
 
   fn render(&self, ctx: &RenderCtx) -> RenderResult {
@@ -381,7 +350,7 @@ where
     }
   }
 
-  fn layout(&self, avail_size: &Size2D<usize>) -> LayoutResult {
+  fn layout(&self, avail_size: &Size2D<usize>) -> LayoutSize {
     self.deref().layout(avail_size)
   }
 
@@ -402,7 +371,7 @@ where
     self.get_mut().event(event, size)
   }
 
-  fn layout(&self, avail_size: &Size2D<usize>) -> LayoutResult {
+  fn layout(&self, avail_size: &Size2D<usize>) -> LayoutSize {
     self.deref().layout(avail_size)
   }
 
@@ -423,7 +392,7 @@ where
     self.deref_mut().event(event, size)
   }
 
-  fn layout(&self, avail_size: &Size2D<usize>) -> LayoutResult {
+  fn layout(&self, avail_size: &Size2D<usize>) -> LayoutSize {
     self.deref().layout(avail_size)
   }
 
@@ -442,15 +411,11 @@ impl Widget for () {
     EventResult::Unhandled
   }
 
-  fn layout(&self, avail_size: &Size2D<usize>) -> LayoutResult {
-    debug!("layout() : avail_size: {:?}", avail_size);
-    let layout = LayoutSize::min_max(Default::default(), Default::default());
-    debug!("layout() : layout: {:?}", layout);
-    Ok(layout)
+  fn layout(&self, avail_size: &Size2D<usize>) -> LayoutSize {
+    LayoutSize::min_max(Size2D::zero(), Size2D::zero())
   }
 
   fn render(&self, ctx: &RenderCtx) -> RenderResult {
-    debug!("render() : frame: {:?}, ", &ctx.get_frame());
     Ok(())
   }
 
@@ -467,7 +432,7 @@ where
     EventResult::Unhandled
   }
 
-  fn layout(&self, avail_size: &Size2D<usize>) -> LayoutResult {
+  fn layout(&self, avail_size: &Size2D<usize>) -> LayoutSize {
     self.content().layout(avail_size)
   }
 

@@ -66,20 +66,14 @@ where
     self.child.event(event, size)
   }
 
-  fn layout(&self, avail_size: &Size2D<usize>) -> LayoutResult {
-    if avail_size.width < self.offsets.left + self.offsets.right
-      || avail_size.height < self.offsets.top + self.offsets.bottom
-    {
-      return Err(LayoutError::InsufficientSpace);
-    }
-
+  fn layout(&self, avail_size: &Size2D<usize>) -> LayoutSize {
     let frame = Rect::from_size(avail_size.clone()).inner_rect(self.offsets.clone());
-    let mut layout = self.child.layout(&frame.size)?;
+    let mut layout = self.child.layout(avail_size);
     layout.min.width += self.offsets.left + self.offsets.right;
     layout.max.width += self.offsets.left + self.offsets.right;
     layout.min.height += self.offsets.top + self.offsets.bottom;
     layout.max.height += self.offsets.top + self.offsets.bottom;
-    Ok(layout)
+    layout
   }
 
   fn render(&self, ctx: &RenderCtx) -> RenderResult {
