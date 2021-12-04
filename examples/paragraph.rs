@@ -12,7 +12,7 @@ In sed pharetra tortor, ut condimentum nunc.
 Donec porta, ex eget varius ultrices, sapien enim iaculis lorem, id sollicitudin orci tellus id dui. Curabitur tincidunt rutrum auctor. Maecenas non suscipit nisi, id porta turpis. Vivamus faucibus finibus ligula, non mattis enim convallis at. Curabitur dictum lacus ut diam luctus, at tempor eros eleifend. Fusce nunc ligula, rhoncus et pellentesque hendrerit, sagittis quis risus. Vivamus malesuada diam id augue tristique, at suscipit magna efficitur. Integer scelerisque condimentum tortor, eu euismod purus blandit sed. In gravida vel purus ut blandit. Aliquam ut congue nisl. Cras vitae purus convallis, vehicula ligula et, dapibus turpis. Curabitur placerat aliquam ex non blandit. Vestibulum vestibulum urna ornare purus aliquet, sit amet suscipit lacus fermentum. Integer consequat est sed placerat congue."
   ).align(TextAlign::Justify);
 
-  let root = Borders::with_child(text).borders_double(Style::default());
+  let root = Borders::with_child(text).borders_rounded(Style::default());
 
   WiTui::root_widget(root).alternate(true).run_loop().unwrap();
 }
