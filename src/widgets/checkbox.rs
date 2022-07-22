@@ -1,14 +1,17 @@
 use crate::render::RenderCtx;
 use crate::widgets::{AnyEvent, Capability, EventResult, LayoutError, LayoutResult, LayoutSize, RenderResult, Widget};
+use crate::{Event, MouseEventKind};
 use euclid::default::Size2D;
 
 pub struct CheckBox {
   marked: bool,
+  marked_str: &'static str,
+  unmarked_str: &'static str,
 }
 
 impl CheckBox {
   pub fn new() -> Self {
-    Self { marked: false }
+    Self { marked: false, marked_str: "◉", unmarked_str: "○" }
   }
 
   pub fn marked(mut self) -> Self {
@@ -24,7 +27,19 @@ impl CheckBox {
 
 impl Widget for CheckBox {
   fn event(&mut self, event: &AnyEvent, size: &Size2D<usize>) -> EventResult {
-    todo!()
+    match event {
+      AnyEvent::Input(event) => match event {
+        Event::Mouse(mouse) => match mouse.kind {
+          MouseEventKind::Down(_) => {
+            self.marked = !self.marked;
+            return EventResult::Done;
+          }
+          _ => {}
+        },
+        _ => {}
+      },
+    }
+    EventResult::Unhandled
   }
 
   fn layout(&self, avail_size: &Size2D<usize>) -> LayoutResult {
@@ -39,9 +54,9 @@ impl Widget for CheckBox {
 
   fn render(&self, ctx: &RenderCtx) -> RenderResult {
     if self.marked {
-      ctx.renderer().write("◉");
+      ctx.renderer().write(self.marked_str);
     } else {
-      ctx.renderer().write("○");
+      ctx.renderer().write(self.unmarked_str);
     }
 
     // if self.marked {
