@@ -10,6 +10,7 @@ use witui::widgets::Align;
 use witui::widgets::Button;
 use witui::widgets::Padding;
 use witui::widgets::Widget;
+use witui::WiTui;
 
 fn main() {
   let button = Button::child("Button");
@@ -119,4 +120,6 @@ fn main() {
 
   let table = Padding::default().left(0).top(10).child(table);
   // table.render(&mut render_ctx).unwrap();
+
+  WiTui::root_widget(table).alternate(true).run_loop().unwrap();
 }
