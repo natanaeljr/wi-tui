@@ -48,6 +48,7 @@ impl Renderer {
     terminal::enable_raw_mode().unwrap();
     let (cols, rows) = terminal::size().unwrap();
     let (pos_c, pos_r) = if alternate { (0, 0) } else { cursor::position().unwrap_or((0, 0)) };
+    trace!("INITIAL SIZE: ({},{})", rows, cols);
     let mut stdout = std::io::stdout();
     let mut this = Self {
       size: Size2D::new(cols as usize, rows as usize),
@@ -65,7 +66,7 @@ impl Renderer {
 
   fn resize(&mut self, cols: usize, rows: usize) {
     // return; // TODO: remove
-    assert!(self.alternate);
+    // assert!(self.alternate);
     self.size.width = cols;
     self.size.height = rows;
     self.nl_counter = 0;
@@ -99,7 +100,7 @@ impl Renderer {
     // std::io::stdout().flush();
   }
 
-  pub(crate) fn flush(&mut self) {
+  pub fn flush(&mut self) {
     self.canvas.render();
   }
 
@@ -228,7 +229,7 @@ pub struct RenderCtx {
 }
 
 impl RenderCtx {
-  pub(crate) fn new(alternate: bool) -> Self {
+  pub fn new(alternate: bool) -> Self {
     let mut this = Self {
       renderer: Rc::new(RefCell::new(Renderer::new(alternate))),
       frame: Default::default(),
@@ -292,7 +293,7 @@ impl RenderCtx {
     result
   }
 
-  pub(crate) fn resize(&mut self, cols: usize, rows: usize) {
+  pub fn resize(&mut self, cols: usize, rows: usize) {
     self.renderer.deref().borrow_mut().resize(cols, rows);
     let frame = self.renderer().frame.clone();
     self.actual_frame = frame.clone();

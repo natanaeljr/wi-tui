@@ -134,7 +134,7 @@ impl Canvas {
 
     queue!(
       stdout,
-      MoveTo(0, 0),
+      // MoveTo(0, 0),
       SetBackgroundColor(Color::Reset),
       SetForegroundColor(Color::Reset),
       SetAttribute(Attribute::Reset)
@@ -280,7 +280,7 @@ impl Canvas {
 
     // Pro Tip from VIM analysis: always reset the cursor to (0,0) after the rendering!
     // this makes the terminal not cause an auto-scroll that flickers the screen when resizing the window to smaller rows values.
-    queue!(stdout, MoveTo(0, 0));
+    // queue!(stdout, MoveTo(0, 0));
 
     // stdout.flush();
     std::io::stdout().write_all(stdout.as_slice());

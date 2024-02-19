@@ -121,5 +121,8 @@ fn main() {
   let table = Padding::default().left(0).top(10).child(table);
   // table.render(&mut render_ctx).unwrap();
 
-  WiTui::root_widget(table).alternate(true).run_loop().unwrap();
+  // WiTui::root_widget(table).alternate(true).run_loop().unwrap();
+
+  let render_ctx = RenderCtx::new(false);
+  table.render(&render_ctx).unwrap();
 }
